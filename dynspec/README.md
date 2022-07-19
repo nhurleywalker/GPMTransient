@@ -1,6 +1,6 @@
 # Dedispersing dynamic spectra
 
-The `csv` files in this directory are not the 3-hr source, but another more recently discovered source.
+The `csv` files in this directory are for the recently discovered 20-minute transient in the Galactic Plane.
 
 ## Results
 
