@@ -40,7 +40,7 @@ python dedisperse_dynspec.py --transpose --sample_time 4 --freqlo 139.515 --dms 
 ![1342096400 dedispersed spectrum](images/1342096400_dedispersed.png)
 ![1342096400 DM curve](images/1342096400_dmcurve.png)
 
-**NB:** Dedispersion method treats window as period, so flux "wraps" to the end of observation. More padding needed to avoid this.
+**NB:** Dedispersion method treats window as periodic, so flux "wraps" to the end of observation. More padding needed to avoid this.
 
 #### 1342097584
 
