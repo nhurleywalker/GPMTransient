@@ -5,8 +5,8 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | GPS time      | Telescope     |
 | ------------- |:-------------:|
 | [1340639536](#1340639536) | MWA |
-| [1342095399](#1342095399) | Murriyang |  
 | [1340641016](#1340641016) | MWA |  
+| [1342095399](#1342095399) | Murriyang |  
 | [1342096104](#1342096104) | MWA |
 | [1342096400](#1342096400) | MWA |
 | [1342097584](#1342097584) | MWA |
@@ -22,12 +22,6 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 185.595 --dm
 ![1340639536 dedispersed spectrum](images/1340639536_dedispersed.png)
 ![1340639536 DM curve](images/1340639536_dmcurve.png)
 
-#### 1342095399
-```
-run dedisperse_dynspec.py --sample_time 0.1 --freqlo=1216.0 --bw 0.5 --dms 100 400 2 --input PKS_1342095399_dynamic_spectrum.csv
-```
-![1342095399 dedispersed spectrum](images/PKS_1342095399_dedispersed.png)
-![1342095399 DM curve](images/PKS_1342095399_dmcurve.png)
 
 #### 1340641016
 
@@ -37,6 +31,13 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 185.595 --dm
 
 ![1340641016 dedispersed spectrum](images/1340641016_dedispersed.png)
 ![1340641016 DM curve](images/1340641016_dmcurve.png)
+
+#### 1342095399
+```
+run dedisperse_dynspec.py --sample_time 0.1 --freqlo=1216.0 --bw 0.5 --dms 100 400 2 --input PKS_1342095399_dynamic_spectrum.csv
+```
+![1342095399 dedispersed spectrum](images/PKS_1342095399_dedispersed.png)
+![1342095399 DM curve](images/PKS_1342095399_dmcurve.png)
 
 #### 1342096104
 
