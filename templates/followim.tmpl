@@ -1,0 +1,72 @@
+#! /bin/bash -l
+# The imaging script that, if the calibration is successful, runs on the rest of the data
+set -x
+
+pipeuser=PIPEUSER
+calid=CALID
+datadir=BASEDIR
+
+# Retrieving unusual variables so that we can easily resubmit the job to check all the data was processed
+script=SCRIPT
+output=OUTPUT
+error=ERROR
+account=ACCOUNT
+queue='QUEUE'
+
+# Common singularity command to run the python code
+SINGCMD="singularity exec ${GXCONTAINER} "
+
+project=D0038_$(${SINGCMD} "${GPTBASE}/determine_night.py" --obsid $calid)
+
+cd "${datadir}" || exit 1
+
+# Test to see if the calibration solution meets minimum quality control. At the moment
+# this is a simple check based on the number of flagged solutions
+solutions="${calid}/${calid}_local_gleam_model_solutions_initial_ref.bin"
+
+# Need to confirm the python script works
+result=$(${SINGCMD} "${GPMBASE}/check_solutions.py" -t 0.5 -s 4 "${solutions}")
+if echo "${result}" | grep -q fail
+then
+    mv "${solutions}" "${solutions%.bin}_failed.bin"
+    echo "Calibration solutions file failed checks. Exiting. "
+
+    mail -a ${solutions%.bin}_phase.png -s "Night $project calibration has failed" nhurleywalker@gmail.com < /dev/null
+
+    exit 111
+fi
+
+# Find all the observations taken within +/-12h of that calibrator
+# That have not yet been processed, as recorded by our database
+# The right mode to leave this script in
+obsids=$(${SINGCMD} "${GPMBASE}/gp_monitor_lookup.py" --calid $calid --skip-db-check --project D0038)
+echo "" > "${project}_${calid}.txt"
+for obs in $obsids
+do
+    echo "${obs}" >> "${project}_${calid}.txt"
+done
+dep=($(obs_manta.sh -p $project -o "${project}_${calid}.txt"))
+depend=${dep[3]}
+
+if [[ $obsids != "" ]]
+then
+    for obs in $obsids
+    do
+# observations imported into the database will be "unprocessed" by default
+        dep=($(obs_autoflag.sh -d ${depend} -p ${project} $obs))
+        depend=${dep[3]}
+        dep=($(obs_apply_cal.sh -d ${depend} -p "${project}" -c $calid  $obs))
+        depend=${dep[3]}
+        dep=($(obs_uvflag.sh -d ${depend} -p "${project}" $obs))
+        depend=${dep[3]}
+        dep=($(obs_uvsub.sh -d ${depend} -p "${project}" $obs))
+        depend=${dep[3]}
+        dep=($(obs_lightcurve.sh -d ${depend} -p "${project}" $obs))
+    done
+
+#    sub="sbatch --begin=now+24h --export=ALL  --time=01:00:00 --mem=3G -M ${GXCOMPUTER} --output=${output} --error=${error}"
+#    sub="${sub} --cores=1 --ntasks-per-node=1 ${account} ${depend} ${queue} ${script}"
+#    $sub
+else
+    echo "No data found for $calid"
+fi

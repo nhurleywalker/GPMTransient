@@ -1,0 +1,135 @@
+#! /bin/bash -l
+
+set -x
+
+obsnum=OBSNUM
+datacolumn="DATA"
+
+# WSClean suffixes for subchannels and MFS
+subchans="MFS 0000 0001 0002 0003"
+# Minimum uvw for self-calibration (in lambda)
+minuv=75
+# S/N Level at which to choose masked pixels for deepclean
+msigma=3
+# S/N Threshold at which to stop cleaning
+tsigma=1
+
+cd ${obsnum}
+
+metafits=${obsnum}.metafits
+if [[ ! -e ${metafits} ]]
+then
+    wget -O ${metafits}  http://ws.mwatelescope.org/metadata/fits?obs_id=${obsnum}
+fi
+
+telescope="MWALB"
+basescale=0.6
+imsize=8000
+robust=0.0
+
+# Set up channel-dependent options
+chan=`pyhead.py -p CENTCHAN ${metafits} | awk '{print $3}'`
+#bandwidth=`pyhead.py -p BANDWDTH ${metafits} | awk '{print $3}'`
+#centfreq=`pyhead.py -p FREQCENT ${metafits} | awk '{print $3}'`
+#chans=`pyhead.py -p CHANNELS ${metafits} | awk '{print $3}' | sed "s/,/ /g"`
+#chans=($chans)
+# Pixel scale
+scale=`echo "$basescale / $chan" | bc -l` # At least 4 pix per synth beam for each channel
+# Calculate min uvw in metres
+#minuvm=`echo "234 * $minuv / $chan" | bc -l`
+
+# Same clean settings as main GLEAM-X
+multiscale="-multiscale -mgain 0.85 -multiscale-gain 0.15"
+
+if [[ $current == *"shift"* ]]
+then
+    echo "Detected that this measurement set has already had its phase centre changed. Not shifting."
+else
+    # Determine whether to shift the pointing centre to be more optimally-centred 
+    # on the peak of the primary beam sensitivity
+    coords=$($GXBASE/gleam_x/bin/calc_optimum_pointing.py --metafits "${metafits}")
+    echo "Optimally shifting co-ordinates of measurement set to $coords, with zenith shiftback."
+    chgcentre \
+            "${obsnum}.ms" \
+            ${coords}
+
+    # Now shift the pointing centre to point straight up, 
+    # which approximates minw without making the phase centre rattle around
+    chgcentre \
+            -zenith \
+            -shiftback \
+            "${obsnum}.ms"
+fi
+
+# First we need to image but with a mask in place
+# Create a template image that has all the same properties as our eventual WSClean image
+if [[ ! -e "${obsnum}_template.fits" ]]
+then
+    wsclean \
+            -abs-mem ${GXMEMORY} \
+            -mgain 1.0 \
+            -nmiter 1 \
+            -niter 0 \
+            -name ${obsnum}_template \
+            -size ${imsize} ${imsize} \
+            -scale ${scale:0:8} \
+            -pol XX \
+            -data-column ${datacolumn} \
+            -channel-range 4 5 \
+            -interval 4 5 \
+            -nwlayers ${GXNCPUS} \
+            "${obsnum}.ms"
+
+    rm "${obsnum}_template-dirty.fits"
+    mv "${obsnum}_template-image.fits" "${obsnum}_template.fits"
+fi
+
+coords=COORDS
+make_mask.py ${obsnum}_template.fits $coords
+
+wsclean \
+        -abs-mem ${GXMEMORY} \
+        $multiscale \
+        -fits-mask ${obsnum}_mask.fits \
+        -nmiter 5 \
+        -niter 10000000 \
+        -auto-mask ${msigma} \
+        -auto-threshold ${tsigma} \
+        -name ${obsnum}_masked \
+        -size ${imsize} ${imsize} \
+        -scale ${scale:0:8} \
+        -weight briggs ${robust} \
+        -pol I \
+        -join-channels \
+        -channels-out 4 \
+        -save-source-list \
+        -fit-spectral-pol 2 \
+        -data-column ${datacolumn} \
+        "${obsnum}.ms"
+
+# Now shift the coordinates to the location of the transient
+echo "Shifting co-ordinates of measurement set to $coords; not bothering with shiftback since we will make tiny images."
+chgcentre ${obsnum}.ms $coords
+
+# Full time resolution
+nscans=`pyhead.py -p NSCANS ${metafits} | awk '{print $3}'`
+# -subtract-model for the image which has been deep-cleaned first
+wsclean \
+        -channels-out 24 \
+        -intervals-out $nscans \
+        -subtract-model \
+        -abs-mem ${GXMEMORY} \
+        -mgain 1 \
+        -nmiter 0 \
+        -name ${obsnum}_dyn \
+        -size 250 250 \
+        -scale ${scale:0:8} \
+        -weight natural \
+        -pol I \
+        -no-update-model-required \
+        -data-column ${datacolumn} \
+        ${obsnum}.ms
+
+munlink ${obsnum}_dyn*dirty.fits
+
+plot_dynspec.py ${obsid}
