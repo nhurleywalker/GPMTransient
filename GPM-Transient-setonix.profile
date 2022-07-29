@@ -40,6 +40,9 @@ export PATH="${PATH}:${GPTBASE}/bin:${GPTBASE}/dynspec:${GPTBASE}"
 # Setting up the path to ensure the base GPT directory available for python scripts
 export SINGULARITY_BINDPATH="${SINGULARITY_BINDPATH},${GPTBASE}"
 
+# Necessary from singularity v3.8 onward so that PATH is sent to the container properly
+export SINGULARITYENV_APPEND_PATH=$PATH
+
 # Manual setup of the python path, meant to be used _within_ the container context
 # as at the moment the GPT python code is not a proper module nor built into the 
 # container
