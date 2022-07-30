@@ -86,7 +86,7 @@ then
     mv "${obsnum}_template-image.fits" "${obsnum}_template.fits"
 fi
 
-make_mask.py ${obsnum}_template.fits $coords
+make_mask.py ${obsnum}_template.fits "$coords"
 
 wsclean \
         -abs-mem ${GXMEMORY} \
