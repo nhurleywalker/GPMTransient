@@ -37,10 +37,30 @@ d0 = Time(fits.open(hdus[0])[0].header["DATE-OBS"])
 d1 = Time(fits.open(hdus[1])[0].header["DATE-OBS"])
 ts = int((d1 - d0).sec)
 
+# Find maximum
+h = fits.open(hdus[0])
+box = 10
+arr = np.zeros(shape=(1,1,2*box,2*box), dtype="float32")
+
+for hdu in hdus:
+    h = fits.open(hdu)
+    d = h[0].data
+# Don't include NaN values or it breaks
+    if not np.isnan(d).any():
+        arr += d[:,:,int(d.shape[2]/2)-box:int(d.shape[2]/2)+box,int(d.shape[3]/2)-box:int(d.shape[3]/2)+box]
+# Peak in x, y = location of source
+peak = np.unravel_index(np.argmax(arr), arr.shape)
+# Put it back in the centre
+peak = list(peak)
+peak[2] += int(d.shape[2]/2)-box
+peak[3] += int(d.shape[3]/2)-box
+peak = tuple(peak)
+print(peak)
+
 for hdu in hdus:
     h = fits.open(hdu)
     try:
-        val.append(np.average(h[0].data[:,:,124:127,124:127]))
+        val.append(h[0].data[peak])
 #        epo.append(int(hdu[0:10]))
         std.append(sc(h[0].data))
 #        freqs.append(h[0].header["CRVAL3"]/1.e6)
@@ -54,7 +74,7 @@ ax.errorbar(ts*np.arange(0,len(val)), val, yerr=std, label=pol, alpha=0.5, lw=0.
 ax.plot(ts*np.arange(0,len(val)), val, alpha=alpha, lw=0.1, zorder=0, color='k')
 ax.set_xlabel("Time (s)")
 ax.set_ylabel("Brightness (Jy/beam)")
-ax.set_ylim([-0.2,1.0])
+#ax.set_ylim([-0.2,1.0])
 #    ax.legend()
 fig.savefig(f"{prefix}_light_curve.pdf", bbox_inches="tight")
 fig.savefig(f"{prefix}_light_curve.png", bbox_inches="tight")
