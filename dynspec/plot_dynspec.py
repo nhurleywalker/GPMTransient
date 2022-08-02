@@ -2,7 +2,9 @@
 
 from matplotlib import pyplot as plt
 from astropy.io import fits
+from astropy.wcs import WCS
 from astropy.time import Time
+from astropy.coordinates import SkyCoord
 import numpy as np
 from scipy.signal import convolve2d
 from glob import glob
@@ -23,8 +25,14 @@ try:
 except:
     prefix = ""
 
-prepend = "pad"
+prepend = "dyn"
 
+def GetBeamAtCoords(obsid, freq, ra_deg, dec_deg):
+#    url = "http://ws.mwatelescope.org/metadata/fits?obs_id=" + str(obs_id)
+    t, delays, centfreq, gridnum = parse_metafits(f"{obsid}.metafits")
+    beam_x, beam_y = beam_value(ra_deg, dec_deg, t, delays, freq, gridnum,)
+    vals = (beam_x + beam_y) / 2
+    return vals
 
 def sc(data):
     std = np.std(data)
@@ -68,11 +76,19 @@ t0 = Time(fits.open(f"{prefix}_{prepend}-t0000-0000{pol}-image.fits")[0].header[
 t1 = Time(fits.open(f"{prefix}_{prepend}-t0001-0000{pol}-image.fits")[0].header["DATE-OBS"])
 tstep = (t1 - t0).sec
 
+h = fits.open(f"{prefix}_{prepend}-t0000-0000{pol}-image.fits")
+x, y = h[0].header["NAXIS1"]/2, h[0].header["NAXIS2"]/2
+w = WCS(h[0].header, naxis=2)
+coords = w.pixel_to_world(x, y)
+
 nus = []
+beam_vals = []
 
 for j in np.arange(0, len(fs)):
     h = fits.open(f"{prefix}_{prepend}-t0000-{fsf[j]}{pol}-image.fits")
-    nus.append(h[0].header["CRVAL3"])
+    nu = h[0].header["CRVAL3"]
+    nus.append(nu)
+    beam_vals.append(GetBeamAtCoords(prefix, nu, coords.fk5.ra.value, coords.fk5.dec.value))
 
 np.savetxt(f"{prefix}_frequencies.csv", nus)
 
@@ -107,6 +123,8 @@ if not os.path.exists(f"{prefix}_dynamic_spectrum.csv"):
         for j in np.arange(0, len(fs)):
             arr[i, j] = fits.open(f"{prefix}_{prepend}-t{tsf[i]}-{fsf[j]}{pol}-image.fits")[0].data[peak]
             #arr[i, j] = fits.open(f"{prefix}_dyn-t{tsf[i]}-{fsf[j]}{pol}-image.fits")[0].data[:,:,126,125]
+        if beam_corr is True:
+            arr[i, :] /= beam_vals
 
     np.savetxt(f"{prefix}_dynamic_spectrum.csv", arr)
     with open(f"{prefix}_timesteps.csv", mode='wt') as myfile:
