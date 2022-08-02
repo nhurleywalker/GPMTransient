@@ -159,7 +159,8 @@ def main(args):
 
         # Get the time of the first bin referenced to infinite frequency
         dmdelay = calc_dmdelay(dmcurve.best_dm[0], dynspec.freq_ref, np.inf)
-        lightcurve = np.array([dynspec.t - dmdelay, dynspec.fscrunched]).T
+        timeaxis = dynspec.t - dmdelay + args.bc_corr
+        lightcurve = np.array([timeaxis, dynspec.fscrunched]).T
         np.savetxt(args.lightcurve, lightcurve, header=header)
 
 
@@ -176,6 +177,7 @@ if __name__ == "__main__":
     parser.add_argument('--lightcurve', type=argparse.FileType('w'), help='Write out the frequency-scrunched, dispersion-corrected lightcurve to the named file. "Dispersion-corrected" means using infinite frequency as reference')
     parser.add_argument('--t0', type=float, default=0, help='The left (early) edge of the first time bin')
     parser.add_argument('--no_plots', action='store_true', help='Do NOT make Matplotlib plots of the DM curve and dedispersed spectrum')
+    parser.add_argument('--bc_corr', type=float, default=0, help='Barycentric correction to apply (in seconds)')
 
     args = parser.parse_args()
 
