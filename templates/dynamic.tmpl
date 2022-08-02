@@ -3,16 +3,26 @@
 set -x
 
 obsnum=OBSNUM
-datacolumn="DATA"
+base=BASEDIR
+debug=DEBUG
+coords='COORDS'
+
+# Which data column to image
+if [[ ! -z $debug ]]
+then
+    datacolumn="CORRECTED_DATA"
+else
+    datacolumn="DATA"
+fi
 
 # WSClean suffixes for subchannels and MFS
 subchans="MFS 0000 0001 0002 0003"
 # Minimum uvw for self-calibration (in lambda)
 minuv=75
 # S/N Level at which to choose masked pixels for deepclean
-msigma=3
+msigma=5
 # S/N Threshold at which to stop cleaning
-tsigma=1
+tsigma=3
 
 cd ${obsnum}
 
@@ -41,25 +51,17 @@ scale=`echo "$basescale / $chan" | bc -l` # At least 4 pix per synth beam for ea
 # Same clean settings as main GLEAM-X
 multiscale="-multiscale -mgain 0.85 -multiscale-gain 0.15"
 
-if [[ $current == *"shift"* ]]
-then
-    echo "Detected that this measurement set has already had its phase centre changed. Not shifting."
-else
-    # Determine whether to shift the pointing centre to be more optimally-centred 
-    # on the peak of the primary beam sensitivity
-    coords=$($GXBASE/gleam_x/bin/calc_optimum_pointing.py --metafits "${metafits}")
-    echo "Optimally shifting co-ordinates of measurement set to $coords, with zenith shiftback."
-    chgcentre \
-            "${obsnum}.ms" \
-            ${coords}
+echo "Shifting co-ordinates of measurement set to transient at $coords, with zenith shiftback."
+chgcentre \
+        "${obsnum}.ms" \
+        ${coords}
 
-    # Now shift the pointing centre to point straight up, 
-    # which approximates minw without making the phase centre rattle around
-    chgcentre \
-            -zenith \
-            -shiftback \
-            "${obsnum}.ms"
-fi
+# Now shift the pointing centre to point straight up,
+# which approximates minw without making the phase centre rattle around
+chgcentre \
+        -zenith \
+        -shiftback \
+        "${obsnum}.ms"
 
 # First we need to image but with a mask in place
 # Create a template image that has all the same properties as our eventual WSClean image
@@ -84,8 +86,7 @@ then
     mv "${obsnum}_template-image.fits" "${obsnum}_template.fits"
 fi
 
-coords=COORDS
-make_mask.py ${obsnum}_template.fits $coords
+make_mask.py ${obsnum}_template.fits "$coords"
 
 wsclean \
         -abs-mem ${GXMEMORY} \
@@ -106,10 +107,6 @@ wsclean \
         -fit-spectral-pol 2 \
         -data-column ${datacolumn} \
         "${obsnum}.ms"
-
-# Now shift the coordinates to the location of the transient
-echo "Shifting co-ordinates of measurement set to $coords; not bothering with shiftback since we will make tiny images."
-chgcentre ${obsnum}.ms $coords
 
 # Full time resolution
 nscans=`pyhead.py -p NSCANS ${metafits} | awk '{print $3}'`
@@ -132,4 +129,4 @@ wsclean \
 
 munlink ${obsnum}_dyn*dirty.fits
 
-plot_dynspec.py ${obsid}
+plot_dynspec.py ${obsnum}
