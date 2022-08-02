@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 from matplotlib import pyplot as plt
 from astropy.io import fits
@@ -9,6 +9,12 @@ from glob import glob
 import os
 
 import sys
+
+try:
+    from gleam_x.bin.beam_value_at_radec import beam_value, parse_metafits
+    beam_corr = True
+except ImportError:
+    beam_corr = False
 
 cm = 1/2.54
 
