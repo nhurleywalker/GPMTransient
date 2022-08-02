@@ -57,6 +57,51 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 200.955 --dm
 ![1341932656 dedispersed spectrum](images/1341932656_dedispersed.png)
 ![1341932656 DM curve](images/1341932656_dmcurve.png)
 
+#### 1341932952
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 139.515 --dms 150 401 5 --input 1341932952_dyn_dynamic_spectrum.csv
+```
+
+![1341932952 dedispersed spectrum](images/1341932952_dedispersed.png)
+![1341932952 DM curve](images/1341932952_dmcurve.png)
+
+#### 1341937984
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 200.955 --dms 150 401 5 --input 1341937984_dyn_dynamic_spectrum.csv
+```
+
+![1341937984 dedispersed spectrum](images/1341937984_dedispersed.png)
+![1341937984 DM curve](images/1341937984_dmcurve.png)
+
+#### 1341938280
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 139.515 --dms 150 401 5 --input 1341938280_dyn_dynamic_spectrum.csv
+```
+
+![1341938280 dedispersed spectrum](images/1341938280_dedispersed.png)
+![1341938280 DM curve](images/1341938280_dmcurve.png)
+
+#### 1341939168
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 139.515 --dms 150 401 5 --input 1341939168_dyn_dynamic_spectrum.csv
+```
+
+![1341939168 dedispersed spectrum](images/1341939168_dedispersed.png)
+![1341939168 DM curve](images/1341939168_dmcurve.png)
+
+#### 1341939760
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 200.955 --dms 150 401 5 --input 1341939760_dyn_dynamic_spectrum.csv
+```
+
+![1341939760 dedispersed spectrum](images/1341939760_dedispersed.png)
+![1341939760 DM curve](images/1341939760_dmcurve.png)
+
 #### 1342095399
 ```
 run dedisperse_dynspec.py --sample_time 0.1 --freqlo=1216.0 --bw 0.5 --dms 100 400 2 --input PKS_1342095399_dynamic_spectrum.csv
