@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 
 from matplotlib import pyplot as plt
 from astropy.io import fits
@@ -9,8 +9,8 @@ import numpy as np
 from scipy.signal import convolve2d
 from glob import glob
 import os
-
 import sys
+cm = 1/2.54
 
 try:
     from gleam_x.bin.beam_value_at_radec import beam_value, parse_metafits
@@ -18,14 +18,13 @@ try:
 except ImportError:
     beam_corr = False
 
-cm = 1/2.54
-
 try:
     prefix = sys.argv[1]
 except:
     prefix = ""
 
 prepend = "dyn"
+debugplot = True
 
 def GetBeamAtCoords(obsid, freq, ra_deg, dec_deg):
 #    url = "http://ws.mwatelescope.org/metadata/fits?obs_id=" + str(obs_id)
@@ -50,19 +49,20 @@ def binArray(data, axis, binstep, binsize, func=np.nanmean):
     data = np.array(data).transpose(argdims)
     return data
 
-try:
-    hdus = sorted(glob(f"{prefix}_{prepend}-t????-????-image.fits"))
-    tmax = int(str(hdus[-1])[16:20])
-    cmax = int(str(hdus[-1])[21:25])
-    pol=""
-except IndexError:
-    pol="-I"
-    hdus = sorted(glob(f"{prefix}_{prepend}-t????-????{pol}-image.fits"))
-    tmax = int(str(hdus[-1])[16:20])
-    cmax = int(str(hdus[-1])[21:25])
+hdus = sorted(glob(f"{prefix}_{prepend}-t????-????-image.fits"))
+h = hdus[-1]
+st = h.split("-t")[1]
+tmax = int(st.split("-")[0])
+cmax = int(st.split("-")[1])
+#    cmax = int(str(hdus[-1])[21:25])
+pol=""
+#except IndexError:
+#    pol="-I"
+#    hdus = sorted(glob(f"{prefix}_{prepend}-t????-????{pol}-image.fits"))
+#    tmax = int(str(hdus[-1])[16:20])
+#    cmax = int(str(hdus[-1])[21:25])
 
 print(tmax, cmax)
-#ts = np.arange(60*2, 120*2)
 ts = np.arange(0, tmax+1)
 tsf = [f"{t:04d}" for t in ts]
 
@@ -95,7 +95,7 @@ np.savetxt(f"{prefix}_frequencies.csv", nus)
 vals = []
 dates = []
 
-if not os.path.exists(f"{prefix}_dynamic_spectrum.csv"):
+if not os.path.exists(f"{prefix}_{prepend}_dynamic_spectrum.csv"):
 # Find maximum
     h = fits.open(hdus[-1])
     box = 5
@@ -109,11 +109,20 @@ if not os.path.exists(f"{prefix}_dynamic_spectrum.csv"):
         if not np.isnan(d).any():
             arr += d[:,:,int(d.shape[2]/2)-box:int(d.shape[2]/2)+box,int(d.shape[3]/2)-box:int(d.shape[3]/2)+box]
 # Peak in x, y = location of source
+        
 #    h[0].data = arr
 #    h.writeto("sum.fits")
     peak = np.unravel_index(np.argmax(arr), arr.shape)
 # Put it back in the centre
     peak = list(peak)
+    if debugplot is True:
+        fig = plt.figure(figsize=(4,4))
+        ax = fig.add_subplot(111)
+        ax.imshow(np.squeeze(arr).T, aspect='auto', interpolation='none')
+        ax.set_xlabel("RA")
+        ax.set_ylabel("Dec")
+        ax.scatter(peak[2], peak[3], marker='x', color='red')
+        fig.savefig(f"{prefix}_{prepend}_center.png", bbox_inches="tight")
     peak[2] += int(d.shape[2]/2)-box
     peak[3] += int(d.shape[3]/2)-box
     peak = tuple(peak)
@@ -122,16 +131,20 @@ if not os.path.exists(f"{prefix}_dynamic_spectrum.csv"):
     for i in np.arange(0, len(ts)):
         for j in np.arange(0, len(fs)):
             arr[i, j] = fits.open(f"{prefix}_{prepend}-t{tsf[i]}-{fsf[j]}{pol}-image.fits")[0].data[peak]
-            #arr[i, j] = fits.open(f"{prefix}_dyn-t{tsf[i]}-{fsf[j]}{pol}-image.fits")[0].data[:,:,126,125]
         if beam_corr is True:
             arr[i, :] /= beam_vals
 
-    np.savetxt(f"{prefix}_dynamic_spectrum.csv", arr)
-    with open(f"{prefix}_timesteps.csv", mode='wt') as myfile:
+    np.savetxt(f"{prefix}_{prepend}_dynamic_spectrum.csv", arr)
+    with open(f"{prefix}_{prepend}_timesteps.csv", mode='wt') as myfile:
         myfile.write('\n'.join(dates))
         myfile.write('\n')
 else:
-    arr = np.loadtxt(f"{prefix}_dynamic_spectrum.csv")
+    arr = np.loadtxt(f"{prefix}_{prepend}_dynamic_spectrum.csv")
+
+# MeerKAT data cleanup
+#m = np.average(np.concatenate([arr[0:100,:],arr[200:300,:]]), axis=0)
+#bkg = np.tile(m, (arr.shape[0],1))
+#arr -= bkg
         
 fig = plt.figure(figsize=(6,3))
 ax = fig.add_subplot(111)
@@ -139,7 +152,7 @@ ax = fig.add_subplot(111)
 #kernel_size = (2,2)
 #kernel = np.ones(kernel_size)
 #ax.imshow(convolve2d(arr.T, kernel, mode='same'))
-ax.imshow(arr.T,extent = [0 , tstep*len(ts), max_nu * 1.e-6 , min_nu * 1.e-6 ], aspect='auto')
+ax.imshow(arr.T,extent = [0 , tstep*len(ts), max_nu * 1.e-6 , min_nu * 1.e-6 ], aspect='auto', interpolation='none')#, vmin = -0.1, vmax=0.25)
 ax.set_xlabel("Time / s")
 ax.set_ylabel("Frequency / MHz")
-fig.savefig(f"{prefix}_dynspec.pdf", bbox_inches="tight")
+fig.savefig(f"{prefix}_{prepend}_dynspec.pdf", bbox_inches="tight")
