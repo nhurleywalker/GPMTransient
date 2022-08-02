@@ -92,7 +92,7 @@ class Dynspec:
         self.dm = dm
 
     def fscrunch(self):
-        self.fscrunched = np.sum(self.dynspec, axis=self.FREQAXIS)
+        self.fscrunched = np.mean(self.dynspec, axis=self.FREQAXIS)
 
 class DMCurve():
     def __init__(self, dynspec):
