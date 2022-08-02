@@ -125,27 +125,35 @@ def main(args):
             time_offset=args.t0,
             transpose=args.transpose)
 
-    # Run a bunch of DM trials to create a DM curve
-    dmcurve = DMCurve(dynspec)
-    dmcurve.run_dmtrials(args.dms)
-    dmcurve.calc_best_dm()
+    if len(args.dms) == 1:
+        # In this case, only a single DM was given, so we don't
+        # do any search, and just use this DM for dedispersion
+        DM = args.dms[0]
+    else:
+        # Run a bunch of DM trials to create a DM curve
+        dmcurve = DMCurve(dynspec)
+        dmcurve.run_dmtrials(args.dms)
+        dmcurve.calc_best_dm()
 
-    if args.no_plots == False:
-        # Plot the DM curve
-        fig, ax = plt.subplots(nrows=1, ncols=1)
-        ax.plot(dmcurve.dms, dmcurve.peak_snrs)
-        ax.set_xlabel("DM (pc/cm^3)")
-        ax.set_ylabel("Peak flux density (a.u.)")
-        plt.show()
+        if args.no_plots == False:
+            # Plot the DM curve
+            fig, ax = plt.subplots(nrows=1, ncols=1)
+            ax.plot(dmcurve.dms, dmcurve.peak_snrs)
+            ax.set_xlabel("DM (pc/cm^3)")
+            ax.set_ylabel("Peak flux density (a.u.)")
+            plt.show()
 
-    dynspec.dedisperse(dmcurve.best_dm)
+        DM = dmcurve.best_dm[0]
 
-    # Plot the dynamic spectrum at the best DM
+    # Dedisperse the spectrum
+    dynspec.dedisperse(DM)
+
+    # Plot the dynamic spectrum at the given/best DM
     if args.no_plots == False:
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
         dynspec.plot(axs[1])
-        fig.suptitle('DM = {:.1f} pc/cm^3'.format(dmcurve.best_dm[0]))
+        fig.suptitle('DM = {:.1f} pc/cm^3'.format(DM))
         axs[0].set_yticks([])
         plt.show()
 
@@ -154,11 +162,12 @@ def main(args):
     if args.lightcurve is not None:
         header = "Created with:\n"
         header += '  ' + ' '.join(sys.argv) + '\n\n'
-        header += 'This time series has been dedispersed to {} pc/cm^3\n\n'.format(dmcurve.best_dm[0])
+        header += 'This time series has been dedispersed to {} pc/cm^3\n'.format(DM)
+        header += 'Using barycentric correction of {} s\n\n'.format(args.bc_corr)
         header += "Time (s) | Flux density (a.u.)"
 
         # Get the time of the first bin referenced to infinite frequency
-        dmdelay = calc_dmdelay(dmcurve.best_dm[0], dynspec.freq_ref, np.inf)
+        dmdelay = calc_dmdelay(DM, dynspec.freq_ref, np.inf)
         timeaxis = dynspec.t - dmdelay + args.bc_corr
         lightcurve = np.array([timeaxis, dynspec.fscrunched]).T
         np.savetxt(args.lightcurve, lightcurve, header=header)
@@ -167,7 +176,7 @@ def main(args):
 if __name__ == "__main__":
     # Parse the command line
     parser = argparse.ArgumentParser(description='Dedisperse a dynamic spectrum')
-    parser.add_argument('--dms', type=float, nargs='*', help='DM trials (pc/cm^3) [[start=0], stop, [step=1]] (i.e. same argument structure as s NumPy''s arange function)')
+    parser.add_argument('--dms', type=float, nargs='*', help='DM trials (pc/cm^3) [[start=0], stop, [step=1]] (i.e. same argument structure as s NumPy''s arange function). If a single value is given, the dynamic spectrum is dedispersed to this DM and no search is performed')
     parser.add_argument('--sample_time', type=float, default=0.5, help='The time of one sample (s)')
     parser.add_argument('--freqlo', type=float, default=139.52, help='The centre frequency of the lowest channel (MHz)')
     parser.add_argument('--bw', type=float, default=1.28, help='The channel width (MHz)')
