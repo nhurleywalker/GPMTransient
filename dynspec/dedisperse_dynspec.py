@@ -5,6 +5,10 @@ import sys
 from scipy.interpolate import interp1d
 from scipy.optimize import fmin
 
+# The DM delay formula assumes time in seconds, frequencies in MHz
+def calc_dmdelay(DM, flo, fhi):
+    return 4.148808e3*DM*(1/(flo*flo) - 1/(fhi*fhi))
+
 class Dynspec:
     def __init__(self, filename, sample_time, freqlo, bw, transpose=False, time_offset=0, freq_offset=0, dm=0):
         self.TIMEAXIS=1
@@ -31,7 +35,7 @@ class Dynspec:
         self.dynspec = self.dynspec.T
 
     def create_time_axis(self, sample_time, offset=0):
-        self.t = np.arange(self.Nt)*sample_time + offset
+        self.t = np.arange(self.Nt)*sample_time + offset + sample_time/2
         self.dt = sample_time
 
     def create_freq_axis(self, bw, freqlo=0):
@@ -58,10 +62,12 @@ class Dynspec:
 
         # Set the reference frequency
         if freq_ref is None:
-            freq_ref = np.mean(self.f)
+            self.freq_ref = np.mean(self.f)
+        else:
+            self.freq_ref = freq_ref
 
         # The DM delay formula assumes time in seconds, frequencies in MHz
-        return 4.148808e3*dm_diff*(1/(freq_ref*freq_ref) - 1/(self.f*self.f))
+        return calc_dmdelay(dm_diff, self.freq_ref, self.f)
 
     def dedisperse(self, dm, freq_ref=None):
         shifts = self.calc_dm_shifts(dm, freq_ref=freq_ref)
@@ -116,6 +122,7 @@ def main(args):
             sample_time=args.sample_time,
             freqlo=args.freqlo,
             bw=args.bw,
+            time_offset=args.t0,
             transpose=args.transpose)
 
     # Run a bunch of DM trials to create a DM curve
@@ -131,9 +138,9 @@ def main(args):
         ax.set_ylabel("Peak flux density (a.u.)")
         plt.show()
 
-    # Plot the dynamic spectrum at the best DM
     dynspec.dedisperse(dmcurve.best_dm)
 
+    # Plot the dynamic spectrum at the best DM
     if args.no_plots == False:
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
@@ -146,9 +153,13 @@ def main(args):
     # lightcurve
     if args.lightcurve is not None:
         header = "Created with:\n"
-        header += ' '.join(sys.argv) + '\n'
+        header += '  ' + ' '.join(sys.argv) + '\n\n'
+        header += 'This time series has been dedispersed to {} pc/cm^3\n\n'.format(dmcurve.best_dm[0])
         header += "Time (s) | Flux density (a.u.)"
-        lightcurve = np.array([dynspec.t + args.t0, dynspec.fscrunched]).T
+
+        # Get the time of the first bin referenced to infinite frequency
+        dmdelay = calc_dmdelay(dmcurve.best_dm[0], dynspec.freq_ref, np.inf)
+        lightcurve = np.array([dynspec.t - dmdelay, dynspec.fscrunched]).T
         np.savetxt(args.lightcurve, lightcurve, header=header)
 
 
