@@ -123,21 +123,34 @@ def main(args):
     dmcurve.run_dmtrials(args.dms)
     dmcurve.calc_best_dm()
 
-    # Plot the DM curve
-    fig, ax = plt.subplots(nrows=1, ncols=1)
-    ax.plot(dmcurve.dms, dmcurve.peak_snrs)
-    ax.set_xlabel("DM (pc/cm^3)")
-    ax.set_ylabel("Peak flux density (a.u.)")
-    plt.show()
+    if args.no_plots == False:
+        # Plot the DM curve
+        fig, ax = plt.subplots(nrows=1, ncols=1)
+        ax.plot(dmcurve.dms, dmcurve.peak_snrs)
+        ax.set_xlabel("DM (pc/cm^3)")
+        ax.set_ylabel("Peak flux density (a.u.)")
+        plt.show()
 
     # Plot the dynamic spectrum at the best DM
     dynspec.dedisperse(dmcurve.best_dm)
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
-    dynspec.plot_lightcurve(axs[0])
-    dynspec.plot(axs[1])
-    fig.suptitle('DM = {:.1f} pc/cm^3'.format(dmcurve.best_dm[0]))
-    axs[0].set_yticks([])
-    plt.show()
+
+    if args.no_plots == False:
+        fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
+        dynspec.plot_lightcurve(axs[0])
+        dynspec.plot(axs[1])
+        fig.suptitle('DM = {:.1f} pc/cm^3'.format(dmcurve.best_dm[0]))
+        axs[0].set_yticks([])
+        plt.show()
+
+    # If requested, write out a time series of the frequency-scrunched
+    # lightcurve
+    if args.lightcurve is not None:
+        header = "Created with:\n"
+        header += ' '.join(sys.argv) + '\n'
+        header += "Time (s) | Flux density (a.u.)"
+        lightcurve = np.array([dynspec.t + args.t0, dynspec.fscrunched]).T
+        np.savetxt(args.lightcurve, lightcurve, header=header)
+
 
 if __name__ == "__main__":
     # Parse the command line
@@ -149,6 +162,9 @@ if __name__ == "__main__":
     parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum will be written')
     parser.add_argument('--input', type=str, help='The (NumPy-readable) file containing the input dynamic spectrum')
     parser.add_argument('--transpose', action='store_true', help='Interpret the input file as rows for time axis, columns for frequency axis')
+    parser.add_argument('--lightcurve', type=argparse.FileType('w'), help='Write out the frequency-scrunched, dispersion-corrected lightcurve to the named file. "Dispersion-corrected" means using infinite frequency as reference')
+    parser.add_argument('--t0', type=float, default=0, help='The left (early) edge of the first time bin')
+    parser.add_argument('--no_plots', action='store_true', help='Do NOT make Matplotlib plots of the DM curve and dedispersed spectrum')
 
     args = parser.parse_args()
 
