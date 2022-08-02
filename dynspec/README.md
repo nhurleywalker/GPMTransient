@@ -6,6 +6,7 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | ------------- |:-------------:|
 | [1340639536](#1340639536) | MWA |
 | [1340641016](#1340641016) | MWA |  
+| [1341930288](#1341930288) | MWA |  
 | [1342095399](#1342095399) | Murriyang |  
 | [1342096104](#1342096104) | MWA |
 | [1342096400](#1342096400) | MWA |
@@ -31,6 +32,15 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 185.595 --dm
 
 ![1340641016 dedispersed spectrum](images/1340641016_dedispersed.png)
 ![1340641016 DM curve](images/1340641016_dmcurve.png)
+
+#### 1341930288
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 139.515 --dms 150 401 5 --input 1341930288_dyn_dynamic_spectrum.csv
+```
+
+![1341930288 dedispersed spectrum](images/1341930288_dedispersed.png)
+![1341930288 DM curve](images/1341930288_dmcurve.png)
 
 #### 1342095399
 ```
