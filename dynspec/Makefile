@@ -5,8 +5,7 @@ LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))
 
 .SECONDARY:
 
-pulsestack.png: $(LIGHTCURVES)
-	python make_pulsestack.py --png $@ 1319.36 $^
+all_lightcurves: $(LIGHTCURVES)
 
 %_lightcurve.txt: dedisperse_dynspec.py observations.txt
 	python $< $$(awk '$$1 == $* {t0 = $* + $$9; if ($$6 == "Y") {printf "--transpose "}; printf "--sample_time %s --bw %s --freqlo %s --dms 150 401 5 --input %s --bc_corr %s --lightcurve $@ --t0 %f --no_plots\n", $$3, $$4, $$5, $$7, $$8, t0}' < $(word 2,$^))
@@ -15,6 +14,10 @@ pulsestack.png: $(LIGHTCURVES)
 # It won't work "out of the box" here, because the paths to the
 # bc_corr binary and also to the de430.bsp file (ephemeris) will be
 # different for each user. Run "python bc_corr.py -h" for usage.
-#
+
 bc_corrections: bc_corr.py
 	python $< 18.6505 -10.5304 $$(locate de430.bsp | head -1) $(GPSTIMES)
+
+pulsestacks/pulsestack_%.png: $(LIGHTCURVES)
+	python make_pulsestack.py --png $@ $* $^
+

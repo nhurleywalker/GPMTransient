@@ -24,21 +24,24 @@ if __name__ == '__main__':
         gpstimes = lightcurve[:,0] # First column
         if i == 0:
             yticks = [0]
-            pulsenumber = ["0"]
+            pulse_numbers = ["0"]
             gps_ref = gpstimes[0]
         else:
-            yticks.append(i)
-            pulsenumber.append(int(np.round((gpstimes[0] - gps_ref)/P)))
+            pulse_number = int(np.round((gpstimes[0] - gps_ref)/P))
+            if pulse_number != pulse_numbers[-1]:
+                yticks.append(yticks[-1] + 1)
+                pulse_numbers.append(pulse_number)
 
         phase = (gpstimes - gps_ref + P/2) % P - P/2
         flux_density = lightcurve[:,1] # Second column
         x = phase
-        y = flux_density/2 + i
+        y = 0.7*flux_density/np.max(flux_density) + yticks[-1]
         plt.plot(x, y)
-        plt.yticks(ticks=yticks, labels=pulsenumber)
+        plt.yticks(ticks=yticks, labels=pulse_numbers)
 
     plt.xlabel("Time (s)")
     plt.ylabel("Pulse number")
+    plt.title("Period = {:.3f} s".format(P))
 
     if args.png is not None:
         plt.savefig(args.png)

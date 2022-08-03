@@ -18,6 +18,13 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | [1342096400](#1342096400) | MWA | 0.5 | 0.32 | 139.515 |
 | [1342097584](#1342097584) | MWA | 0.5 | 0.32 | 170.235 |
 
+## Barycentric correction
+
+The file `observations.txt` contains a column listing the barycentric correction.
+These numbers are positive and, for the first few observations at least, get smaller over time.
+Since the (first few) observations start in late June, and since the source has an RA of ~18 hrs, we can say that the Earth is closest to the source at this time, and only gets further away from the source over the next months.
+We can conclude therefore, that the numbers in the column should be interpreted as "the number that should be ***added*** to the arrival time in order to give a calculated arrival time at the barycentre."
+
 ## Results
 
 #### 1340639536
