@@ -13,8 +13,8 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | [1341938280](#1341938280) | MWA | 0.5 | 1.28 | 139.515 |
 | [1341939168](#1341939168) | MWA | 0.5 | 1.28 | 139.515 |
 | [1341939760](#1341939760) | MWA | 0.5 | 1.28 | 200.955 |
-| [1342095399](#1342095399) | Murriyang | 0.1 | 0.5 | 1216.0 |
 | [1342096104](#1342096104) | MWA | 0.5 | 0.32 | 200.955 |
+| [1342096266](#1342096266) | Murriyang | 0.1 | 0.5 | 1216.0 |
 | [1342096400](#1342096400) | MWA | 0.5 | 0.32 | 139.515 |
 | [1342097584](#1342097584) | MWA | 0.5 | 0.32 | 170.235 |
 
@@ -109,13 +109,6 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 200.955 --dm
 ![1341939760 dedispersed spectrum](images/1341939760_dedispersed.png)
 ![1341939760 DM curve](images/1341939760_dmcurve.png)
 
-#### 1342095399
-```
-run dedisperse_dynspec.py --sample_time 0.1 --freqlo=1216.0 --bw 0.5 --dms 100 400 2 --input PKS_1342095399_dynamic_spectrum.csv
-```
-![1342095399 dedispersed spectrum](images/PKS_1342095399_dedispersed.png)
-![1342095399 DM curve](images/PKS_1342095399_dmcurve.png)
-
 #### 1342096104
 
 ```
@@ -126,6 +119,13 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 0.32 --freqlo 20
 ![1342096104 DM curve](images/1342096104_dmcurve.png)
 
 **Looks like the DM curve gets the DM 'wrong' here.**
+
+#### 1342096266
+```
+run dedisperse_dynspec.py --sample_time 0.1 --freqlo=1216.0 --bw 0.5 --dms 100 400 2 --input PKS_1342096266_dynamic_spectrum.csv
+```
+![1342096266 dedispersed spectrum](images/PKS_1342096266_dedispersed.png)
+![1342096266 DM curve](images/PKS_1342096266_dmcurve.png)
 
 #### 1342096400
 
