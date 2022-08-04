@@ -209,7 +209,7 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 1.28 --freqlo 20
 #### 1342623792
 
 ```
-python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 1.28 --freqlo 72.955 --dms 150 401 5 --input 1342623792_dyn_dynamic_spectrum.csv
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 1.28 --freqlo 72.955 --dms 150 401 5 --input 1342623792_dyn_dynamic_spectrum.csv --freq_ref 72.315
 ```
 
 ![1342623792 dedispersed spectrum](images/1342623792_dedispersed.png)
