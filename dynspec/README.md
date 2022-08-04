@@ -17,6 +17,8 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | [1342096266](#1342096266) | Murriyang | 0.1 | 0.5 | 1216.0 |
 | [1342096400](#1342096400) | MWA | 0.5 | 0.32 | 139.515 |
 | [1342097584](#1342097584) | MWA | 0.5 | 0.32 | 170.235 |
+| [1342623496](#1342623496) | MWA | 0.5 | 1.28 | 200.955 |
+| [1342623792](#1342623792) | MWA | 0.5 | 1.28 | 72.955 |
 
 ## Barycentric correction
 
@@ -146,4 +148,22 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 0.32 --freqlo 17
 
 ![1342097584 dedispersed spectrum](images/1342097584_dedispersed.png)
 ![1342097584 DM curve](images/1342097584_dmcurve.png)
+
+#### 1342623496
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 1.28 --freqlo 200.955 --dms 150 401 5 --input 1342623496_dyn_dynamic_spectrum.csv
+```
+
+![1342623496 dedispersed spectrum](images/1342623496_dedispersed.png)
+![1342623496 DM curve](images/1342623496_dmcurve.png)
+
+#### 1342623792
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 1.28 --freqlo 72.955 --dms 150 401 5 --input 1342623792_dyn_dynamic_spectrum.csv
+```
+
+![1342623792 dedispersed spectrum](images/1342623792_dedispersed.png)
+![1342623792 DM curve](images/1342623792_dmcurve.png)
 
