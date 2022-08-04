@@ -20,6 +20,14 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | [1342623496](#1342623496) | MWA | 0.5 | 1.28 | 200.955 |
 | [1342623792](#1342623792) | MWA | 0.5 | 1.28 | 72.955 |
 
+## Time-corrected light curves
+
+To get time-corrected lightcurves (i.e. with both the barycentric and DM corrections applied) run
+```
+make all_lightcurves
+```
+This uses a DM set by the `BEST_DM` variable set at the top of the `Makefile`.
+
 ## Barycentric correction
 
 The file `observations.txt` contains a column listing the barycentric correction.

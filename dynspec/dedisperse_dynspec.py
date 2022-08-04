@@ -147,6 +147,7 @@ def main(args):
 
     # Dedisperse the spectrum
     dynspec.dedisperse(DM)
+    dynspec.fscrunch()
 
     # Plot the dynamic spectrum at the given/best DM
     if args.no_plots == False:
