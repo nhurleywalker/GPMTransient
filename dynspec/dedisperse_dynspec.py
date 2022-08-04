@@ -94,6 +94,10 @@ class Dynspec:
     def fscrunch(self):
         self.fscrunched = np.mean(self.dynspec, axis=self.FREQAXIS)
 
+    def get_time_at_infinite_frequency(self):
+        dmdelay = calc_dmdelay(self.dm, self.freq_ref, np.inf)
+        return self.t - dmdelay
+
 class DMCurve():
     def __init__(self, dynspec):
         self.dynspec = dynspec
@@ -168,8 +172,8 @@ def main(args):
         header += "Time (s) | Flux density (a.u.)"
 
         # Get the time of the first bin referenced to infinite frequency
-        dmdelay = calc_dmdelay(DM, dynspec.freq_ref, np.inf)
-        timeaxis = dynspec.t - dmdelay + args.bc_corr
+        timeaxis = dynspec.get_time_at_infinite_frequency()
+        timeaxis += args.bc_corr # Add the barycentric correction
         lightcurve = np.array([timeaxis, dynspec.fscrunched]).T
         np.savetxt(args.lightcurve, lightcurve, header=header)
 

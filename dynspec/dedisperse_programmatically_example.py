@@ -8,6 +8,9 @@ dynspec = dd.Dynspec('1342623792_dyn_dynamic_spectrum.csv', sample_time=0.5, fre
 dynspec.dedisperse(285, freq_ref=72.955)
 # ...the dedispersed spectrum is now in dynspec.dynspec (NumPy array)
 
+# Adjust the time axis to match the time of arrival of the pulse at infinite frequency
+dynspec.set_time_to_infinite_frequency()
+
 # Plot it
 fig, ax = plt.subplots(1,1)
 dynspec.plot(ax)
