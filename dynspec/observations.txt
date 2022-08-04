@@ -1,5 +1,5 @@
 # ObsID (GPS time) | Telescope | Sample time (s) | Channel width (MHz) | Centre of lowest channel (MHz) | Transpose CSV? | Input file | Barycentric correction (s) | Offset (s) |
-1340639536 MWA 0.5 1.28 185.595 Y 1340639536_dynamic_spectrum_pad.csv 493.45818 205
+1340639536 MWA 0.5 0.64 185.275 Y 1340639536_dyn_dynamic_spectrum.csv 493.45818 0
 1340641016 MWA 0.5 1.28 185.595 Y 1340641016_dynamic_spectrum_pad.csv 493.461572 25
 1341930288 MWA 0.5 1.28 139.515 Y 1341930288_dyn_dynamic_spectrum.csv 480.918857 0
 1341932656 MWA 0.5 1.28 200.955 Y 1341932656_dyn_dynamic_spectrum.csv 480.867702 0

@@ -4,7 +4,7 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 
 | GPS time      | Telescope     | Integration time (s) | Channel width (MHz) | Centre of first channel (MHz) |
 | ------------- |:-------------:| :------------------: | :-----------------: | :---------------------------: |
-| [1340639536](#1340639536) | MWA | 0.5 | 1.28 | 185.595 |
+| [1340639536](#1340639536) | MWA | 0.5 | 0.64 | 185.595 |
 | [1340641016](#1340641016) | MWA | 0.5 | 1.28 | 185.595 |
 | [1341930288](#1341930288) | MWA | 0.5 | 1.28 | 139.515 |
 | [1341932656](#1341932656) | MWA | 0.5 | 1.28 | 200.955 |
@@ -40,7 +40,7 @@ We can conclude therefore, that the numbers in the column should be interpreted 
 #### 1340639536
 
 ```
-python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 185.595 --dms 150 401 5 --input 1340639536_dynamic_spectrum_pad.csv
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 185.595 --bw 0.64 --dms 250 301 2 --input 1340639536_dynamic_spectrum_pad.csv
 ```
 
 ![1340639536 dedispersed spectrum](images/1340639536_dedispersed.png)
