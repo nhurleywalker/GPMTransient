@@ -94,15 +94,19 @@ class Dynspec:
     def fscrunch(self):
         self.fscrunched = np.mean(self.dynspec, axis=self.FREQAXIS)
 
+    def get_time_at_infinite_frequency(self):
+        dmdelay = calc_dmdelay(self.dm, self.freq_ref, np.inf)
+        return self.t - dmdelay
+
 class DMCurve():
     def __init__(self, dynspec):
         self.dynspec = dynspec
 
-    def run_dmtrials(self, dmtrials):
+    def run_dmtrials(self, dmtrials, freq_ref=None):
         self.dms = np.arange(*dmtrials)
         self.peak_snrs = []
         for dm in self.dms:
-            self.dynspec.dedisperse(dm)
+            self.dynspec.dedisperse(dm, freq_ref=freq_ref)
             self.dynspec.fscrunch()
             self.peak_snrs.append(np.max(self.dynspec.fscrunched))
         self.peak_snrs = np.array(self.peak_snrs)
@@ -132,7 +136,7 @@ def main(args):
     else:
         # Run a bunch of DM trials to create a DM curve
         dmcurve = DMCurve(dynspec)
-        dmcurve.run_dmtrials(args.dms)
+        dmcurve.run_dmtrials(args.dms, freq_ref=args.freq_ref)
         dmcurve.calc_best_dm()
 
         if args.no_plots == False:
@@ -146,7 +150,8 @@ def main(args):
         DM = dmcurve.best_dm[0]
 
     # Dedisperse the spectrum
-    dynspec.dedisperse(DM)
+    dynspec.dedisperse(DM, freq_ref=args.freq_ref)
+    dynspec.fscrunch()
 
     # Plot the dynamic spectrum at the given/best DM
     if args.no_plots == False:
@@ -167,11 +172,13 @@ def main(args):
         header += "Time (s) | Flux density (a.u.)"
 
         # Get the time of the first bin referenced to infinite frequency
-        dmdelay = calc_dmdelay(DM, dynspec.freq_ref, np.inf)
-        timeaxis = dynspec.t - dmdelay + args.bc_corr
+        timeaxis = dynspec.get_time_at_infinite_frequency()
+        timeaxis += args.bc_corr # Add the barycentric correction
         lightcurve = np.array([timeaxis, dynspec.fscrunched]).T
         np.savetxt(args.lightcurve, lightcurve, header=header)
 
+    if args.output is not None:
+        np.savetxt(args.output, dynspec.dynspec)
 
 if __name__ == "__main__":
     # Parse the command line
@@ -179,6 +186,7 @@ if __name__ == "__main__":
     parser.add_argument('--dms', type=float, nargs='*', help='DM trials (pc/cm^3) [[start=0], stop, [step=1]] (i.e. same argument structure as s NumPy''s arange function). If a single value is given, the dynamic spectrum is dedispersed to this DM and no search is performed')
     parser.add_argument('--sample_time', type=float, default=0.5, help='The time of one sample (s)')
     parser.add_argument('--freqlo', type=float, default=139.52, help='The centre frequency of the lowest channel (MHz)')
+    parser.add_argument('--freq_ref', type=float, help='The reference frequency used during dedispersion (MHz) (default = centre frequency)')
     parser.add_argument('--bw', type=float, default=1.28, help='The channel width (MHz)')
     parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum will be written')
     parser.add_argument('--input', type=str, help='The (NumPy-readable) file containing the input dynamic spectrum')
