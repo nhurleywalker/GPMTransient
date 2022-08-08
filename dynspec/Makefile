@@ -1,5 +1,5 @@
 GPSTIMES = $(shell grep "^[0-9]" observations.txt | cut -d' ' -f1)
-BEST_DM = 285
+BEST_DM = 385
 
 # Lightcurves DM-corrected to infinite frequency, and also barycentric corrected
 LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))
@@ -9,7 +9,7 @@ LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))
 all_lightcurves: $(LIGHTCURVES)
 
 %_lightcurve.txt: dedisperse_dynspec.py observations.txt
-	python $< $$(awk '$$1 == $* {t0 = $* + $$9; if ($$6 == "Y") {printf "--transpose "}; printf "--sample_time %s --bw %s --freqlo %s --dms $(BEST_DM) --input %s --bc_corr %s --lightcurve $@ --t0 %f --no_plots\n", $$3, $$4, $$5, $$7, $$8, t0}' < $(word 2,$^))
+	python $< $$(awk '$$1 == $* {t0 = $* + $$9; if ($$6 == "Y") {printf "--transpose "}; printf "--sample_time %s --bw %s --freqlo %s --dms $(BEST_DM) --input %s --bc_corr %s --freq_ref %s --lightcurve $@ --t0 %f --no_plots\n", $$3, $$4, $$5, $$7, $$8, $$10, t0}' < $(word 2,$^))
 
 # This recipe is here just as an example of a call to bc_corr.py.
 # It won't work "out of the box" here, because the paths to the

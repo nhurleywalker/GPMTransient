@@ -56,15 +56,27 @@ class Dynspec:
         if self.fscrunched is not None:
             ax.plot(self.t, self.fscrunched)
 
+    def set_freq_ref(self, freq_ref):
+        if freq_ref is None or freq_ref == 'centre':
+            self.freq_ref = np.mean(self.f)
+        elif freq_ref == 'low':
+            self.freq_ref = self.f[0]
+        elif freq_ref == 'high':
+            self.freq_ref = self.f[-1]
+        else:
+            try:
+                self.freq_ref = float(freq_ref)
+            except:
+                meanfreq = np.mean(self.f)
+                print("Warning: could not interpret {} as frequency, setting the reference frequency to {} MHz".format(freq_ref, meanfreq))
+                self.freq_ref = meanfreq
+
     def calc_dm_shifts(self, dm, freq_ref=None):
+        # Set the reference frequency
+        self.set_freq_ref(freq_ref)
+
         # Calculate how much the DM is to change by
         dm_diff = dm - self.dm
-
-        # Set the reference frequency
-        if freq_ref is None:
-            self.freq_ref = np.mean(self.f)
-        else:
-            self.freq_ref = freq_ref
 
         # The DM delay formula assumes time in seconds, frequencies in MHz
         return calc_dmdelay(dm_diff, self.freq_ref, self.f)
@@ -186,7 +198,7 @@ if __name__ == "__main__":
     parser.add_argument('--dms', type=float, nargs='*', help='DM trials (pc/cm^3) [[start=0], stop, [step=1]] (i.e. same argument structure as s NumPy''s arange function). If a single value is given, the dynamic spectrum is dedispersed to this DM and no search is performed')
     parser.add_argument('--sample_time', type=float, default=0.5, help='The time of one sample (s)')
     parser.add_argument('--freqlo', type=float, default=139.52, help='The centre frequency of the lowest channel (MHz)')
-    parser.add_argument('--freq_ref', type=float, help='The reference frequency used during dedispersion (MHz) (default = centre frequency)')
+    parser.add_argument('--freq_ref', type=str, default='centre', help='The reference frequency used during dedispersion. Either a frequency in MHz, or one of [\'low\', \'centre\', \'high\'] (default=\'centre\')')
     parser.add_argument('--bw', type=float, default=1.28, help='The channel width (MHz)')
     parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum will be written')
     parser.add_argument('--input', type=str, help='The (NumPy-readable) file containing the input dynamic spectrum')
