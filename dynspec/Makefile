@@ -1,5 +1,5 @@
 GPSTIMES = $(shell grep "^[0-9]" observations.txt | cut -d' ' -f1)
-BEST_DM = 385
+BEST_DM = 288
 
 # Lightcurves DM-corrected to infinite frequency, and also barycentric corrected
 LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))

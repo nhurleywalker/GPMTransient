@@ -107,8 +107,8 @@ class Dynspec:
         self.fscrunched = np.mean(self.dynspec, axis=self.FREQAXIS)
 
     def get_time_at_infinite_frequency(self):
-        dmdelay = calc_dmdelay(self.dm, self.freq_ref, np.inf)
-        return self.t - dmdelay
+        self.dmdelay = calc_dmdelay(self.dm, self.freq_ref, np.inf)
+        return self.t - self.dmdelay
 
 class DMCurve():
     def __init__(self, dynspec):
@@ -177,15 +177,19 @@ def main(args):
     # If requested, write out a time series of the frequency-scrunched
     # lightcurve
     if args.lightcurve is not None:
-        header = "Created with:\n"
-        header += '  ' + ' '.join(sys.argv) + '\n\n'
-        header += 'This time series has been dedispersed to {} pc/cm^3\n'.format(DM)
-        header += 'Using barycentric correction of {} s\n\n'.format(args.bc_corr)
-        header += "Time (s) | Flux density (a.u.)"
-
         # Get the time of the first bin referenced to infinite frequency
         timeaxis = dynspec.get_time_at_infinite_frequency()
         timeaxis += args.bc_corr # Add the barycentric correction
+
+        # Create verbose header for lightcurve output files
+        header = "Created with:\n"
+        header += '  ' + ' '.join(sys.argv) + '\n\n'
+        header += 'This time series has been dedispersed to {} pc/cm^3\n'.format(DM)
+        header += 'Using barycentric correction of {} s\n'.format(args.bc_corr)
+        header += 'Using dedispersion delay of {} s (for reference frequency {})\n\n'.format(dynspec.dmdelay, dynspec.freq_ref)
+        header += "Time (s) | Flux density (a.u.)"
+
+        # Construct array to be written out and write it out
         lightcurve = np.array([timeaxis, dynspec.fscrunched]).T
         np.savetxt(args.lightcurve, lightcurve, header=header)
 
