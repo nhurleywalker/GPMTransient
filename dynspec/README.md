@@ -17,10 +17,10 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | [1341939168](#1341939168) | MWA | 0.5 | 1.28 | 139.515 | |
 | [1341939464](#1341939464) | MWA | 0.5 | 0.64 | 169.915 | |
 | [1341939760](#1341939760) | MWA | 0.5 | 1.28 | 200.955 | |
-| [1342096104](#1342096104) | MWA | 0.5 | 0.32 | 200.955 | |
+| [1342096104](#1342096104) | MWA | 0.5 | 0.64 | 200.955 | |
 | [1342096266](#1342096266) | Murriyang | 0.1 | 0.5 | 1216.0 | |
-| [1342096400](#1342096400) | MWA | 0.5 | 0.32 | 139.515 | |
-| [1342097584](#1342097584) | MWA | 0.5 | 0.32 | 170.235 | |
+| [1342096400](#1342096400) | MWA | 0.5 | 0.64 | 139.515 | |
+| [1342097584](#1342097584) | MWA | 0.5 | 0.64 | 170.235 | |
 | [1342536736](#1342536736) | MWA | 0.5 | 0.64 | 139.195 | |
 | [1342537920](#1342537920) | MWA | 0.5 | 0.64 | 103.355 | |
 | [1342623496](#1342623496) | MWA | 0.5 | 1.28 | 200.955 | |
@@ -32,6 +32,10 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 | [1343222200](#1343222200) | MWA | 0.5 | 0.64 | 200.635 | |
 | [1343223088](#1343223088) | MWA | 0.5 | 0.64 | 139.195 | |
 | [1343223384](#1343223384) | MWA | 0.5 | 0.64 | 169.915 | |
+| [1343480400](#1343480400) | MWA | 0.5 | 0.64 | 169.915 | |
+| [1343481584](#1343481584) | MWA | 0.5 | 0.64 | 139.195 | |
+| [1343481880](#1343481880) | MWA | 0.5 | 0.64 | 169.915 | |
+| [1343483064](#1343483064) | MWA | 0.5 | 0.64 | 139.195 | |
 
 ## Time-corrected light curves
 
@@ -302,4 +306,40 @@ python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 0.64 --freqlo 16
 
 ![1343223384 dedispersed spectrum](images/1343223384_dedispersed.png)
 ![1343223384 DM curve](images/1343223384_dmcurve.png)
+
+#### 1343480400
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 0.64 --freqlo 169.915 --dms 200 301 5 --input 1343480400_dyn_dynamic_spectrum.csv --freq_ref high
+```
+
+![1343480400 dedispersed spectrum](images/1343480400_dedispersed.png)
+![1343480400 DM curve](images/1343480400_dmcurve.png)
+
+#### 1343481584
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 0.64 --freqlo 139.195 --dms 200 301 1 --input 1343481584_dyn_dynamic_spectrum.csv --freq_ref high
+```
+
+![1343481584 dedispersed spectrum](images/1343481584_dedispersed.png)
+![1343481584 DM curve](images/1343481584_dmcurve.png)
+
+#### 1343481880
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 0.64 --freqlo 169.915 --dms 250 301 1 --input 1343481880_dyn_dynamic_spectrum.csv --freq_ref low
+```
+
+![1343481880 dedispersed spectrum](images/1343481880_dedispersed.png)
+![1343481880 DM curve](images/1343481880_dmcurve.png)
+
+#### 1343483064
+
+```
+python dedisperse_dynspec.py --transpose --sample_time 0.5 --bw 0.64 --freqlo 139.195 --dms 200 301 2 --input 1343483064_dyn_dynamic_spectrum.csv --freq_ref centre
+```
+
+![1343483064 dedispersed spectrum](images/1343483064_dedispersed.png)
+![1343483064 DM curve](images/1343483064_dmcurve.png)
 
