@@ -1,8 +1,13 @@
 import matplotlib.pyplot as plt
 import dedisperse_dynspec as dd
 
-dlo = dd.Dynspec('1342623792_dyn_dynamic_spectrum.csv', sample_time=0.5, freqlo=72.955, bw=0.64, time_offset=1342623792, transpose=True)
-dhi = dd.Dynspec('1342623496_dyn_dynamic_spectrum.csv', sample_time=0.5, freqlo=200.955, bw=1.28, time_offset=1342623496, transpose=True)
+# Incl. Parkes
+#dlo = dd.Dynspec('1342623792_dyn_dynamic_spectrum.csv', sample_time=0.5, freqlo=72.955, bw=0.64, time_offset=1342623792, transpose=True)
+#dhi = dd.Dynspec('1342623496_dyn_dynamic_spectrum.csv', sample_time=0.5, freqlo=200.955, bw=1.28, time_offset=1342623496, transpose=True)
+
+# Two MWA ones
+dlo = dd.Dynspec('1342096104_dyn_dynamic_spectrum.csv', sample_time=0.5, freqlo=200.475, bw=0.64, time_offset=1342096104, transpose=True)
+dhi = dd.Dynspec('PKS_1342096266_dynamic_spectrum.csv', sample_time=0.1, freqlo=1216.0, bw=0.5, time_offset=1342096266.11, transpose=False)
 
 DM = 288
 dlo.dedisperse(DM, freq_ref='low')
