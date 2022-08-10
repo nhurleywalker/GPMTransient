@@ -2,13 +2,15 @@
 
 [MWA Observation Status page](http://ws.mwatelescope.org/observation/obs/?obs_id=1344081136)
 
-#### Wed, 10 Aug 2022
+### Wed, 10 Aug 2022
 
 - Started downloading from ASVO (JobID: 583749)
 
 The surrounding correlator jobs selected an integration time of 0.5 s and a frequency resolution of 10 kHz.
 Understandably, these settings have to be folded into the setting up of the offline correlator as well.
 The instructions for doing so are found on the [MWAX Offline Correlator wiki page](https://wiki.mwatelescope.org/pages/viewpage.action?spaceKey=MP&title=MWAX+Offline+Correlator).
+
+#### Modifying subfile headers
 
 The first step is modifying the `.sub` file headers:
 
@@ -28,3 +30,7 @@ module load mwax_offline_correlator
 
 mwax_update_subfile_header -s MODE=MWAX_CORRELATOR -s INT_TIME_MSEC=500 -s FSCRUNCH_FACTOR=50 -s FINE_CHAN_WIDTH_HZ=10000 -s NFINE_CHAN=128 *.sub
 ```
+
+#### Running the correlator
+
+See [correlate.sbatch](correlate.sbatch) (also still a **work in progress**).
