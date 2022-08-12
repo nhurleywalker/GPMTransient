@@ -4,6 +4,7 @@ import argparse
 import sys
 from scipy.interpolate import interp1d
 from scipy.optimize import fmin
+import yaml
 
 # The DM delay formula assumes time in seconds, frequencies in MHz
 def calc_dmdelay(DM, flo, fhi):
@@ -235,8 +236,52 @@ if __name__ == "__main__":
     parser.add_argument('--bc_corr', type=float, default=0, help='Barycentric correction to apply (in seconds)')
     parser.add_argument('--mask_time_bins', type=int, nargs='*', help='Mask these time bins (expecting ints)')
     parser.add_argument('--mask_value', type=float, default=0.0, help='The value to use for masked bins/frequencies')
+    parser.add_argument('--yaml', type=argparse.FileType('r'), help='Obtain parameters from yaml file. These will override other parameters given on the command line')
 
     args = parser.parse_args()
+
+    if args.yaml is not None:
+        yaml_params = yaml.safe_load(args.yaml)
+        try:
+            args.bc_corr = yaml_params['Barycentric correction (s)']
+        except:
+            pass
+        try:
+            args.freqlo = yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)']
+        except:
+            pass
+        try:
+            args.bw = yaml_params['Dynamic spectrum']['Channel width (MHz)']
+        except:
+            pass
+        try:
+            args.input = yaml_params['Dynamic spectrum']['Input file']
+        except:
+            pass
+        try:
+            args.sample_time = yaml_params['Dynamic spectrum']['Sample time (s)']
+        except:
+            pass
+        try:
+            args.t0 = yaml_params['Dynamic spectrum']['T0 (s)']
+        except:
+            pass
+        try:
+            args.transpose = yaml_params['Dynamic spectrum']['Transpose']
+        except:
+            pass
+        try:
+            args.freq_ref = yaml_params['Reference frequency (MHz)']
+        except:
+            pass
+        try:
+            args.mask_time_bins = yaml_params['RFI Mask']['Time bins']
+        except:
+            pass
+        try:
+            args.max_value = yaml_params['RFI Mask']['Value']
+        except:
+            pass
 
     main(args)
 
