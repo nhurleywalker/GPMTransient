@@ -151,13 +151,13 @@ def main(args):
         dmcurve.run_dmtrials(args.dms, freq_ref=args.freq_ref)
         dmcurve.calc_best_dm()
 
-        if args.no_plots == False:
+        if args.dmcurve_image == False:
             # Plot the DM curve
             fig, ax = plt.subplots(nrows=1, ncols=1)
             ax.plot(dmcurve.dms, dmcurve.peak_snrs)
             ax.set_xlabel("DM (pc/cm^3)")
             ax.set_ylabel("Peak flux density (a.u.)")
-            plt.show()
+            plt.savefig(args.dmcurve_image)
 
         DM = dmcurve.best_dm[0]
 
@@ -166,13 +166,13 @@ def main(args):
     dynspec.fscrunch()
 
     # Plot the dynamic spectrum at the given/best DM
-    if args.no_plots == False:
+    if args.dynspec_image is not None:
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
         dynspec.plot(axs[1])
         fig.suptitle('DM = {:.1f} pc/cm^3'.format(DM))
         axs[0].set_yticks([])
-        plt.show()
+        plt.savefig(args.dynspec_image)
 
     # If requested, write out a time series of the frequency-scrunched
     # lightcurve
@@ -204,12 +204,13 @@ if __name__ == "__main__":
     parser.add_argument('--freqlo', type=float, default=139.52, help='The centre frequency of the lowest channel (MHz)')
     parser.add_argument('--freq_ref', type=str, default='centre', help='The reference frequency used during dedispersion. Either a frequency in MHz, or one of [\'low\', \'centre\', \'high\'] (default=\'centre\')')
     parser.add_argument('--bw', type=float, default=1.28, help='The channel width (MHz)')
-    parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum will be written')
+    parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum data will be written')
+    parser.add_argument('--dynspec_image', type=str, help='The file to which the dedispersed dynamic spectrum image will be saved')
+    parser.add_argument('--dmcurve_image', type=str, help='The file to which the DM curve image will be saved')
     parser.add_argument('--input', type=str, help='The (NumPy-readable) file containing the input dynamic spectrum')
     parser.add_argument('--transpose', action='store_true', help='Interpret the input file as rows for time axis, columns for frequency axis')
     parser.add_argument('--lightcurve', type=argparse.FileType('w'), help='Write out the frequency-scrunched, dispersion-corrected lightcurve to the named file. "Dispersion-corrected" means using infinite frequency as reference')
     parser.add_argument('--t0', type=float, default=0, help='The left (early) edge of the first time bin')
-    parser.add_argument('--no_plots', action='store_true', help='Do NOT make Matplotlib plots of the DM curve and dedispersed spectrum')
     parser.add_argument('--bc_corr', type=float, default=0, help='Barycentric correction to apply (in seconds)')
 
     args = parser.parse_args()
