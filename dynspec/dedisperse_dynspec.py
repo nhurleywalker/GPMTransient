@@ -11,7 +11,7 @@ def calc_dmdelay(DM, flo, fhi):
     return 4.148808e3*DM*(1/(flo*flo) - 1/(fhi*fhi))
 
 class Dynspec:
-    def __init__(self, filename, sample_time, freqlo, bw, transpose=False, time_offset=0, freq_offset=0, dm=0, mask_value=0):
+    def __init__(self, filename, sample_time, freqlo, bw, transpose=False, time_offset=0, freq_offset=0, dm=0):
         self.TIMEAXIS=1
         self.FREQAXIS=0
         self.load_dynspec(filename, transpose)
@@ -19,7 +19,6 @@ class Dynspec:
         self.create_freq_axis(bw, freqlo=freqlo)
         self.dm = dm # The initial DM of the loaded data
         self.fscrunched = None
-        self.mask_value = mask_value
 
     def load_dynspec(self, filename, transpose=False):
         # Load the data with NumPy
@@ -33,13 +32,21 @@ class Dynspec:
         self.Nf = self.dynspec.shape[self.FREQAXIS]
         self.Nt = self.dynspec.shape[self.TIMEAXIS]
 
-    def mask_time_bins(self, time_bins):
+    def mask_time_bins(self, time_bins, mask_value=0.0):
         if self.TIMEAXIS == 0:
             for idx in time_bins:
-                self.dynspec[idx,:] = self.mask_value
+                self.dynspec[idx,:] = mask_value
         else: # TIMEAXIS == 1
             for idx in time_bins:
-                self.dynspec[:,idx] = self.mask_value
+                self.dynspec[:,idx] = mask_value
+
+    def mask_freq_bins(self, freq_bins, mask_value=0.0):
+        if self.FREQAXIS == 0:
+            for idx in freq_bins:
+                self.dynspec[idx,:] = mask_value
+        else: # FREQAXIS == 1
+            for idx in freq_bins:
+                self.dynspec[:,idx] = mask_value
 
     def transpose(self):
         self.dynspec = self.dynspec.T
@@ -149,12 +156,13 @@ def main(args):
             freqlo=args.freqlo,
             bw=args.bw,
             time_offset=args.t0,
-            transpose=args.transpose,
-            mask_value=args.mask_value)
+            transpose=args.transpose)
 
     # Apply any RFI masking
     if args.mask_time_bins is not None:
-        dynspec.mask_time_bins(args.mask_time_bins)
+        dynspec.mask_time_bins(args.mask_time_bins, mask_value=args.mask_value)
+    if args.mask_freq_bins is not None:
+        dynspec.mask_freq_bins(args.mask_freq_bins, mask_value=args.mask_value)
 
     if len(args.dms) == 1:
         # In this case, only a single DM was given, so we don't
@@ -223,9 +231,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Dedisperse a dynamic spectrum')
     parser.add_argument('--dms', type=float, nargs='*', help='DM trials (pc/cm^3) [[start=0], stop, [step=1]] (i.e. same argument structure as s NumPy''s arange function). If a single value is given, the dynamic spectrum is dedispersed to this DM and no search is performed')
     parser.add_argument('--sample_time', type=float, default=1, help='The time of one sample (s)')
-    parser.add_argument('--freqlo', type=float, default=139.52, help='The centre frequency of the lowest channel (MHz)')
+    parser.add_argument('--freqlo', type=float, default=0.5, help='The centre frequency of the lowest channel (MHz)')
     parser.add_argument('--freq_ref', type=str, default='centre', help='The reference frequency used during dedispersion. Either a frequency in MHz, or one of [\'low\', \'centre\', \'high\'] (default=\'centre\')')
-    parser.add_argument('--bw', type=float, default=1.28, help='The channel width (MHz)')
+    parser.add_argument('--bw', type=float, default=1, help='The channel width (MHz)')
     parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum data will be written. If set to SHOW, then the image is shown (plt.show()) instead.')
     parser.add_argument('--dynspec_image', type=str, help='The file to which the dedispersed dynamic spectrum image will be saved. If set to SHOW, then the image is shown (plt.show()) instead.')
     parser.add_argument('--dmcurve_image', type=str, help='The file to which the DM curve image will be saved')
@@ -235,6 +243,7 @@ if __name__ == "__main__":
     parser.add_argument('--t0', type=float, default=0, help='The left (early) edge of the first time bin')
     parser.add_argument('--bc_corr', type=float, default=0, help='Barycentric correction to apply (in seconds)')
     parser.add_argument('--mask_time_bins', type=int, nargs='*', help='Mask these time bins (expecting ints)')
+    parser.add_argument('--mask_freq_bins', type=int, nargs='*', help='Mask these frequency bins (expecting ints)')
     parser.add_argument('--mask_value', type=float, default=0.0, help='The value to use for masked bins/frequencies')
     parser.add_argument('--yaml', type=argparse.FileType('r'), help='Obtain parameters from yaml file. These will override other parameters given on the command line')
 
@@ -276,6 +285,10 @@ if __name__ == "__main__":
             pass
         try:
             args.mask_time_bins = yaml_params['RFI Mask']['Time bins']
+        except:
+            pass
+        try:
+            args.mask_freq_bins = yaml_params['RFI Mask']['Freq bins']
         except:
             pass
         try:

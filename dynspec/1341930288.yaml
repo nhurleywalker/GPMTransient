@@ -9,3 +9,7 @@ Dynamic spectrum:
 ObsID: 1341930288
 Reference frequency (MHz): low
 Telescope: MWA
+RFI Mask:
+  Freq bins:
+    - 21
+    - 22

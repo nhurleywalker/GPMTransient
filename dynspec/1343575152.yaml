@@ -1,11 +1,11 @@
 Barycentric correction (s): 421.534428
 Dynamic spectrum:
   Centre of lowest channel (MHz): 139.035
-  Channel width (MHz): 0.64
+  Channel width (MHz): 0.32
   Input file: 1343575152_dyn_dynamic_spectrum.csv
   Sample time (s): 0.5
   T0 (s): 1343575152.0
   Transpose: true
 ObsID: 1343575152
-Reference frequency (MHz): centre
+Reference frequency (MHz): high
 Telescope: MWA

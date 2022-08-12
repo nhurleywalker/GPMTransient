@@ -11,8 +11,8 @@ DEDISPERSED_SPECTRA = $(patsubst %,dedispersed_spectra/%_dedispersed.png,$(GPSTI
 
 all_lightcurves: $(LIGHTCURVES)
 
-%_lightcurve.txt: dedisperse_dynspec.py observations.txt
-	python $< $$(awk '$$1 == $* {t0 = $* + $$9; if ($$6 == "Y") {printf "--transpose "}; printf "--sample_time %s --bw %s --freqlo %s --dms $(BEST_DM) --input %s --bc_corr %s --freq_ref %s --lightcurve $@ --t0 %f\n", $$3, $$4, $$5, $$7, $$8, $$10, t0}' < $(word 2,$^))
+%_lightcurve.txt: dedisperse_dynspec.py %.yaml
+	python $< --dms $(BEST_DM) --lightcurve $@ --yaml $(word 2,$^)
 
 all_dedispersed_spectra: $(DEDISPERSED_SPECTRA)
 

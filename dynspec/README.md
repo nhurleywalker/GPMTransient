@@ -2,7 +2,7 @@
 
 The `csv` files in this directory are for the recently discovered 20-minute transient in the Galactic Plane.
 
-The file `observations.txt` contains metadata associated with each observation that is used to form the data products such as dediserpsed spectra and lightcurves.
+The `.yaml` files contain metadata associated with each observation that is used to form the data products such as dediserpsed spectra and lightcurves.
 Most of the data products can be produced by using the `dedisperse_dynspec.py` script.
 
 ## Making individual dedispersed spectra
@@ -11,7 +11,11 @@ Example:
 ```
 python dedisperse_dynspec.py --transpose --sample_time 0.5 --freqlo 185.595 --bw 0.64 --dms 288 --input 1340639536_dynamic_spectrum_pad.csv --dynspec_image dediserpsed_spectra/1340639536_dedispersed.png
 ```
-![1340639536 dedispersed spectrum](dediserpsed_spectra/1340639536_dedispersed.png)
+or
+```
+python dedisperse_dynspec.py --dms 288 --dynspec_image dediserpsed_spectra/1340639536_dedispersed.png --yaml 1340639536.yaml
+```
+![1340639536 dedispersed spectrum](dedispersed_spectra/1340639536_dedispersed.png)
 
 Alternatively,
 ```
