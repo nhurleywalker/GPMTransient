@@ -16,21 +16,38 @@ The first step is modifying the `.sub` file headers:
 
 | Key | Existing Value | Set to | Notes |
 | :-- | :------------- | :----- | :---- |
-| MODE | MWAX_VCS | MWAX_CORRELATOR | |
-| INT_TIME_MSEC |  | 500 | 500ms = 0.5s |
-| FSCRUNCH_FACTOR |  | 50 | 50 x 200 Hz = 10 kHz |
-| FINE_CHAN_WIDTH_HZ |  | 10000 | 10000 Hz = 10 kHz |
-| NFINE_CHAN |  | 128 | 128 x 10 kHz per coarse channel |
+| MODE               | MWAX_VCS   | MWAX_CORRELATOR | |
+| INT_TIME_MSEC      | 500        | 500             | 500ms = 0.5s                    |
+| FSCRUNCH_FACTOR    | 50         | 50              | 50 x 200 Hz = 10 kHz            |
+| FINE_CHAN_WIDTH_HZ | 10000      | 10000           | 10000 Hz = 10 kHz               |
+| NFINE_CHAN         | 128        | 128             | 128 x 10 kHz per coarse channel |
+| EXPOSURE_SECS      | 64         | 64              | |
+| OBS_ID             | 1344081136 | 1344081136      | |
+| OBS_OFFSET         | 0 (etc.)   | 0 (etc.)        | |
 
-To effect these changes on Pawsey (**don't try yet**):
+In this case, the only change that needs to happen is to the `MODE`.
+This can be effected using the [`mwax_update_subfile_header`](https://github.com/MWATelescope/mwax_user_tools) utility.
+
+To effect these changes on Pawsey:
 
 ```
 module use /pawsey/mwa/software/python3/modulefiles
-module load mwax_offline_correlator
+module load mwax_offline_correlator/136T
 
-mwax_update_subfile_header -s MODE=MWAX_CORRELATOR -s INT_TIME_MSEC=500 -s FSCRUNCH_FACTOR=50 -s FINE_CHAN_WIDTH_HZ=10000 -s NFINE_CHAN=128 *.sub
+mwax_update_subfile_header -s MODE=MWAX_CORRELATOR *.sub
 ```
 
 #### Running the correlator
 
 See [correlate.sbatch](correlate.sbatch) (also still a **work in progress**).
+
+##### Notes (Log)
+
+- `NINPUTS_XGPU` = 288, but `mwax_db2correlate2db` complains about it not equalling the xGPU configuration:
+```
+...
+[2022-08-13-18:07:21] ERR: mwax_db2correlate2db_open: NINPUTS_XGPU [288] does not match the current xGPU configuration [272]
+[2022-08-13-18:07:21] ERR: Error calling open function
+[2022-08-13-18:07:21] ERR: mwax_db2correlate2db main: error during PSRDADA client read call
+...
+```
