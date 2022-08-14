@@ -9,6 +9,9 @@ DEDISPERSED_SPECTRA = $(patsubst %,dedispersed_spectra/%_dedispersed.png,$(GPSTI
 
 .SECONDARY:
 
+de430.bsp:
+	wget -O $@ http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp
+
 all_lightcurves: $(LIGHTCURVES)
 
 %_lightcurve.txt: dedisperse_dynspec.py %.yaml

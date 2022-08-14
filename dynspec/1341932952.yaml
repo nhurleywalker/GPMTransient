@@ -1,4 +1,4 @@
-Barycentric correction (s): 480.861301
+Apply barycentric correction: true
 Dynamic spectrum:
   Centre of lowest channel (MHz): 139.515
   Channel width (MHz): 0.32
@@ -9,3 +9,5 @@ Dynamic spectrum:
 ObsID: 1341932952
 Reference frequency (MHz): centre
 Telescope: MWA
+RA: 18.6505
+Dec: -10.5304

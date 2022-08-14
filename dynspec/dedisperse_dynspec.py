@@ -9,6 +9,8 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 import yaml
 
+EPHEMERIS = 'de430.bsp'
+
 # The DM delay formula assumes time in seconds, frequencies in MHz
 def calc_dmdelay(DM, flo, fhi):
     return 4.148808e3*DM*(1/(flo*flo) - 1/(fhi*fhi))
@@ -216,12 +218,15 @@ def main(args):
         # Get the time of the first bin referenced to infinite frequency
         timeaxis = dynspec.get_time_at_infinite_frequency()
         if args.bc_corr == True:
-            from bc_corr import bc_corr
-            coord = SkyCoord(ra=18.6505*u.hr, dec=-10.5304*u.deg, frame='icrs')
-            time = Time(timeaxis[0], format='gps')
-            bc_correction = bc_corr(coord, time, 'de430.bsp')
-            header += 'Using barycentric correction of {} s\n'.format(bc_correction)
-            timeaxis += bc_correction # Add the barycentric correction
+            if args.RA is not None and args.Dec is not None:
+                from bc_corr import bc_corr
+                coord = SkyCoord(ra=args.RA*u.hr, dec=args.Dec*u.deg, frame='icrs')
+                time = Time(timeaxis[0], format='gps')
+                bc_correction = bc_corr(coord, time, EPHEMERIS)
+                header += 'Using barycentric correction of {} s\n'.format(bc_correction)
+                timeaxis += bc_correction # Add the barycentric correction
+            else:
+                raise Exception("Barycentric correction requested but source coordinates not given")
 
         # Create verbose header for lightcurve output files
         header += 'Using dedispersion delay of {} s (for reference frequency {})\n\n'.format(dynspec.dmdelay, dynspec.freq_ref)
@@ -253,6 +258,8 @@ if __name__ == "__main__":
     parser.add_argument('--mask_time_bins', type=int, nargs='*', help='Mask these time bins (expecting ints)')
     parser.add_argument('--mask_freq_bins', type=int, nargs='*', help='Mask these frequency bins (expecting ints)')
     parser.add_argument('--mask_value', type=float, default=0.0, help='The value to use for masked bins/frequencies')
+    parser.add_argument('--RA', type=float, help='The RA of the source in decimal hours')
+    parser.add_argument('--Dec', type=float, help='The Dec of the source in decimal degrees')
     parser.add_argument('--yaml', type=argparse.FileType('r'), help='Obtain parameters from yaml file. These will override other parameters given on the command line')
 
     args = parser.parse_args()
@@ -260,8 +267,7 @@ if __name__ == "__main__":
     if args.yaml is not None:
         yaml_params = yaml.safe_load(args.yaml)
         try:
-            asdf = yaml_params['Barycentric correction (s)']
-            args.bc_corr = True
+            args.bc_corr = yaml_params['Apply barycentric correction']
         except:
             pass
         try:
@@ -302,6 +308,14 @@ if __name__ == "__main__":
             pass
         try:
             args.max_value = yaml_params['RFI Mask']['Value']
+        except:
+            pass
+        try:
+            args.RA = yaml_params['RA']
+        except:
+            pass
+        try:
+            args.Dec = yaml_params['Dec']
         except:
             pass
 
