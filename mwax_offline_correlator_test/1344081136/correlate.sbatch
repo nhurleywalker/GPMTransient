@@ -16,7 +16,8 @@
 NUMTILES=136
 
 module use /pawsey/mwa/software/python3/modulefiles
-module load mwax_offline_correlator/${NUMTILES}T
+#module load mwax_offline_correlator/${NUMTILES}T
+module load mwax_offline_correlator/144T
 
 INPUT_BUFFER_SIZE=$(echo "$NUMTILES * 256000" | bc)
 OUTPUT_BUFFER_SIZE=$(echo "($NUMTILES + 1) * $NUMTILES * 102408" | bc)
