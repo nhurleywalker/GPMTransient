@@ -25,7 +25,7 @@ dedispersed_spectra/%_dedispersed.png: dedisperse_dynspec.py %.yaml
 # different for each user. Run "python bc_corr.py -h" for usage.
 
 bc_corrections: bc_corr.py
-	python $< 18.6505 -10.5304 $$(locate de430.bsp | head -1) $(GPSTIMES)
+	python $< --ephemeris $$(locate de430.bsp | head -1) 18.6505 -10.5304 $(GPSTIMES)
 
 pulsestacks/pulsestack_%s_DM_$(BEST_DM).png: $(LIGHTCURVES)
 	python make_pulsestack.py --png $@ $* $^
