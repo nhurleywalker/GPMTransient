@@ -4,6 +4,9 @@ import argparse
 import sys
 from scipy.interpolate import interp1d
 from scipy.optimize import fmin
+from astropy.time import Time
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 import yaml
 
 # The DM delay formula assumes time in seconds, frequencies in MHz
@@ -207,15 +210,20 @@ def main(args):
     # If requested, write out a time series of the frequency-scrunched
     # lightcurve
     if args.lightcurve is not None:
-        # Get the time of the first bin referenced to infinite frequency
-        timeaxis = dynspec.get_time_at_infinite_frequency()
-        timeaxis += args.bc_corr # Add the barycentric correction
-
-        # Create verbose header for lightcurve output files
         header = "Created with:\n"
         header += '  ' + ' '.join(sys.argv) + '\n\n'
         header += 'This time series has been dedispersed to {} pc/cm^3\n'.format(DM)
-        header += 'Using barycentric correction of {} s\n'.format(args.bc_corr)
+        # Get the time of the first bin referenced to infinite frequency
+        timeaxis = dynspec.get_time_at_infinite_frequency()
+        if args.bc_corr == True:
+            from bc_corr import bc_corr
+            coord = SkyCoord(ra=18.6505*u.hr, dec=-10.5304*u.deg, frame='icrs')
+            time = Time(timeaxis[0], format='gps')
+            bc_correction = bc_corr(coord, time, 'de430.bsp')
+            header += 'Using barycentric correction of {} s\n'.format(bc_correction)
+            timeaxis += bc_correction # Add the barycentric correction
+
+        # Create verbose header for lightcurve output files
         header += 'Using dedispersion delay of {} s (for reference frequency {})\n\n'.format(dynspec.dmdelay, dynspec.freq_ref)
         header += "Time (s) | Flux density (a.u.)"
 
@@ -241,7 +249,7 @@ if __name__ == "__main__":
     parser.add_argument('--transpose', action='store_true', help='Interpret the input file as rows for time axis, columns for frequency axis')
     parser.add_argument('--lightcurve', type=argparse.FileType('w'), help='Write out the frequency-scrunched, dispersion-corrected lightcurve to the named file. "Dispersion-corrected" means using infinite frequency as reference')
     parser.add_argument('--t0', type=float, default=0, help='The left (early) edge of the first time bin')
-    parser.add_argument('--bc_corr', type=float, default=0, help='Barycentric correction to apply (in seconds)')
+    parser.add_argument('--bc_corr', action='store_true', help='Apply barycentric correction')
     parser.add_argument('--mask_time_bins', type=int, nargs='*', help='Mask these time bins (expecting ints)')
     parser.add_argument('--mask_freq_bins', type=int, nargs='*', help='Mask these frequency bins (expecting ints)')
     parser.add_argument('--mask_value', type=float, default=0.0, help='The value to use for masked bins/frequencies')
@@ -252,7 +260,8 @@ if __name__ == "__main__":
     if args.yaml is not None:
         yaml_params = yaml.safe_load(args.yaml)
         try:
-            args.bc_corr = yaml_params['Barycentric correction (s)']
+            asdf = yaml_params['Barycentric correction (s)']
+            args.bc_corr = True
         except:
             pass
         try:

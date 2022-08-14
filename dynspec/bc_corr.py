@@ -6,24 +6,24 @@ from astropy.coordinates import SkyCoord
 from astropy.constants import c
 from spiceypy.spiceypy import spkezr, furnsh, j2000, spd, unload
 
-def bc_corr(coord, times, ephemeris_file='de430.bsp'):
+def bc_corr(coord, time, ephemeris_file='de430.bsp'):
     '''
     coord - SkyCoord object (from astropy) representing the location of the source
-    times - Time object (from astropy)
+    time - Time object (from astropy)
     ephemeris_file - 
     '''
     try:
         furnsh(ephemeris_file)
     except:
         raise Exception("Cannot load ephemeris file {}\n".format(ephemeris_file))
-    jds = np.array([time.mjd + 2400000.5 for time in times])
-    ets = (jds - j2000())*spd()
-    r_earth = [spkezr("earth", et, "j2000", "NONE", "solar system barycenter")[0][:3] for et in ets]
+    jd = time.mjd + 2400000.5
+    et = (jd - j2000())*spd()
+    r_earth = spkezr("earth", et, "j2000", "NONE", "solar system barycenter")[0][:3]
     r_src_normalised = [np.cos(coord.ra.rad)*np.cos(coord.dec.rad),
             np.sin(coord.ra.rad)*np.cos(coord.dec.rad),
             np.sin(coord.dec.rad)]
-    delays = [np.dot(r_earth, r_src_normalised) * 1e3 * u.meter / c] # (1e3 = km->m)
-    return delays
+    delay = np.dot(r_earth, r_src_normalised) * 1e3 * u.meter / c # (1e3 = km->m)
+    return delay.value
 
 if __name__ == "__main__":
     # Parse the command line
@@ -31,13 +31,13 @@ if __name__ == "__main__":
     parser.add_argument('ra', type=float, help='The RA in decimal hours')
     parser.add_argument('dec', type=float, help='The declination in decimal degrees')
     parser.add_argument('--ephemeris', type=str, default='de430.bsp', help='The ephemeris file (e.g. http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp)')
-    parser.add_argument('gpstimes', type=float, nargs='*', help='The GPS times at which the barycentric correction is to be calculated')
+    parser.add_argument('gpstimes', type=float, help='The GPS time at which the barycentric correction is to be calculated')
 
     args = parser.parse_args()
 
     times = [Time(gpstime, format='gps') for gpstime in args.gpstimes]
 
     coord = SkyCoord(ra=args.ra*u.hr, dec=args.dec*u.deg, frame='icrs')
-    corrected = bc_corr(coord, times, ephemeris_file=args.ephemeris)
+    corrected = [bc_corr(coord, time, ephemeris_file=args.ephemeris) for time in times]
 
     print(corrected)
