@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
@@ -6,8 +8,17 @@ from scipy.interpolate import interp1d
 from scipy.optimize import fmin
 from glob import glob
 from astropy.io import fits
+from astropy.coordinates import SkyCoord
+from astropy import units as u
+from astropy.wcs import WCS
 import multiprocessing
 
+DMP = True
+try:
+    import pygedm
+except ImportError:
+    DMP = False
+    print("No position-dependent DM trials available")
 
 # The DM delay formula assumes time in seconds, frequencies in MHz
 def calc_dmdelay(DM, flo, fhi):
@@ -121,9 +132,12 @@ class DMCurve():
         # Interpolate the DM curve and get the max value
 #        try:
 #        interped = interp1d(self.dms, self.peak_snrs, kind='cubic')
-        closest_best_dm_idx = np.argmax(self.peak_snrs, keepdims=True)[0]
+#        closest_best_dm_idx = np.argmax(self.peak_snrs, keepdims=True)[0]
+# Old numpy compatibility
+        closest_best_dm_idx = np.argmax(self.peak_snrs)
 #        self.best_dm = fmin(lambda dm: -interped(dm), self.dms[closest_best_dm_idx])
         self.best_dm = self.dms[closest_best_dm_idx]
+        self.best_snr = self.peak_snrs[closest_best_dm_idx]
 #        except ValueError:
 #        self.best_dm = [0.0]
 
@@ -160,8 +174,10 @@ def main(n, coords, dynspec, args):
     dmcurve = DMCurve(dynspec)
     dmcurve.run_dmtrials(args.dms, freq_ref=args.freq_ref)
     dmcurve.calc_best_dm()
+    DM = dmcurve.best_dm
+    peak = dmcurve.best_snr
 
-    if args.no_plots == False:
+    if args.no_plots == False and peak > 1:
         # Plot the DM curve
         fig, ax = plt.subplots(nrows=1, ncols=1)
         ax.plot(dmcurve.dms, dmcurve.peak_snrs)
@@ -169,19 +185,16 @@ def main(n, coords, dynspec, args):
         ax.set_ylabel("Peak flux density (a.u.)")
         fig.savefig(f"lc_best_DM_{n:04d}.png", bbox_inches="tight")
 
-    DM = dmcurve.best_dm
-#    DM = dmcurve.best_dm[0]
-
     # Dedisperse the spectrum
     dynspec.dedisperse(DM, freq_ref=args.freq_ref)
     dynspec.fscrunch()
 
     # Plot the dynamic spectrum at the given/best DM
-    if args.no_plots == False:
+    if args.no_plots == False and peak > 1:
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
         dynspec.plot(axs[1])
-        fig.suptitle('DM = {:.1f} pc/cm^3'.format(DM))
+        fig.suptitle(f'x, y = {coords[0], coords[1]}, DM = {DM:.1f} pc/cm^3')
         axs[0].set_yticks([])
         fig.savefig(f"ds_best_DM_{n:04d}.png", bbox_inches="tight")
 
@@ -207,8 +220,7 @@ def main(n, coords, dynspec, args):
     if args.output is not None:
         np.savetxt(args.output, dynspec.dynspec)
 
-# TODO: return the peak or light curve or something more interesting
-    return(n, coords, DM)
+    return(n, coords, DM, peak)
 
 if __name__ == "__main__":
     # Parse the command line
@@ -232,27 +244,33 @@ if __name__ == "__main__":
         cores = multiprocessing.cpu_count()
     else:
         cores = args.cores
+    print(f"Using {cores} cores...")
+
+# Make a copy of the default DMs
+    dms = args.dms
+    print(args.dms)
 
     # read in the images
-    hdus = sorted(glob(f"{args.input}-t????-????-tiny.fits"))
+    hdus = sorted(glob(f"{args.input}-t????-????-image.fits"))
     h = hdus[-1]
     st = h.split("-t")[1]
     tmax = int(st.split("-")[0])
     cmax = int(st.split("-")[1])
     a = fits.open(h)
-    xmax = a[0].data.shape[0]
-    ymax = a[0].data.shape[1]
+    xmax = a[0].data.shape[2]
+    ymax = a[0].data.shape[3]
+    w = WCS(a[0].header, naxis=2)
 
     # TODO optimise this so you only read in |b| < 1 deg
 
     # make a (hyper-) cube
     arr = np.empty((tmax, cmax, ymax, xmax))
+    print(arr.shape)
     for t in range(0, tmax):
         for c in range(0, cmax):
-            h = fits.open(f"{args.input}-t{t:04d}-{c:04d}-tiny.fits")
+            h = fits.open(f"{args.input}-t{t:04d}-{c:04d}-image.fits")
             arr[t, c, :, :] = h[0].data
 
-    # form a DM map (for now we'll just do these tiny images)
     
     # When using a pool, you need to send the arguments as a tuple through the
     # wrapping function, so we set up the arguments here before running the pool
@@ -262,8 +280,16 @@ if __name__ == "__main__":
     n = 0
     for x in range(0,xmax):
         for y in range(0,ymax):
-            pargs.append((n, [x,y], arr[:, :, x, y], args))
-            n+=1
+# Fast testing
+#    for x in range(499,500):
+#        for y in range(0,1000):
+            coords = w.pixel_to_world(y, x)
+            if np.abs(coords.galactic.b.value) < 2.1:
+                if DMP:
+                    DM, tau_sc = pygedm.dist_to_dm(coords.galactic.l.value, coords.galactic.b.value, 10000, method='ymw16')
+                    args.dms[1] = DM.value
+                pargs.append((n, [x,y], arr[:, :, x, y], args))
+                n+=1
 
     # make a multiprocessing pool
     # start a new process for each task
@@ -277,14 +303,21 @@ if __name__ == "__main__":
     pool.close()
     pool.join()
 
-    indices, coords, DMs = map(list, zip(*results))
+    indices, coords, DMs, peaks = map(list, zip(*results))
     # Order correctly
     ind = np.argsort(indices)
     DMs = np.array(DMs)
     DMs = DMs[ind]
+    peaks = np.array(peaks)
+    peaks = peaks[ind]
+
+    a[0].data = np.zeros(a[0].data.shape)
 
     for c, DM in zip(coords, DMs):
-        a[0].data[c] = DM
-
+        a[0].data[:,:,c[0],c[1]] = DM
     a.writeto("DM_map.fits", overwrite=True)
+
+    for c, p in zip(coords, peaks):
+        a[0].data[:,:,c[0],c[1]] = p
+    a.writeto("SNR_map.fits", overwrite=True)
 
