@@ -24,6 +24,14 @@ except ImportError:
 def calc_dmdelay(DM, flo, fhi):
     return 4.148808e3*DM*(1/(flo*flo) - 1/(fhi*fhi))
 
+def sc(data):
+    '''
+    Perform some sigma-clipping on a light curve
+    '''
+    std = np.std(data)
+    std = np.std(data[np.abs(data) < 3*std])
+    return std
+
 class Dynspec:
     def __init__(self, dynspec, sample_time, freqlo, bw, time_offset=0, freq_offset=0, dm=0):
         self.TIMEAXIS=1
@@ -140,14 +148,6 @@ class DMCurve():
         self.best_snr = self.peak_snrs[closest_best_dm_idx]
 #        except ValueError:
 #        self.best_dm = [0.0]
-
-    def sc(data):
-        '''
-        Perform some sigma-clipping on a light curve
-        '''
-        std = np.std(data)
-        std = np.std(data[np.abs(data) < 3*std])
-        return std
 
 def _main(pargs):
     """
