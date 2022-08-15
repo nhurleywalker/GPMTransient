@@ -1,36 +1,51 @@
-# ObsID (GPS time) | Telescope | Sample time (s) | Channel width (MHz) | Centre of lowest channel (MHz) | Transpose CSV? | Input file | Barycentric correction (s) | Offset (s) | Reference frequency (MHz)
-1340639536 MWA 0.5 0.64 185.275 Y 1340639536_dyn_dynamic_spectrum.csv 493.45818 0 centre
-1340641016 MWA 0.5 0.64 185.595 Y 1340641016_dyn_dynamic_spectrum.csv 493.461572 0 centre
-1341844600 MWA 0.5 0.64 185.275 Y 1341844600_dyn_dynamic_spectrum.csv 482.701507 0 low
-1341845784 MWA 0.5 0.64 185.275 Y 1341845784_dyn_dynamic_spectrum.csv 482.677783 0 low
-1341930288 MWA 0.5 0.32 139.515 Y 1341930288_dyn_dynamic_spectrum.csv 480.918857 0 low
-1341931472 MWA 0.5 0.64 169.915 Y 1341931472_dyn_dynamic_spectrum.csv 480.893292 0 centre
-1341932656 MWA 0.5 0.64 200.955 Y 1341932656_dyn_dynamic_spectrum.csv 480.867702 0 centre
-1341932952 MWA 0.5 0.32 139.515 Y 1341932952_dyn_dynamic_spectrum.csv 480.861301 0 centre
-1341937984 MWA 0.5 0.64 200.955 Y 1341937984_dyn_dynamic_spectrum.csv 480.752234 0 high
-1341938280 MWA 0.5 0.32 139.515 Y 1341938280_dyn_dynamic_spectrum.csv 480.745804 0 low
-1341939168 MWA 0.5 0.32 139.515 Y 1341939168_dyn_dynamic_spectrum.csv 480.726504 0 high
-1341939464 MWA 0.5 0.64 169.915 Y 1341939464_dyn_dynamic_spectrum.csv 480.720068 0 low
-#1341939760 MWA 0.5 0.64 200.955 Y 1341939760_dyn_dynamic_spectrum.csv 480.71363 0 centre
-1342096266 Murriyang 0.1 0.5 1216.0 N PKS_1342096266_dynamic_spectrum.csv 477.109035 0.11 centre
-1342096104 MWA 0.5 0.64 200.475 Y 1342096104_dynamic_spectrum.csv 477.091713 0 centre
-1342096400 MWA 0.5 0.32 139.515 Y 1342096400_dynamic_spectrum.csv 477.084437 0 low
-1342097584 MWA 0.5 0.64 170.235 Y 1342097584_dynamic_spectrum.csv 477.055317 0 low
-1342536736 MWA 0.5 0.32 139.195 Y 1342536736_dyn_dynamic_spectrum.csv 464.521441 0 low
-1342537920 MWA 0.5 0.16 103.355 Y 1342537920_dyn_dynamic_spectrum.csv 464.483005 0 low
-1342623496 MWA 0.5 0.64 200.955 Y 1342623496_dyn_dynamic_spectrum.csv 461.639451 0 high
-1342623792 MWA 0.5 0.08 72.955 Y 1342623792_dyn_dynamic_spectrum.csv 461.629392 0 low
-1342790792 MWA 0.5 0.32 139.195 Y 1342790792_dyn_dynamic_spectrum.csv 455.709143 0 high
-#1343135152 MWA 0.5 0.16 103.355 Y 1343135152_dyn_dynamic_spectrum.csv 441.978214 0 centre
-1343136336 MWA 0.5 0.08 72.635 Y 1343136336_dyn_dynamic_spectrum.csv 441.927516 0 high
-1343221904 MWA 0.5 0.64 169.915 Y 1343221904_dyn_dynamic_spectrum.csv 438.201075 0 high
-1343222200 MWA 0.5 0.64 200.635 Y 1343222200_dyn_dynamic_spectrum.csv 438.187972 0 low
-1343223088 MWA 0.5 0.32 139.195 Y 1343223088_dyn_dynamic_spectrum.csv 438.148652 0 high
-1343223384 MWA 0.5 0.64 169.915 Y 1343223384_dyn_dynamic_spectrum.csv 438.135542 0 low
-1343480400 MWA 0.5 0.64 169.915 Y 1343480400_dyn_dynamic_spectrum.csv 426.20496 0 high
-1343481584 MWA 0.5 0.32 139.195 Y 1343481584_dyn_dynamic_spectrum.csv 426.147493 0 high
-1343481880 MWA 0.5 0.64 169.915 Y 1343481880_dyn_dynamic_spectrum.csv 426.133123 0 low
-1343483064 MWA 0.5 0.32 139.195 Y 1343483064_dyn_dynamic_spectrum.csv 426.075627 0 centre
-1343569824 MWA 0.5 0.64 200.955 Y 1343569824_dyn_dynamic_spectrum.csv
-1343573968 MWA 0.5 0.64 169.915 Y 1343573968_dyn_dynamic_spectrum.csv
-1343575448 MWA 0.5 0.64 169.915 Y 1343575448_dyn_dynamic_spectrum.csv
+# ObsID (GPS time) | Telescope | Sample time (s) | Channel width (MHz) | Centre of lowest channel (MHz) | Transpose CSV? | Input file | Barycentric correction (s) | Offset (s) | Reference frequency (MHz) | RFI time bins
+1340639536 MWA 0.5 0.64 185.275 Y 1340639536_dyn_dynamic_spectrum.csv 493.45818 0 centre none
+1340641016 MWA 0.5 0.64 185.595 Y 1340641016_dyn_dynamic_spectrum.csv 493.461572 0 centre none
+1341844600 MWA 0.5 0.64 185.275 Y 1341844600_dyn_dynamic_spectrum.csv 482.701507 0 low none
+1341845784 MWA 0.5 0.64 185.275 Y 1341845784_dyn_dynamic_spectrum.csv 482.677783 0 low none
+1341930288 MWA 0.5 0.32 139.515 Y 1341930288_dyn_dynamic_spectrum.csv 480.918857 0 low none
+1341931472 MWA 0.5 0.64 169.915 Y 1341931472_dyn_dynamic_spectrum.csv 480.893292 0 centre none
+1341932656 MWA 0.5 0.64 200.955 Y 1341932656_dyn_dynamic_spectrum.csv 480.867702 0 centre none
+1341932952 MWA 0.5 0.32 139.515 Y 1341932952_dyn_dynamic_spectrum.csv 480.861301 0 centre none
+1341937984 MWA 0.5 0.64 200.955 Y 1341937984_dyn_dynamic_spectrum.csv 480.752234 0 high none
+1341938280 MWA 0.5 0.32 139.515 Y 1341938280_dyn_dynamic_spectrum.csv 480.745804 0 low none
+1341939168 MWA 0.5 0.32 139.515 Y 1341939168_dyn_dynamic_spectrum.csv 480.726504 0 high none
+1341939464 MWA 0.5 0.64 169.915 Y 1341939464_dyn_dynamic_spectrum.csv 480.720068 0 low none
+#1341939760 MWA 0.5 0.64 200.955 Y 1341939760_dyn_dynamic_spectrum.csv 480.71363 0 centre none
+1342096104 MWA 0.5 0.32 200.475 Y 1342096104_dynamic_spectrum.csv 477.091713 0 centre none
+1342096266 Murriyang 0.1 0.5 1216.0 N PKS_1342096266_dynamic_spectrum.csv 477.109035 0.11 centre none
+1342096400 MWA 0.5 0.32 139.515 Y 1342096400_dynamic_spectrum.csv 477.084437 0 low none
+1342097584 MWA 0.5 0.32 170.235 Y 1342097584_dynamic_spectrum.csv 477.055317 0 low none
+1342535256 MWA 0.5 0.32 139.035 Y 1342535256_dyn_dynamic_spectrum.csv 464.569451 0 centre none
+1342536440 MWA 0.5 0.16 103.115 Y 1342536440_dyn_dynamic_spectrum.csv 464.531046 0 centre 311,313,314,315
+1342536736 MWA 0.5 0.32 139.195 Y 1342536736_dyn_dynamic_spectrum.csv 464.521441 0 low none
+1342537920 MWA 0.5 0.16 103.355 Y 1342537920_dyn_dynamic_spectrum.csv 464.483005 0 low none
+1342623496 MWA 0.5 0.64 200.955 Y 1342623496_dyn_dynamic_spectrum.csv 461.639451 0 high none
+1342623792 MWA 0.5 0.08 72.955 Y 1342623792_dyn_dynamic_spectrum.csv 461.629392 0 low none
+1342624680 MWA 0.5 0.64 169.915 Y 1342624680_dyn_dynamic_spectrum.csv 461.599204 0 centre none
+1342624976 MWA 0.5 0.64 200.635 Y 1342624976_dyn_dynamic_spectrum.csv 461.589138 0 centre none
+1342790792 MWA 0.5 0.32 139.195 Y 1342790792_dyn_dynamic_spectrum.csv 455.709143 0 high none
+1343135152 MWA 0.5 0.64 103.115 Y 1343135152_dyn_dynamic_spectrum.csv 441.978214 0 centre none
+#1343135152 MWA 0.5 0.16 103.355 Y 1343135152_dyn_dynamic_spectrum.csv 441.978214 0 centre none
+1343136336 MWA 0.5 0.08 72.635 Y 1343136336_dyn_dynamic_spectrum.csv 441.927516 0 high none
+1343221904 MWA 0.5 0.64 169.915 Y 1343221904_dyn_dynamic_spectrum.csv 438.201075 0 high none
+1343222200 MWA 0.5 0.64 200.635 Y 1343222200_dyn_dynamic_spectrum.csv 438.187972 0 low none
+1343223088 MWA 0.5 0.32 139.195 Y 1343223088_dyn_dynamic_spectrum.csv 438.148652 0 high none
+1343223384 MWA 0.5 0.64 169.915 Y 1343223384_dyn_dynamic_spectrum.csv 438.135542 0 low none
+1343228664 MWA 0.5 0.64 169.915 Y 1343228664_dyn_dynamic_spectrum.csv 437.901449 0 centre none
+1343229848 MWA 0.5 0.64 169.915 Y 1343229848_dyn_dynamic_spectrum.csv 437.848891 0 centre none
+1343230144 MWA 0.5 0.64 169.915 Y 1343230144_dyn_dynamic_spectrum.csv 437.835748 0 centre none
+1343231032 MWA 0.5 0.64 169.915 Y 1343231032_dyn_dynamic_spectrum.csv 437.79631 0 centre none
+1343231328 MWA 0.5 0.64 169.915 Y 1343231328_dyn_dynamic_spectrum.csv 437.783162 0 centre none
+1343480400 MWA 0.5 0.64 169.915 Y 1343480400_dyn_dynamic_spectrum.csv 426.20496 0 high none
+1343481584 MWA 0.5 0.32 139.195 Y 1343481584_dyn_dynamic_spectrum.csv 426.147493 0 high none
+1343481880 MWA 0.5 0.64 169.915 Y 1343481880_dyn_dynamic_spectrum.csv 426.133123 0 low none
+1343483064 MWA 0.5 0.32 139.195 Y 1343483064_dyn_dynamic_spectrum.csv 426.075627 0 centre none
+1343567456 MWA 0.5 0.64 103.115 Y 1343567456_dyn_dynamic_spectrum.csv 421.919174 0 centre none
+1343568640 MWA 0.5 0.64 72.355 Y 1343568640_dyn_dynamic_spectrum.csv 421.860044 0 centre none
+1343568936 MWA 0.5 0.64 103.115 Y 1343568936_dyn_dynamic_spectrum.csv 421.845258 0 centre none
+1343569824 MWA 0.5 0.64 200.955 Y 1343569824_dyn_dynamic_spectrum.csv 421.800892 0 centre none
+1343570120 MWA 0.5 0.64 72.355 Y 1343570120_dyn_dynamic_spectrum.csv 421.7861 0 centre none
+1343573968 MWA 0.5 0.64 169.915 Y 1343573968_dyn_dynamic_spectrum.csv 421.593681 0 centre none
+1343575152 MWA 0.5 0.64 139.035 Y 1343575152_dyn_dynamic_spectrum.csv 421.534428 0 centre none
+1343575448 MWA 0.5 0.64 169.915 Y 1343575448_dyn_dynamic_spectrum.csv 421.519611 0 centre none

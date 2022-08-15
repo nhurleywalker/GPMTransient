@@ -1,0 +1,13 @@
+Apply barycentric correction: true
+Dynamic spectrum:
+  Centre of lowest channel (MHz): 1216.0
+  Channel width (MHz): 0.5
+  Input file: PKS_1342096266_dynamic_spectrum.csv
+  Sample time (s): 0.1
+  T0 (s): 1342096266.11
+  Transpose: false
+ObsID: 1342096266
+Reference frequency (MHz): centre
+Telescope: Murriyang
+RA: 18.6505
+Dec: -10.5304

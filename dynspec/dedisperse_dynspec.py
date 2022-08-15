@@ -4,6 +4,12 @@ import argparse
 import sys
 from scipy.interpolate import interp1d
 from scipy.optimize import fmin
+from astropy.time import Time
+from astropy.coordinates import SkyCoord
+from astropy import units as u
+import yaml
+
+EPHEMERIS = 'de430.bsp'
 
 # The DM delay formula assumes time in seconds, frequencies in MHz
 def calc_dmdelay(DM, flo, fhi):
@@ -30,6 +36,22 @@ class Dynspec:
         # Record the dimensions of the array
         self.Nf = self.dynspec.shape[self.FREQAXIS]
         self.Nt = self.dynspec.shape[self.TIMEAXIS]
+
+    def mask_time_bins(self, time_bins, mask_value=0.0):
+        if self.TIMEAXIS == 0:
+            for idx in time_bins:
+                self.dynspec[idx,:] = mask_value
+        else: # TIMEAXIS == 1
+            for idx in time_bins:
+                self.dynspec[:,idx] = mask_value
+
+    def mask_freq_bins(self, freq_bins, mask_value=0.0):
+        if self.FREQAXIS == 0:
+            for idx in freq_bins:
+                self.dynspec[idx,:] = mask_value
+        else: # FREQAXIS == 1
+            for idx in freq_bins:
+                self.dynspec[:,idx] = mask_value
 
     def transpose(self):
         self.dynspec = self.dynspec.T
@@ -141,6 +163,12 @@ def main(args):
             time_offset=args.t0,
             transpose=args.transpose)
 
+    # Apply any RFI masking
+    if args.mask_time_bins is not None:
+        dynspec.mask_time_bins(args.mask_time_bins, mask_value=args.mask_value)
+    if args.mask_freq_bins is not None:
+        dynspec.mask_freq_bins(args.mask_freq_bins, mask_value=args.mask_value)
+
     if len(args.dms) == 1:
         # In this case, only a single DM was given, so we don't
         # do any search, and just use this DM for dedispersion
@@ -151,13 +179,17 @@ def main(args):
         dmcurve.run_dmtrials(args.dms, freq_ref=args.freq_ref)
         dmcurve.calc_best_dm()
 
-        if args.no_plots == False:
+        if args.dmcurve_image is not None:
             # Plot the DM curve
             fig, ax = plt.subplots(nrows=1, ncols=1)
             ax.plot(dmcurve.dms, dmcurve.peak_snrs)
             ax.set_xlabel("DM (pc/cm^3)")
             ax.set_ylabel("Peak flux density (a.u.)")
-            plt.show()
+
+            if args.dmcurve_image == "SHOW":
+                plt.show()
+            else:
+                plt.savefig(args.dmcurve_image)
 
         DM = dmcurve.best_dm[0]
 
@@ -166,26 +198,37 @@ def main(args):
     dynspec.fscrunch()
 
     # Plot the dynamic spectrum at the given/best DM
-    if args.no_plots == False:
+    if args.dynspec_image is not None:
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
         dynspec.plot(axs[1])
         fig.suptitle('DM = {:.1f} pc/cm^3'.format(DM))
         axs[0].set_yticks([])
-        plt.show()
+        if args.dynspec_image == "SHOW":
+            plt.show()
+        else:
+            plt.savefig(args.dynspec_image)
 
     # If requested, write out a time series of the frequency-scrunched
     # lightcurve
     if args.lightcurve is not None:
-        # Get the time of the first bin referenced to infinite frequency
-        timeaxis = dynspec.get_time_at_infinite_frequency()
-        timeaxis += args.bc_corr # Add the barycentric correction
-
-        # Create verbose header for lightcurve output files
         header = "Created with:\n"
         header += '  ' + ' '.join(sys.argv) + '\n\n'
         header += 'This time series has been dedispersed to {} pc/cm^3\n'.format(DM)
-        header += 'Using barycentric correction of {} s\n'.format(args.bc_corr)
+        # Get the time of the first bin referenced to infinite frequency
+        timeaxis = dynspec.get_time_at_infinite_frequency()
+        if args.bc_corr == True:
+            if args.RA is not None and args.Dec is not None:
+                from bc_corr import bc_corr
+                coord = SkyCoord(ra=args.RA*u.hr, dec=args.Dec*u.deg, frame='icrs')
+                time = Time(timeaxis[0], format='gps')
+                bc_correction = bc_corr(coord, time, EPHEMERIS)
+                header += 'Using barycentric correction of {} s\n'.format(bc_correction)
+                timeaxis += bc_correction # Add the barycentric correction
+            else:
+                raise Exception("Barycentric correction requested but source coordinates not given")
+
+        # Create verbose header for lightcurve output files
         header += 'Using dedispersion delay of {} s (for reference frequency {})\n\n'.format(dynspec.dmdelay, dynspec.freq_ref)
         header += "Time (s) | Flux density (a.u.)"
 
@@ -200,19 +243,81 @@ if __name__ == "__main__":
     # Parse the command line
     parser = argparse.ArgumentParser(description='Dedisperse a dynamic spectrum')
     parser.add_argument('--dms', type=float, nargs='*', help='DM trials (pc/cm^3) [[start=0], stop, [step=1]] (i.e. same argument structure as s NumPy''s arange function). If a single value is given, the dynamic spectrum is dedispersed to this DM and no search is performed')
-    parser.add_argument('--sample_time', type=float, default=0.5, help='The time of one sample (s)')
-    parser.add_argument('--freqlo', type=float, default=139.52, help='The centre frequency of the lowest channel (MHz)')
+    parser.add_argument('--sample_time', type=float, default=1, help='The time of one sample (s)')
+    parser.add_argument('--freqlo', type=float, default=0.5, help='The centre frequency of the lowest channel (MHz)')
     parser.add_argument('--freq_ref', type=str, default='centre', help='The reference frequency used during dedispersion. Either a frequency in MHz, or one of [\'low\', \'centre\', \'high\'] (default=\'centre\')')
-    parser.add_argument('--bw', type=float, default=1.28, help='The channel width (MHz)')
-    parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum will be written')
+    parser.add_argument('--bw', type=float, default=1, help='The channel width (MHz)')
+    parser.add_argument('--output', type=argparse.FileType('w'), help='The file to which the dedispersed dynamic spectrum data will be written. If set to SHOW, then the image is shown (plt.show()) instead.')
+    parser.add_argument('--dynspec_image', type=str, help='The file to which the dedispersed dynamic spectrum image will be saved. If set to SHOW, then the image is shown (plt.show()) instead.')
+    parser.add_argument('--dmcurve_image', type=str, help='The file to which the DM curve image will be saved')
     parser.add_argument('--input', type=str, help='The (NumPy-readable) file containing the input dynamic spectrum')
     parser.add_argument('--transpose', action='store_true', help='Interpret the input file as rows for time axis, columns for frequency axis')
     parser.add_argument('--lightcurve', type=argparse.FileType('w'), help='Write out the frequency-scrunched, dispersion-corrected lightcurve to the named file. "Dispersion-corrected" means using infinite frequency as reference')
     parser.add_argument('--t0', type=float, default=0, help='The left (early) edge of the first time bin')
-    parser.add_argument('--no_plots', action='store_true', help='Do NOT make Matplotlib plots of the DM curve and dedispersed spectrum')
-    parser.add_argument('--bc_corr', type=float, default=0, help='Barycentric correction to apply (in seconds)')
+    parser.add_argument('--bc_corr', action='store_true', help='Apply barycentric correction')
+    parser.add_argument('--mask_time_bins', type=int, nargs='*', help='Mask these time bins (expecting ints)')
+    parser.add_argument('--mask_freq_bins', type=int, nargs='*', help='Mask these frequency bins (expecting ints)')
+    parser.add_argument('--mask_value', type=float, default=0.0, help='The value to use for masked bins/frequencies')
+    parser.add_argument('--RA', type=float, help='The RA of the source in decimal hours')
+    parser.add_argument('--Dec', type=float, help='The Dec of the source in decimal degrees')
+    parser.add_argument('--yaml', type=argparse.FileType('r'), help='Obtain parameters from yaml file. These will override other parameters given on the command line')
 
     args = parser.parse_args()
+
+    if args.yaml is not None:
+        yaml_params = yaml.safe_load(args.yaml)
+        try:
+            args.bc_corr = yaml_params['Apply barycentric correction']
+        except:
+            pass
+        try:
+            args.freqlo = yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)']
+        except:
+            pass
+        try:
+            args.bw = yaml_params['Dynamic spectrum']['Channel width (MHz)']
+        except:
+            pass
+        try:
+            args.input = yaml_params['Dynamic spectrum']['Input file']
+        except:
+            pass
+        try:
+            args.sample_time = yaml_params['Dynamic spectrum']['Sample time (s)']
+        except:
+            pass
+        try:
+            args.t0 = yaml_params['Dynamic spectrum']['T0 (s)']
+        except:
+            pass
+        try:
+            args.transpose = yaml_params['Dynamic spectrum']['Transpose']
+        except:
+            pass
+        try:
+            args.freq_ref = yaml_params['Reference frequency (MHz)']
+        except:
+            pass
+        try:
+            args.mask_time_bins = yaml_params['RFI Mask']['Time bins']
+        except:
+            pass
+        try:
+            args.mask_freq_bins = yaml_params['RFI Mask']['Freq bins']
+        except:
+            pass
+        try:
+            args.max_value = yaml_params['RFI Mask']['Value']
+        except:
+            pass
+        try:
+            args.RA = yaml_params['RA']
+        except:
+            pass
+        try:
+            args.Dec = yaml_params['Dec']
+        except:
+            pass
 
     main(args)
 
