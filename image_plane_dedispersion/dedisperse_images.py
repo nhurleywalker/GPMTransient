@@ -141,6 +141,14 @@ class DMCurve():
 #        except ValueError:
 #        self.best_dm = [0.0]
 
+    def sc(data):
+        '''
+        Perform some sigma-clipping on a light curve
+        '''
+        std = np.std(data)
+        std = np.std(data[np.abs(data) < 3*std])
+        return std
+
 def _main(pargs):
     """
     A shallow wrapper for main
@@ -177,7 +185,13 @@ def main(n, coords, dynspec, args):
     DM = dmcurve.best_dm
     peak = dmcurve.best_snr
 
-    if args.no_plots == False and peak > 1:
+    # Dedisperse the spectrum
+    dynspec.dedisperse(DM, freq_ref=args.freq_ref)
+    dynspec.fscrunch()
+
+    snr = peak / np.std(sc(dynspec.fscrunched))
+
+    if args.no_plots == False and snr > 6:
         # Plot the DM curve
         fig, ax = plt.subplots(nrows=1, ncols=1)
         ax.plot(dmcurve.dms, dmcurve.peak_snrs)
@@ -185,22 +199,17 @@ def main(n, coords, dynspec, args):
         ax.set_ylabel("Peak flux density (a.u.)")
         fig.savefig(f"lc_best_DM_{n:04d}.png", bbox_inches="tight")
 
-    # Dedisperse the spectrum
-    dynspec.dedisperse(DM, freq_ref=args.freq_ref)
-    dynspec.fscrunch()
-
-    # Plot the dynamic spectrum at the given/best DM
-    if args.no_plots == False and peak > 1:
+        # Plot the dynamic spectrum at the given/best DM
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
         dynspec.plot(axs[1])
-        fig.suptitle(f'x, y = {coords[0], coords[1]}, DM = {DM:.1f} pc/cm^3')
+        fig.suptitle(f'x, y = {coords[1], coords[0]}, DM = {DM:.1f} pc/cm^3')
         axs[0].set_yticks([])
         fig.savefig(f"ds_best_DM_{n:04d}.png", bbox_inches="tight")
 
     # If requested, write out a time series of the frequency-scrunched
     # lightcurve
-    if args.lightcurve is not None:
+    if args.lightcurve is not None and snr > 6:
         # Get the time of the first bin referenced to infinite frequency
         timeaxis = dynspec.get_time_at_infinite_frequency()
         timeaxis += args.bc_corr # Add the barycentric correction
