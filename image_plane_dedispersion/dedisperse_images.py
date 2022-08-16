@@ -181,7 +181,6 @@ def main(n, coords, dynspec, args):
 
     # Run a bunch of DM trials to create a DM curve
     dmcurve = DMCurve(dynspec)
-    print(args.dms)
     dmcurve.run_dmtrials(args.dms, freq_ref=args.freq_ref)
     dmcurve.calc_best_dm()
     DM = dmcurve.best_dm
@@ -274,11 +273,11 @@ if __name__ == "__main__":
     # make a (hyper-) cube
     arr = np.empty((tmax, cmax, ymax, xmax))
     print(arr.shape)
-    #for t in range(0, tmax):
-    #    for c in range(0, cmax):
+    for t in range(0, tmax):
+        for c in range(0, cmax):
 # Fast testing
-    for t in range(0, 3):
-        for c in range(0, 3):
+    #for t in range(0, 3):
+    #    for c in range(0, 3):
             h = fits.open(f"{args.input}-t{t:04d}-{c:04d}-image.fits")
             arr[t, c, :, :] = h[0].data
 
@@ -288,11 +287,11 @@ if __name__ == "__main__":
     # We need to order our arguments by an index, since the results will be returned
     # in whatever order the pooled tasks finish
     n = 0
-#    for x in range(0,xmax):
-#        for y in range(0,ymax):
+    for x in range(0,xmax):
+        for y in range(0,ymax):
 # Fast testing
-    for x in range(499,500):
-        for y in range(0,1000):
+#    for x in range(499,500):
+#        for y in range(0,1000):
             coords = w.pixel_to_world(y, x)
             if np.abs(coords.galactic.b.value) < 2.1:
                 if DMP is True:
