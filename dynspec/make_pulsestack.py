@@ -16,10 +16,11 @@ if __name__ == '__main__':
     P = args.period
 
     if args.png is not None:
-        fig = plt.figure(figsize=(8,12))
+        fig = plt.figure(figsize=(8,16))
 
     for i in range(len(args.lightcurves)):
         file = args.lightcurves[i]
+        obsname = file[:10]
         lightcurve = np.loadtxt(file)
         gpstimes = lightcurve[:,0] # First column
         if i == 0:
@@ -37,6 +38,7 @@ if __name__ == '__main__':
         x = phase
         y = 0.7*flux_density/np.max(flux_density) + yticks[-1]
         plt.plot(x, y)
+        plt.annotate(obsname, (x[0], y[0]))
         plt.yticks(ticks=yticks, labels=pulse_numbers)
 
     plt.xlabel("Time (s)")

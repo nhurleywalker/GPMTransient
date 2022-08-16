@@ -199,6 +199,7 @@ def main(args):
 
     # Plot the dynamic spectrum at the given/best DM
     if args.dynspec_image is not None:
+        dynspec.t = dynspec.get_time_at_infinite_frequency()
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
         dynspec.plot(axs[1])
