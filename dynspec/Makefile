@@ -27,3 +27,6 @@ bc_corrections: bc_corr.py
 
 pulsestacks/pulsestack_%s_DM_$(BEST_DM).png: $(LIGHTCURVES)
 	python make_pulsestack.py --png $@ $* $^
+
+pulsestacks/pulsestack_%s_DM_$(BEST_DM).svg: $(LIGHTCURVES)
+	python make_pulsestack.py --svg $@ $* $^

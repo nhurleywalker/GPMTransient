@@ -8,7 +8,9 @@ if __name__ == '__main__':
     parser.add_argument('period', type=float, help='The folding period in seconds')
     parser.add_argument('lightcurves', type=str, nargs='*', help='The files containing lightcurve data. Expected to contain two columns: (1) Time (s), (2) Flux density')
     parser.add_argument('--time_offset', type=float, help='An optional offset')
-    parser.add_argument('--png', type=str, help='Output PNG file. If not set, then the plot is just shown, not saved.')
+    parser.add_argument('--png', type=str, help='Output PNG file.')
+    parser.add_argument('--svg', type=str, help='Output SVG file.')
+    parser.add_argument('--show_plot', action='store_true', help='Show interactive plot.')
 
     args = parser.parse_args()
 
@@ -37,8 +39,9 @@ if __name__ == '__main__':
         flux_density = lightcurve[:,1] # Second column
         x = phase
         y = 0.7*flux_density/np.max(flux_density) + yticks[-1]
-        plt.plot(x, y)
-        plt.annotate(obsname, (x[0], y[0]))
+        plt.plot(x, y, lw=0.5)
+        url = "../dedispersed_spectra/" + obsname + "_dedispersed.png"
+        plt.text(x[0], y[0], obsname, url=url, bbox = dict(color='w', alpha=0.01, url=url))
         plt.yticks(ticks=yticks, labels=pulse_numbers)
 
     plt.xlabel("Time (s)")
@@ -47,5 +50,8 @@ if __name__ == '__main__':
 
     if args.png is not None:
         plt.savefig(args.png)
-    else:
+    if args.svg is not None:
+        plt.savefig(args.svg)
+
+    if args.show_plot == True:
         plt.show()

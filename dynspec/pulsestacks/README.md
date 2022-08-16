@@ -4,3 +4,7 @@
 
 ![1318.2 seconds, DM = 288](pulsestack_1318.2s_DM_288.png)
 ![1318.15 seconds, DM = 288](pulsestack_1318.15s_DM_288.png)
+
+#### Experimenting with SVG
+
+![1318.2 seconds, DM = 288](pulsestack_1318.2s_DM_288.svg)
