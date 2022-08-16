@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # Shorthand:
     P = args.period
 
-    if args.png is not None:
+    if args.png is not None or args.svg is not None:
         fig = plt.figure(figsize=(8,16))
 
     for i in range(len(args.lightcurves)):
