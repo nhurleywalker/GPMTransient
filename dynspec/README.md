@@ -5,6 +5,15 @@ The `csv` files in this directory are for the recently discovered 20-minute tran
 The `.yaml` files contain metadata associated with each observation that is used to form the data products such as dediserpsed spectra and lightcurves.
 Most of the data products can be produced by using the `dedisperse_dynspec.py` script.
 
+## Dependencies
+
+- Python modules:
+  - `numpy`
+  - `scipy`
+  - `astropy`
+  - [`spiceypy`](https://spiceypy.readthedocs.io/en/main/)
+    - This also requires a planetary ephemeris for the barycentric correction. We use the `de430.bsp` ephemeris, which can be downloaded from [http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp](http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp) (or by running `make de430.bsp` in this directory).
+
 ## Making individual dedispersed spectra
 
 Example:
