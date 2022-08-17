@@ -261,64 +261,122 @@ if __name__ == "__main__":
     parser.add_argument('--mask_value', type=float, default=0.0, help='The value to use for masked bins/frequencies')
     parser.add_argument('--RA', type=float, help='The RA of the source in decimal hours')
     parser.add_argument('--Dec', type=float, help='The Dec of the source in decimal degrees')
-    parser.add_argument('--yaml', type=argparse.FileType('r'), help='Obtain parameters from yaml file. These will override other parameters given on the command line')
+    parser.add_argument('--yaml', type=argparse.FileType('r'), help='Obtain parameters from yaml file. These will be overriden by equivalent parameters given on the command line')
+    parser.add_argument('--yaml_help', action='store_true', help='More detailed documentation on the --yaml option')
 
     args = parser.parse_args()
 
+    if args.yaml_help == True:
+        print("Documentation for the --yaml option")
+        print("===================================\n")
+        print("yaml files can be used in place of command line options as an effective 'configuration' file for processing")
+        print("dynamic spectra. Each command line option maps to a yaml field, as detailed below. Note that some fields must")
+        print("be in particular heirarchies, i.e. as subfields of other fields.\n")
+        print("yaml field                     | parent field     | valid values   | equivalent command line option")
+        print("-------------------------------+------------------+----------------+-------------------------------")
+        print("Apply barycentric correction   |                  | true/false     | --bc_corr")
+        print("Dynamic spectrum               |                  |                |")
+        print("Centre of lowest channel (MHz) | Dynamic spectrum | [float]        | --freqlo")
+        print("Channel width (MHz)            | Dynamic spectrum | [float]        | --bw")
+        print("Input file                     | Dynamic spectrum | [file]         | --input")
+        print("Sample time (s)                | Dynamic spectrum | [float]        | --sample_time")
+        print("T0 (s)                         | Dynamic spectrum | [float]        | --t0")
+        print("Transpose                      | Dynamic spectrum | true/false     | --transpose")
+        print("Reference frequency (MHz)      |                  | [float]        | --freq_ref")
+        print("RA                             |                  | [float]        | --RA")
+        print("Dec                            |                  | [float]        | --Dec")
+        print("RFI Mask                       |                  |                |")
+        print("Time bins                      | RFI Mask         | [list of ints] | --mask_time_bins")
+        print("Freq bins                      | RFI Mask         | [list of ints] | --mask_freq_bins")
+        print("\nExample:\n")
+        print("Apply barycentric correction: true")
+        print("Dynamic spectrum:")
+        print("  Centre of lowest channel (MHz): 103.115")
+        print("  Channel width (MHz): 0.16")
+        print("  Input file: 1343567456_dyn_dynamic_spectrum.csv")
+        print("  Sample time (s): 0.5")
+        print("  T0 (s): 1343567456.0")
+        print("  Transpose: true")
+        print("ObsID: 1343567456")
+        print("Reference frequency (MHz): centre")
+        print("Telescope: MWA")
+        print("RFI Mask:")
+        print("  Time bins:")
+        print("    - 14")
+        print("    - 15")
+        print("    - 28")
+        print("RA: 12.345")
+        print("Dec: -67.890")
+
+        exit()
+
     if args.yaml is not None:
         yaml_params = yaml.safe_load(args.yaml)
-        try:
-            args.bc_corr = yaml_params['Apply barycentric correction']
-        except:
-            pass
-        try:
-            args.freqlo = yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)']
-        except:
-            pass
-        try:
-            args.bw = yaml_params['Dynamic spectrum']['Channel width (MHz)']
-        except:
-            pass
-        try:
-            args.input = yaml_params['Dynamic spectrum']['Input file']
-        except:
-            pass
-        try:
-            args.sample_time = yaml_params['Dynamic spectrum']['Sample time (s)']
-        except:
-            pass
-        try:
-            args.t0 = yaml_params['Dynamic spectrum']['T0 (s)']
-        except:
-            pass
-        try:
-            args.transpose = yaml_params['Dynamic spectrum']['Transpose']
-        except:
-            pass
-        try:
-            args.freq_ref = yaml_params['Reference frequency (MHz)']
-        except:
-            pass
-        try:
-            args.mask_time_bins = yaml_params['RFI Mask']['Time bins']
-        except:
-            pass
-        try:
-            args.mask_freq_bins = yaml_params['RFI Mask']['Freq bins']
-        except:
-            pass
-        try:
-            args.max_value = yaml_params['RFI Mask']['Value']
-        except:
-            pass
-        try:
-            args.RA = yaml_params['RA']
-        except:
-            pass
-        try:
-            args.Dec = yaml_params['Dec']
-        except:
-            pass
+        if args.bc_corr is None:
+            try:
+                args.bc_corr = yaml_params['Apply barycentric correction']
+            except:
+                pass
+        if args.freqlo is None:
+            try:
+                args.freqlo = yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)']
+            except:
+                pass
+        if args.bw is None:
+            try:
+                args.bw = yaml_params['Dynamic spectrum']['Channel width (MHz)']
+            except:
+                pass
+        if args.input is None:
+            try:
+                args.input = yaml_params['Dynamic spectrum']['Input file']
+            except:
+                pass
+        if args.sample_time is None:
+            try:
+                args.sample_time = yaml_params['Dynamic spectrum']['Sample time (s)']
+            except:
+                pass
+        if args.t0 is None:
+            try:
+                args.t0 = yaml_params['Dynamic spectrum']['T0 (s)']
+            except:
+                pass
+        if args.transpose is None:
+            try:
+                args.transpose = yaml_params['Dynamic spectrum']['Transpose']
+            except:
+                pass
+        if args.freq_ref is None:
+            try:
+                args.freq_ref = yaml_params['Reference frequency (MHz)']
+            except:
+                pass
+        if args.mask_time_bins is None:
+            try:
+                args.mask_time_bins = yaml_params['RFI Mask']['Time bins']
+            except:
+                pass
+        if args.mask_freq_bins is None:
+            try:
+                args.mask_freq_bins = yaml_params['RFI Mask']['Freq bins']
+            except:
+                pass
+        if args.mask_value is None:
+            try:
+                args.mask_value = yaml_params['RFI Mask']['Value']
+            except:
+                pass
+        if args.RA is None:
+            try:
+                args.RA = yaml_params['RA']
+            except:
+                pass
+        if args.Dec is None:
+            try:
+                args.Dec = yaml_params['Dec']
+            except:
+                pass
 
     main(args)
 
