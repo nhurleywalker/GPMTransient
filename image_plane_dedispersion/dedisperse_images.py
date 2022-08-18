@@ -13,6 +13,7 @@ from astropy import units as u
 from astropy.wcs import WCS
 import multiprocessing
 import copy
+import datetime
 
 DMP = True
 try:
@@ -29,9 +30,11 @@ def sc(data):
     '''
     Perform some sigma-clipping on a light curve
     '''
-    std = np.std(data)
-    std = np.std(data[np.abs(data) < 3*std])
-    return std
+    std_init = np.std(data)
+    mean_init = np.average(data)
+    std = np.std(data[np.abs(data - mean_init) < 3*std_init])
+    mean = np.average(data[np.abs(data - mean_init) < 3*std_init])
+    return std, mean
 
 class Dynspec:
     def __init__(self, dynspec, sample_time, freqlo, bw, time_offset=0, freq_offset=0, dm=0):
@@ -189,24 +192,28 @@ def main(n, coords, dynspec, args):
     # Dedisperse the spectrum
     dynspec.dedisperse(DM, freq_ref=args.freq_ref)
     dynspec.fscrunch()
+    rms, mean = sc(dynspec.fscrunched)
 
-    snr = peak / sc(dynspec.fscrunched)
+    snr = (peak - mean) / rms
 
     if args.no_plots == False and snr > 6:
         # Plot the DM curve
-        fig, ax = plt.subplots(nrows=1, ncols=1)
-        ax.plot(dmcurve.dms, dmcurve.peak_snrs)
-        ax.set_xlabel("DM (pc/cm^3)")
-        ax.set_ylabel("Peak flux density (a.u.)")
-        fig.savefig(f"lc_best_DM_{n:04d}.png", bbox_inches="tight")
+#        fig, ax = plt.subplots(nrows=1, ncols=1)
+#        ax.plot(dmcurve.dms, dmcurve.peak_snrs)
+#        ax.set_xlabel("DM (pc/cm^3)")
+#        ax.set_ylabel("Peak flux density (a.u.)")
+#        fig.savefig(f"dmc_best_DM_{n:04d}.png", bbox_inches="tight")
 
         # Plot the dynamic spectrum at the given/best DM
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         dynspec.plot_lightcurve(axs[0])
+        axs[0].fill_between(dynspec.t, mean-rms, mean+rms, alpha=0.3, color='red')
+        axs[0].axhline(mean, color='black')
+        axs[0].set_ylabel("S / Jy")
         dynspec.plot(axs[1])
-        fig.suptitle(f'x, y = {coords[1], coords[0]}, DM = {DM:.1f} pc/cm^3')
-        axs[0].set_yticks([])
-        fig.savefig(f"ds_best_DM_{n:04d}.png", bbox_inches="tight")
+        fig.suptitle(f'x, y = {coords[1], coords[0]}, SNR = {snr:.1f}, peak = {peak:.2f}, rms {rms:.2f}, DM = {DM:.1f} pc/cm^3')
+        #axs[0].set_yticks([])
+        fig.savefig(f"dys_best_DM_{n:04d}.png", bbox_inches="tight")
 
     # If requested, write out a time series of the frequency-scrunched
     # lightcurve
@@ -230,7 +237,7 @@ def main(n, coords, dynspec, args):
     if args.output is not None:
         np.savetxt(args.output, dynspec.dynspec)
 
-    return(n, coords, DM, peak)
+    return(n, coords, DM, peak, snr)
 
 if __name__ == "__main__":
     # Parse the command line
@@ -249,15 +256,14 @@ if __name__ == "__main__":
     parser.add_argument('--cores', dest='cores', default=None, type=int,
                         help="Number of cores to use (default = autodetect")
 
+    print("Parsing args at", datetime.datetime.now())
     args = parser.parse_args()
     if args.cores is None:
+        print("Counting CPUs at", datetime.datetime.now())
         cores = multiprocessing.cpu_count()
     else:
         cores = args.cores
-    print(f"Using {cores} cores...")
-
-# Make a copy of the default DMs
-    dms = args.dms
+    print(f"Using {cores} cores at", datetime.datetime.now())
 
     # read in the images
     hdus = sorted(glob(f"{args.input}-t????-????-image.fits"))
@@ -270,17 +276,21 @@ if __name__ == "__main__":
     ymax = a[0].data.shape[3]
     w = WCS(a[0].header, naxis=2)
 
+    print("Started reading files at", datetime.datetime.now())
     # make a (hyper-) cube
     arr = np.empty((tmax, cmax, ymax, xmax))
     print(arr.shape)
-    for t in range(0, tmax):
-        for c in range(0, cmax):
+# Skipping first timestep due to garbage data -- will be fixed with proper imaging
+    for t in range(1, tmax):
+        for c in range(1, cmax):
 # Fast testing
     #for t in range(0, 3):
     #    for c in range(0, 3):
             h = fits.open(f"{args.input}-t{t:04d}-{c:04d}-image.fits")
             arr[t, c, :, :] = h[0].data
 
+
+    print("Read array of dimensions", arr.shape, "at", datetime.datetime.now())
     # When using a pool, you need to send the arguments as a tuple through the
     # wrapping function, so we set up the arguments here before running the pool
     pargs = []
@@ -313,13 +323,15 @@ if __name__ == "__main__":
     pool.close()
     pool.join()
 
-    indices, coords, DMs, peaks = map(list, zip(*results))
+    indices, coords, DMs, peaks, SNRs = map(list, zip(*results))
     # Order correctly
     ind = np.argsort(indices)
     DMs = np.array(DMs)
     DMs = DMs[ind]
     peaks = np.array(peaks)
     peaks = peaks[ind]
+    SNRs = np.array(SNRss)
+    SNRs = SNRs[ind]
 
     a[0].data = np.zeros(a[0].data.shape)
 
@@ -329,5 +341,9 @@ if __name__ == "__main__":
 
     for c, p in zip(coords, peaks):
         a[0].data[:,:,c[0],c[1]] = p
-    a.writeto("SNR_map.fits", overwrite=True)
+    a.writeto("Flux_map.fits", overwrite=True)
 
+    for c, p in zip(coords, SNRs):
+        a[0].data[:,:,c[0],c[1]] = p
+    a.writeto("SNR_map.fits", overwrite=True)
+    print("Completed at", datetime.datetime.now())
