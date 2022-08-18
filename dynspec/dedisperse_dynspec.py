@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 import argparse
 import sys
 from scipy.interpolate import interp1d
-from scipy.optimize import fmin
+from scipy.optimize import fmin, fminbound
 from astropy.time import Time
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 import yaml
+import copy
 
 EPHEMERIS = 'de430.bsp'
 
@@ -152,7 +153,7 @@ class Dynspec:
                 self.f[0]  - self.df/2,
                 self.f[-1] + self.df/2)
         # Create masked array
-        mask_applied = self.dynspec[:,:] # shallow copy
+        mask_applied = copy.deepcopy(self.dynspec)
         mask_applied[self.mask] = np.nan
         ax.imshow(mask_applied, aspect='auto', interpolation='none', origin='lower', extent=extent)
         ax.set_xlabel('Time (s)')
@@ -217,7 +218,7 @@ class Dynspec:
         self.dm = dm
 
     def fscrunch(self):
-        mask_applied = self.dynspec[:,:] # shallow copy
+        mask_applied = copy.deepcopy(self.dynspec)
         mask_applied[self.mask] = np.nan
         self.fscrunched = np.nanmean(mask_applied, axis=self.FREQAXIS)
 
@@ -233,9 +234,9 @@ class DMCurve():
         self.dms = np.arange(*dmtrials)
         self.peak_snrs = []
         for dm in self.dms:
-            self.dynspec.dedisperse(dm, freq_ref=freq_ref)
+            self.dynspec.dedisperse(dm)
             self.dynspec.fscrunch()
-            self.peak_snrs.append(np.max(self.dynspec.fscrunched))
+            self.peak_snrs.append(np.nanmax(self.dynspec.fscrunched))
         self.peak_snrs = np.array(self.peak_snrs)
 
     def calc_best_dm(self):
@@ -244,8 +245,8 @@ class DMCurve():
         '''
         # Interpolate the DM curve and get the max value
         interped = interp1d(self.dms, self.peak_snrs, kind='cubic')
-        closest_best_dm_idx = np.argmax(self.peak_snrs, keepdims=True)[0]
-        self.best_dm = fmin(lambda dm: -interped(dm), self.dms[closest_best_dm_idx])
+        #closest_best_dm_idx = np.argmax(self.peak_snrs, keepdims=True)[0]
+        self.best_dm = fminbound(lambda dm: -interped(dm), self.dms[0], self.dms[-1])
 
 def main(**kwargs):
     # Load the data into a "dynspec" object
@@ -256,8 +257,11 @@ def main(**kwargs):
 
     # Apply any padding
     if kwargs['padding'] is not None:
-        if kwargs['padding'] == "DM" and len(kwargs['dms']) == 1:
-            DM = kwargs['dms'][0]
+        if kwargs['padding'] == "DM":
+            if len(kwargs['dms']) == 1:
+                DM = kwargs['dms'][0]
+            else:
+                DM = kwargs['dms'][1]
             dynspec.add_dm_padding(DM, fill_value=kwargs['mask_value'])
         else:
             try:
@@ -287,7 +291,7 @@ def main(**kwargs):
             else:
                 plt.savefig(kwargs['dmcurve_image'])
 
-        DM = dmcurve.best_dm[0]
+        DM = dmcurve.best_dm
 
     # Dedisperse the spectrum
     dynspec.dedisperse(DM)
