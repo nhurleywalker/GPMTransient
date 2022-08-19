@@ -1,5 +1,5 @@
 GPSTIMES = $(shell ls *.yaml | sed 's/\.yaml//')
-BEST_DM = 288
+BEST_DM = 275
 
 # Lightcurves DM-corrected to infinite frequency, and also barycentric corrected
 LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))
