@@ -53,7 +53,7 @@ if __name__ == '__main__':
     plt.title("Period = {:.3f} s".format(P))
 
     if args.png is not None:
-        plt.savefig(args.png)
+        plt.savefig(args.png, bbox_inches="tight")
     if args.svg is not None:
         plt.savefig(args.svg)
 
