@@ -22,14 +22,17 @@ class Dynspec:
         self.FREQAXIS=0
 
         try:
-            filename = kwargs['input']
-        except:
-            raise Exception("'input' (filename) required for Dynspec initialiser")
-
-        try:
             transpose = kwargs['transpose']
         except:
             transpose = None
+
+        try:
+            dynspec = np.loadtxt(kwargs['input'])
+        except:
+            try:
+                dynspec = kwargs['dynspec']
+            except:
+                raise Exception("'input' (filename) or 'dynspec' (2D Numpy array) required for Dynspec initialiser")
 
         try:
             sample_time = kwargs['sample_time']
@@ -51,7 +54,7 @@ class Dynspec:
         except:
             freqlo = 0.0
 
-        self.load_dynspec(filename, transpose=transpose)
+        self.load_dynspec(dynspec, transpose=transpose)
         self.create_time_axis(sample_time, t0)
         self.create_freq_axis(bw, freqlo)
         self.dm = dm # The initial DM of the loaded data
@@ -70,11 +73,11 @@ class Dynspec:
 
         self.freq_ref = None
 
-    def load_dynspec(self, filename, transpose=None):
+    def load_dynspec(self, dynspec, transpose=None):
         if transpose is None:
             transpose = False
         # Load the data with NumPy
-        self.dynspec = np.loadtxt(filename)
+        self.dynspec = dynspec
         self.mask = np.full(self.dynspec.shape, False, dtype=bool)
 
         # Swap rows/columns, if specified
@@ -111,26 +114,47 @@ class Dynspec:
                 self.dynspec[:,idx] = mask_value
                 self.mask[:,idx] = True
 
-    def add_dm_padding(self, DM, fill_value=None):
+    def prune_time(self, nsecs, before=True, after=True):
+        nbins = int(nsecs/self.dt)
+        if before:
+            self.dynspec = np.delete(self.dynspec, range(nbins), axis=self.TIMEAXIS)
+            self.mask = np.delete(self.mask, range(nbins), axis=self.TIMEAXIS)
+            self.t = np.delete(self.t, range(nbins))
+            if self.fscrunched is not None:
+                self.fscrunched = np.delete(self.fscrunched, range(nbins))
+            self.Nt -= nbins
+        if after:
+            self.dynspec = np.delete(self.dynspec, range(self.Nt-nbins, self.Nt), axis=self.TIMEAXIS)
+            self.mask = np.delete(self.mask, range(self.Nt-nbins, self.Nt), axis=self.TIMEAXIS)
+            self.t = np.delete(self.t, range(self.Nt-nbins, self.Nt))
+            if self.fscrunched is not None:
+                self.fscrunched = np.delete(self.fscrunched, range(self.Nt-nbins, self.Nt))
+            self.Nt -= nbins
+
+    def add_dm_padding(self, DM, fill_value=None, mask=True):
         before_padding = calc_dmdelay(DM, self.f[0], self.freq_ref)
         after_padding = calc_dmdelay(DM, self.freq_ref, self.f[-1])
 
         self.add_time_padding(before_padding, fill_value=fill_value, before=True, after=False)
         self.add_time_padding(after_padding, fill_value=fill_value, before=False, after=True)
 
-    def add_time_padding(self, nsecs, fill_value=None, before=True, after=True):
+    def add_time_padding(self, nsecs, fill_value=None, before=True, after=True, mask=True):
         nbins = int(nsecs/self.dt)
         if fill_value is None:
             fill_value = 0.0
         padding_shape = (nbins, self.Nf) if self.TIMEAXIS == 0 else (self.Nf, nbins)
         if before:
             self.dynspec = np.concatenate((np.full(padding_shape, fill_value), self.dynspec), axis=self.TIMEAXIS)
-            self.mask = np.concatenate((np.full(padding_shape, True), self.mask), axis=self.TIMEAXIS)
+            self.mask = np.concatenate((np.full(padding_shape, mask), self.mask), axis=self.TIMEAXIS)
+            if self.fscrunched is not None:
+                self.fscrunched = np.concatenate((np.full(nbins, fill_value), self.fscrunched))
             self.Nt += nbins
             self.create_time_axis(self.dt, t0=self.t[0] - self.dt/2 - nbins*self.dt)
         if after:
             self.dynspec = np.concatenate((self.dynspec, np.full(padding_shape, fill_value)), axis=self.TIMEAXIS)
-            self.mask = np.concatenate((self.mask, np.full(padding_shape, True)), axis=self.TIMEAXIS)
+            self.mask = np.concatenate((self.mask, np.full(padding_shape, mask)), axis=self.TIMEAXIS)
+            if self.fscrunched is not None:
+                self.fscrunched = np.concatenate((self.fscrunched, np.full(nbins, fill_value)))
             self.Nt += nbins
             self.create_time_axis(self.dt, t0=self.t[0] - self.dt/2)
 
@@ -255,7 +279,7 @@ def main(**kwargs):
     # Set the reference frequency
     dynspec.set_freq_ref(kwargs['freq_ref'])
 
-    # Apply any padding
+    # Apply padding
     if kwargs['padding'] is not None:
         if kwargs['padding'] == "DM":
             if len(kwargs['dms']) == 1:
