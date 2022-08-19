@@ -196,7 +196,7 @@ def main(n, coords, dynspec, args):
 
     snr = (peak - mean) / rms
 
-    if args.no_plots == False and snr > 6:
+    if args.no_plots == False and snr > 6 and peak > 0.1:
         # Plot the DM curve
 #        fig, ax = plt.subplots(nrows=1, ncols=1)
 #        ax.plot(dmcurve.dms, dmcurve.peak_snrs)
@@ -217,7 +217,7 @@ def main(n, coords, dynspec, args):
 
     # If requested, write out a time series of the frequency-scrunched
     # lightcurve
-    if args.lightcurve is not None and snr > 6:
+    if args.lightcurve is not None and snr > 6 and peak > 0.1:
         # Get the time of the first bin referenced to infinite frequency
         timeaxis = dynspec.get_time_at_infinite_frequency()
         timeaxis += args.bc_corr # Add the barycentric correction
@@ -315,8 +315,7 @@ if __name__ == "__main__":
     # start a new process for each task
     pool = multiprocessing.Pool(processes=cores, maxtasksperchild=1)
     try:
-        # chunksize=1 ensures that we only send a single task to each process
-        results = pool.map_async(_main, pargs, chunksize=1).get(timeout=10000000)
+        results = pool.map_async(_main, pargs, chunksize=1000).get(timeout=10000000)
     except KeyboardInterrupt:
         pool.close()
         sys.exit(1)
@@ -330,7 +329,7 @@ if __name__ == "__main__":
     DMs = DMs[ind]
     peaks = np.array(peaks)
     peaks = peaks[ind]
-    SNRs = np.array(SNRss)
+    SNRs = np.array(SNRs)
     SNRs = SNRs[ind]
 
     a[0].data = np.zeros(a[0].data.shape)
@@ -343,7 +342,7 @@ if __name__ == "__main__":
         a[0].data[:,:,c[0],c[1]] = p
     a.writeto("Flux_map.fits", overwrite=True)
 
-    for c, p in zip(coords, SNRs):
-        a[0].data[:,:,c[0],c[1]] = p
+    for c, s in zip(coords, SNRs):
+        a[0].data[:,:,c[0],c[1]] = s
     a.writeto("SNR_map.fits", overwrite=True)
     print("Completed at", datetime.datetime.now())
