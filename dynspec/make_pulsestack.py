@@ -29,11 +29,15 @@ if __name__ == '__main__':
             yticks = [0]
             pulse_numbers = ["0"]
             gps_ref = gpstimes[0]
+            xt = -500
         else:
             pulse_number = int(np.round((gpstimes[0] - gps_ref)/P))
             if pulse_number != pulse_numbers[-1]:
+                xt = -500
                 yticks.append(yticks[-1] + 1)
                 pulse_numbers.append(pulse_number)
+            else:
+                xt = 500
 
         phase = (gpstimes - gps_ref + P/2) % P - P/2
         flux_density = lightcurve[:,1] # Second column
@@ -41,7 +45,7 @@ if __name__ == '__main__':
         y = 0.7*flux_density/np.max(flux_density) + yticks[-1]
         plt.plot(x, y, lw=0.5)
         url = "../dedispersed_spectra/" + obsname + "_dedispersed.png"
-        plt.text(x[0], y[0], obsname, url=url, bbox = dict(color='w', alpha=0.01, url=url))
+        plt.text(xt, y[0], obsname, url=url, bbox = dict(color='w', alpha=0.01, url=url))
         plt.yticks(ticks=yticks, labels=pulse_numbers)
 
     plt.xlabel("Time (s)")
