@@ -18,18 +18,22 @@ with open(yamllo, 'r') as yaml:
     params = dd.parse_yaml(yaml)
     dlo = dd.Dynspec(**params)
 
-dlo.set_freq_ref('low')
 dhi.set_freq_ref('high')
 
-# Chop off the front chunk of data, which has no signal in it
+# Chop off the front chunk of high-frequency data, which has no signal in it
 dhi.prune_time(100, before=True, after=False)
+
+# Chop off the tail end of low-frequency data, which has no (or negligible) signal in it
+dlo.prune_time(60, before=False, after=True)
 
 # Add enough padding for largest requested DM
 dhi.add_dm_padding(350, fill_value=0.0)
 
 # For each candidate DM, dedisperse the high frequency pulse to get the "true pulse shape"
 dedispersed_pulse = {}
-DMs = np.arange(270, 280)
+DMs = np.arange(250, 320)
+correlated_NE2001 = []
+correlated_YMW16 = []
 
 # In the DM range 250 - 320,
 # NE2001 in this direction gives tau_sc = 3.922s x (DM/300)^(3.972) x (f/150 MHz)^(-4.4)
@@ -37,6 +41,7 @@ DMs = np.arange(270, 280)
 
 for DM in DMs:
 
+    print("Analysing DM = {}...".format(DM))
     # Make a copy and dedisperse it
     dhi_copy = copy.deepcopy(dhi)
     dhi_copy.dedisperse(DM)
@@ -99,8 +104,8 @@ for DM in DMs:
     # Disperse them (i.e. dedisperse them with a negative DM
     d_NE2001.set_freq_ref("high")
     d_YMW16.set_freq_ref("high")
-    d_NE2001.add_time_padding(130, before=False, after=True, mask=True) # 130s is enough for the highest DM we're considering here
-    d_YMW16.add_time_padding(130, before=False, after=True, mask=True)
+    d_NE2001.add_time_padding(130, before=False, after=True, mask=False) # 130s is enough for the highest DM we're considering here
+    d_YMW16.add_time_padding(130, before=False, after=True, mask=False)
     d_NE2001.dedisperse(-DM)
     d_YMW16.dedisperse(-DM)
 
@@ -108,7 +113,28 @@ for DM in DMs:
     d_NE2001.t += dd.calc_dmdelay(DM, d_NE2001.freq_ref, np.inf)
     d_YMW16.t += dd.calc_dmdelay(DM, d_YMW16.freq_ref, np.inf)
 
-fig, ax = plt.subplots(nrows=3, ncols=1, sharex=True)
+    # Now, the time bins of the predicted dynamic spectra won't exactly line up
+    # with the time bins of the low frequency dynamic spectrum, but I think the
+    # (random) error we get by effectively "shifting" the spectra by less than
+    # one time bin will be much less significant than the correlated noise.
+
+    # Prune the predicted spectra so that they match the dimensions of the low-frequency
+    # spectrum. The following assumes that the sampling time is the same for both
+    prune_nsecs_before_NE2001 = np.round((dlo.t[0] - d_NE2001.t[0])/d_NE2001.dt) * d_NE2001.dt
+    prune_nsecs_after_NE2001 = np.round((d_NE2001.t[-1] - dlo.t[-1])/d_NE2001.dt) * d_NE2001.dt
+    d_NE2001.prune_time(prune_nsecs_before_NE2001, before=True, after=False)
+    d_NE2001.prune_time(prune_nsecs_after_NE2001, before=False, after=True)
+
+    prune_nsecs_before_YMW16 = np.round((dlo.t[0] - d_YMW16.t[0])/d_YMW16.dt) * d_YMW16.dt
+    prune_nsecs_after_YMW16 = np.round((d_YMW16.t[-1] - dlo.t[-1])/d_YMW16.dt) * d_YMW16.dt
+    d_YMW16.prune_time(prune_nsecs_before_YMW16, before=True, after=False)
+    d_YMW16.prune_time(prune_nsecs_after_YMW16, before=False, after=True)
+
+    # Now, correlate them!
+    correlated_NE2001.append(np.nanmean(d_NE2001.dynspec * dlo.dynspec))
+    correlated_YMW16.append(np.nanmean(d_YMW16.dynspec * dlo.dynspec))
+
+#fig, ax = plt.subplots(nrows=3, ncols=1, sharex=True)
 #fig.suptitle("DM = {:.2f}".format(DM))
 
 #dhi_copy.plot_lightcurve(ax[0])
@@ -116,7 +142,14 @@ fig, ax = plt.subplots(nrows=3, ncols=1, sharex=True)
 
 #plt.xlim([dhi.t[0], dlo.t[-1]])
 #plt.savefig('lineup.png')
-dlo.plot(ax[2])
-d_NE2001.plot(ax[0])
-d_YMW16.plot(ax[1])
+#dlo.plot(ax[2])
+#d_NE2001.plot(ax[0])
+#d_YMW16.plot(ax[1])
+
+plt.plot(DMs, correlated_NE2001, label="NE2001")
+plt.plot(DMs, correlated_YMW16, label="YMW16")
+plt.legend()
+plt.xlabel("DM (pc/cm^3)")
+plt.ylabel("Correlation (a.u.)")
+
 plt.show()
