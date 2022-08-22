@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcol
 import argparse
 
 if __name__ == '__main__':
@@ -20,10 +21,16 @@ if __name__ == '__main__':
     if args.png is not None or args.svg is not None:
         fig = plt.figure(figsize=(8,16))
 
+    cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["c","m"])
+
     for i in range(len(args.lightcurves)):
         file = args.lightcurves[i]
         obsname = file[:10]
         lightcurve = np.loadtxt(file)
+        with open(file, 'r') as f:
+            for line in f.readlines():
+                if 'frequency' in line:
+                    freq = float(line.split(' ')[10])
         gpstimes = lightcurve[:,0] # First column
         if i == 0:
             yticks = [0]
@@ -43,7 +50,7 @@ if __name__ == '__main__':
         flux_density = lightcurve[:,1] # Second column
         x = phase
         y = 0.7*flux_density/np.max(flux_density) + yticks[-1]
-        plt.plot(x, y, lw=0.5)
+        plt.plot(x, y, lw=0.5, color=cm1((freq - 88.)/(215.-88.)))
         url = "../dedispersed_spectra/" + obsname + "_dedispersed.png"
         plt.text(xt, y[0], obsname, url=url, bbox = dict(color='w', alpha=0.01, url=url))
         plt.yticks(ticks=yticks, labels=pulse_numbers)
