@@ -13,6 +13,7 @@ if __name__ == '__main__':
     parser.add_argument('--png', type=str, help='Output PNG file.')
     parser.add_argument('--svg', type=str, help='Output SVG file.')
     parser.add_argument('--show_plot', action='store_true', help='Show interactive plot.')
+    parser.add_argument('--gpstimes', default=False, action='store_true', help='Show GPS times on the pulse stack.')
 
     args = parser.parse_args()
 
@@ -56,7 +57,10 @@ if __name__ == '__main__':
         y = 0.7*flux_density/np.max(flux_density) + yticks[-1]
         plt.plot(x, y, lw=0.5, color=cm1((freq - 88.)/(215.-88.)))
         url = "../dedispersed_spectra/" + obsname + "_dedispersed.png"
-        plt.text(xt, y[0], f"{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}", url=url, bbox = dict(color='w', alpha=0.01, url=url))
+        if args.gpstimes is True:
+            plt.text(xt, y[0], f"{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}", url=url, bbox = dict(color='w', alpha=0.01, url=url))
+        else:
+            plt.text(xt, y[0], obsname, url=url, bbox = dict(color='w', alpha=0.01, url=url))
         plt.yticks(ticks=yticks, labels=pulse_numbers)
 
     plt.xlabel("Time (s)")
