@@ -22,7 +22,7 @@ make -B -j4 all_lightcurves
 ```
 to remake all the lightcurves, and
 ```
-make pulsestack_<P>s_DM_<DM>.png
+make pulsestacks/pulsestack_<P>s_DM_<DM>.png
 ```
 where `<P>` is the desired folding period in seconds, and `<DM>` must match the `DM` variable set in `Makefile`.
 
