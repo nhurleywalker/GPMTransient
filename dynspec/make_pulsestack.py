@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcol
+from astropy.time import Time
 import argparse
 
 if __name__ == '__main__':
@@ -26,6 +27,9 @@ if __name__ == '__main__':
     for i in range(len(args.lightcurves)):
         file = args.lightcurves[i]
         obsname = file[:10]
+        ti = Time(obsname, format="gps")
+        ti.format="ymdhms"
+        t = ti.value
         lightcurve = np.loadtxt(file)
         with open(file, 'r') as f:
             for line in f.readlines():
@@ -52,7 +56,7 @@ if __name__ == '__main__':
         y = 0.7*flux_density/np.max(flux_density) + yticks[-1]
         plt.plot(x, y, lw=0.5, color=cm1((freq - 88.)/(215.-88.)))
         url = "../dedispersed_spectra/" + obsname + "_dedispersed.png"
-        plt.text(xt, y[0], obsname, url=url, bbox = dict(color='w', alpha=0.01, url=url))
+        plt.text(xt, y[0], f"{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}", url=url, bbox = dict(color='w', alpha=0.01, url=url))
         plt.yticks(ticks=yticks, labels=pulse_numbers)
 
     plt.xlabel("Time (s)")
