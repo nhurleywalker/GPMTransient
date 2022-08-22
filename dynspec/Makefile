@@ -14,7 +14,7 @@ de430.bsp:
 
 all_lightcurves: $(LIGHTCURVES)
 
-%_lightcurve.txt: dedisperse_dynspec.py %.yaml
+%_lightcurve.txt: dedisperse_dynspec.py %.yaml de430.bsp
 	python $< --dms $(BEST_DM) --lightcurve $@ --yaml $(word 2,$^)
 
 all_dedispersed_spectra: $(DEDISPERSED_SPECTRA)
