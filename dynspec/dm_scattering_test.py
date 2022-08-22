@@ -31,7 +31,7 @@ dhi.add_dm_padding(350, fill_value=0.0)
 
 # For each candidate DM, dedisperse the high frequency pulse to get the "true pulse shape"
 dedispersed_pulse = {}
-DMs = np.arange(250, 320)
+DMs = np.arange(220, 320)
 correlated_NE2001 = []
 correlated_YMW16 = []
 

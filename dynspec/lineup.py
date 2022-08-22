@@ -18,7 +18,7 @@ dhi.set_freq_ref('centre')
 #dlo = dd.Dynspec(input='1342096104_dyn_dynamic_spectrum.csv', sample_time=0.5, freqlo=200.475, bw=0.64, t0=1342096104, transpose=True)
 #dhi = dd.Dynspec(input='PKS_1342096266_dynamic_spectrum.csv', sample_time=0.1, freqlo=1216.0, bw=0.5, t0=1342096266.11, transpose=False)
 
-DM = 288
+DM = 267
 
 dlo.add_dm_padding(DM, fill_value=0.0)
 dhi.add_dm_padding(DM, fill_value=0.0)
