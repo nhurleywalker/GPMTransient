@@ -18,7 +18,8 @@ make all_dedispersed_spectra
 In the parent folder, open the `Makefile` and set the `DM` variable to the desired DM.
 Then, run
 ```
-make -B -j4 all_lightcurves
+touch *.yaml
+make -j4 all_lightcurves
 ```
 to remake all the lightcurves, and
 ```
