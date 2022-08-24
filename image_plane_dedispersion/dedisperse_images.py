@@ -281,8 +281,8 @@ if __name__ == "__main__":
     arr = np.empty((tmax, cmax, ymax, xmax))
     print(arr.shape)
 # Skipping first timestep due to garbage data -- will be fixed with proper imaging
-    for t in range(1, tmax):
-        for c in range(1, cmax):
+    for t in range(0, tmax):
+        for c in range(0, cmax):
 # Fast testing
     #for t in range(0, 3):
     #    for c in range(0, 3):
@@ -303,11 +303,12 @@ if __name__ == "__main__":
 #    for x in range(499,500):
 #        for y in range(0,1000):
             coords = w.pixel_to_world(y, x)
-            if np.abs(coords.galactic.b.value) < 2.1:
+            if np.abs(coords.galactic.b.value) < 3.0:
                 if DMP is True:
                     DM, tau_sc = pygedm.dist_to_dm(coords.galactic.l.value, coords.galactic.b.value, 10000, method='ymw16')
                     xargs = copy.deepcopy(args)
-                    xargs.dms[1] = DM.value
+    # Scattering and distance will kill you so there's no point searching past DM 1,000
+                    xargs.dms[1] = np.minimum(args.dms[1], DM.value)
                 pargs.append((n, [x,y], arr[:, :, x, y], xargs))
                 n+=1
 
@@ -336,13 +337,13 @@ if __name__ == "__main__":
 
     for c, DM in zip(coords, DMs):
         a[0].data[:,:,c[0],c[1]] = DM
-    a.writeto("DM_map.fits", overwrite=True)
+    a.writeto(f"{args.input}_DM_map.fits", overwrite=True)
 
     for c, p in zip(coords, peaks):
         a[0].data[:,:,c[0],c[1]] = p
-    a.writeto("Flux_map.fits", overwrite=True)
+    a.writeto(f"{args.input}_Flux_map.fits", overwrite=True)
 
     for c, s in zip(coords, SNRs):
         a[0].data[:,:,c[0],c[1]] = s
-    a.writeto("SNR_map.fits", overwrite=True)
+    a.writeto(f"{args.input}_SNR_map.fits", overwrite=True)
     print("Completed at", datetime.datetime.now())
