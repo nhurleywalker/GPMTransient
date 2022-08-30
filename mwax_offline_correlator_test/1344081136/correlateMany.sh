@@ -27,8 +27,8 @@ module load mwax_offline_correlator/${MODULE}
 #for each line/channels make a new buffer
 for CHAN in $(seq $startChan 1 $endChan); do
 
-dada_db -b 34816000 -k "1${CHAN}${CHAN}1" -n 644 -l -p
-dada_db -b 1908065856 -k "2${CHAN}${CHAN}2" -n 64 -l -p
+dada_db -b ${INPUT_BUFFER_SIZE} -k "1${CHAN}${CHAN}1" -n 644 -l -p
+dada_db -b ${OUTPUT_BUFFER_SIZE} -k "2${CHAN}${CHAN}2" -n 64 -l -p
 
 done
 
