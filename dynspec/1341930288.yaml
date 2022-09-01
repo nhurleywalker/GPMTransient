@@ -1,4 +1,4 @@
-Barycentric correction (s): 480.918857
+Apply barycentric correction: true
 Dynamic spectrum:
   Centre of lowest channel (MHz): 139.515
   Channel width (MHz): 0.32
@@ -13,3 +13,6 @@ RFI Mask:
   Freq bins:
     - 21
     - 22
+RA: 18.6505
+Dec: -10.5304
+Padding: DM

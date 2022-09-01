@@ -1,4 +1,4 @@
-Barycentric correction (s): 477.109035
+Apply barycentric correction: true
 Dynamic spectrum:
   Centre of lowest channel (MHz): 1216.0
   Channel width (MHz): 0.5
@@ -9,3 +9,6 @@ Dynamic spectrum:
 ObsID: 1342096266
 Reference frequency (MHz): centre
 Telescope: Murriyang
+RA: 18.6505
+Dec: -10.5304
+Padding: DM

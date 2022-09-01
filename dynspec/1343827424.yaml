@@ -1,0 +1,18 @@
+Apply barycentric correction: true
+Dynamic spectrum:
+  Centre of lowest channel (MHz): 103.115
+  Channel width (MHz): 0.16
+  Input file: 1343827424_dyn_dynamic_spectrum.csv
+  Sample time (s): 0.5
+  T0 (s): 1343827424.0
+  Transpose: true
+ObsID: 1343827424
+Reference frequency (MHz): low
+Telescope: MWA
+RFI Mask:
+  Time bins:
+    - 185
+    - 433
+RA: 18.6505
+Dec: -10.5304
+Padding: DM
