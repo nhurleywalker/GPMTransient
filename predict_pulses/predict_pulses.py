@@ -203,7 +203,7 @@ def predict_times(
         )
 
         sep = c1.separation(c2)
-        logger.debug(f"Sepeation {sep.deg=} degrees")
+        logger.debug(f"Separation {sep.deg=} degrees")
 
         if sep.deg >= separation:
             continue
