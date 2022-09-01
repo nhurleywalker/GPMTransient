@@ -186,7 +186,7 @@ def predict_times(
             logger.debug(
                 f"Continuum mode checks {obs['mwas.mode']=} {obs['mwas.dataquality']=}"
             )
-            if not (obs["mwas.mode"] == "HW_LFILES" and obs["mwas.dataquality"] < 4):
+            if not ((obs["mwas.mode"] == "HW_LFILES" or obs["mwas.mode"] == "MWAX_CORRELATOR") and obs["mwas.dataquality"] < 4):
                 continue
 
                 # Some of the observations are antenna tests or VCS or drift scans so they don't have RAs and Decs
