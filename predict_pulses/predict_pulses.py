@@ -10,7 +10,7 @@ import pandas as pd
 # import math
 
 from astropy.io import fits
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 from astropy import units as u
 from astropy.coordinates import SkyCoord, EarthLocation
 
@@ -28,14 +28,6 @@ logger.setLevel(logging.INFO)
 
 BASEURL = "http://ws.mwatelescope.org/"
 
-# MWA location from CONV2UVFITS/convutils.h
-LAT = -26.703319
-LON = 116.67081
-ALT = 377.0
-
-LOCATION = EarthLocation.from_geodetic(
-    lat=LAT * u.deg, lon=LON * u.deg, height=ALT * u.m
-)
 
 
 def getmeta(servicetype="metadata", service="obs", params=None):
@@ -72,6 +64,78 @@ def barycentre_time_delta(src_coord, location, time):
 
     return ltt_bary
 
+def predict_times_list(
+    ra=279.75833333,
+    dec=-10.53041667,
+    period=21.97,
+    pulseref=59780.80241087963,
+    pulserefgps=None,
+    obslength=596,
+    input=None,
+    output="periodic_search.txt",
+    location="VLA",
+):
+    
+    logger.info(f"Searching input file: {input}")
+    # Transient location
+    c1 = SkyCoord(ra, dec, unit=(u.deg, u.deg), frame="fk5")
+
+    # Transient period
+    period = period * 60  # seconds
+
+    # Reference pulse start time
+    if pulserefgps is None:
+        t0 = Time(pulseref, format="mjd")
+    else:
+        t0 = Time(pulserefgps, format="gps")
+        
+    logger.info(f"Period estimate: {period/60.:3.4f} minutes")
+    logger.info(f"Reference pulse time (MJD) {t0.mjd:8.4f}")
+    logger.info(f"Reference pulse time (GPS) {t0.gps:8.4f}")
+
+    inlist = np.loadtxt(input)
+    
+    obstimes = [Time(t, format='mjd') for t in inlist]
+#    temp_time = Time(time, location=location)
+    
+    obslist = []
+    records = []
+
+    # For each observation, what pulses are contained within?
+    # This makes it work for observations of arbitrary length
+    for obs in obstimes:
+        min_n = np.floor((obs.gps - t0.gps) / period).astype(int)
+        max_n = np.ceil((obs.gps + obslength - t0.gps) / period).astype(int)
+        for n in range(min_n, max_n):
+            deltaT = TimeDelta(n * period, format="sec")
+            predicted_time = t0 + deltaT
+            logger.debug(f"{n=}, {predicted_time=}")
+            ltt_bary = barycentre_time_delta(c1, LOCATION, predicted_time)
+            predicted_time_bary = predicted_time + ltt_bary
+            logger.debug(f"Refined light-travel-time is {ltt_bary.value=}")
+            if obs.gps < predicted_time_bary.gps < obs.gps + obslength:
+                records.append(
+                    dict(
+                        obstime=obs.mjd,
+                        mjd_pulse=predicted_time.mjd,
+                        gps_pulse=predicted_time.gps,
+                        bary_mjd_pulse=predicted_time_bary.mjd,
+                        bary_gps_pulse=predicted_time_bary.gps,
+                    )
+                )
+
+    if len(records) == 0:
+        logger.error("No observations found. ")
+        import sys
+        sys.exit()
+
+    # Transmute back to MJD for Tracy
+    records_df = pd.DataFrame(records)
+    records_df.to_csv(output, sep=" ")
+
+    logger.info(f"Have written dataframe: ")
+    logger.info(f"  - {len(records_df)=}")
+    logger.info(f"  - {records_df.columns=}")
 
 def predict_times(
     ra=279.75833333,
@@ -87,6 +151,7 @@ def predict_times(
     obslength=596,
     output="periodic_search.txt",
     vcs=False,
+    location="MWA",
 ):
 
     # Transient location
@@ -250,7 +315,7 @@ def predict_times(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    group1 = parser.add_argument_group("Input/output files")
+    group1 = parser.add_argument_group("Options")
     group1.add_argument(
         "--ra",
         dest="ra",
@@ -336,11 +401,25 @@ if __name__ == "__main__":
         help="Search for VCS observations rather than HW_LFILES",
     )
     group1.add_argument(
+        "--input",
+        dest="input",
+        type=str,
+        default=None,
+        help="If supplied, search a (line-separated) list of MJDs rather than the MWA database",
+    )
+    group1.add_argument(
         "--output",
         dest="output",
         type=str,
         default="periodic_search.txt",
         help="Output text file for search results (default = periodic_search.txt",
+    )
+    group1.add_argument(
+        "--telescope",
+        dest="telescope",
+        type=str,
+        default="MWA",
+        help="Which telescope? Allowed values: VLA or MWA (default)",
     )
     group1.add_argument(
         "-v",
@@ -356,18 +435,46 @@ if __name__ == "__main__":
         logger.info("Setting to debug mode")
         logger.setLevel(logging.DEBUG)
 
-    predict_times(
-        ra=results.ra,
-        dec=results.dec,
-        separation=results.separation,
-        starttime=results.starttime,
-        stoptime=results.stoptime,
-        minchan=results.minchan,
-        maxchan=results.maxchan,
-        period=results.period,
-        pulseref=results.pulseref,
-        pulserefgps=results.pulserefgps,
-        obslength=results.obslength,
-        output=results.output,
-        vcs=results.vcs,
+    if results.telescope == "MWA":
+        # MWA location from CONV2UVFITS/convutils.h
+        LAT = -26.703319
+        LON = 116.67081
+        ALT = 377.0
+    elif results.telescope == "VLA":
+        LAT = 34.0784
+        LON = -107.6184
+        ALT = 2120 
+
+    LOCATION = EarthLocation.from_geodetic(
+        lat=LAT * u.deg, lon=LON * u.deg, height=ALT * u.m
     )
+
+    if results.input is None:
+        predict_times(
+            ra=results.ra,
+            dec=results.dec,
+            separation=results.separation,
+            starttime=results.starttime,
+            stoptime=results.stoptime,
+            minchan=results.minchan,
+            maxchan=results.maxchan,
+            period=results.period,
+            pulseref=results.pulseref,
+            pulserefgps=results.pulserefgps,
+            obslength=results.obslength,
+            output=results.output,
+            vcs=results.vcs,
+            location=LOCATION,
+        )
+    else:
+        predict_times_list(
+                ra=results.ra,
+                dec=results.dec,
+                period=results.period,
+                pulseref=results.pulseref,
+                pulserefgps=results.pulserefgps,
+                obslength=results.obslength,
+                input=results.input,
+                output=results.output,
+                location=LOCATION,
+                )
