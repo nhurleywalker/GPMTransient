@@ -27,7 +27,7 @@ class Dynspec:
             transpose = None
 
         try:
-            dynspec = np.loadtxt(kwargs['input'])
+            dynspec = np.loadtxt(kwargs['input'], ndmin=2)
         except:
             try:
                 dynspec = kwargs['dynspec']
