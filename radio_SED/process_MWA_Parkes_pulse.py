@@ -21,11 +21,16 @@ plt.rcParams.update({
 #matplotlib.rcParams['ps.fonttype'] = 42
 cm = 1/2.54  # centimeters in inches
 
-freq_ref = 1200
+# Load the dynamic spectra
+with open("../dynspec/1342096104.yaml", "r") as mwa_yaml:
+    mwa_params = dd.parse_yaml(mwa_yaml)
+    mwa_params["input"] = "../dynspec/" + mwa_params["input"]
+with open("../dynspec/1342096266.yaml", "r") as parkes_yaml:
+    parkes_params = dd.parse_yaml(parkes_yaml)
+    parkes_params["input"] = "../dynspec/" + parkes_params["input"]
 
-# Parkes
-dlo = dd.Dynspec(input='../dynspec/1342096104_dyn_dynamic_spectrum.csv', sample_time=0.5, freqlo=200.955, bw=0.64, time_offset=1342096104, transpose=True)
-dhi = dd.Dynspec(input='../dynspec/PKS_1342096266_dynamic_spectrum.csv', sample_time=0.1, freqlo=1216.0, bw=0.5, time_offset=1342096266.11, transpose=False)
+dlo = dd.Dynspec(**mwa_params)
+dhi = dd.Dynspec(**parkes_params)
 
 #NB: none of these plots line up properly
 fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True)
@@ -39,11 +44,16 @@ dhi.plot(ax[0])
 plt.xlim([dhi.t[0], dlo.t[-1]])
 plt.savefig('pre_ddsp_lineup.png')
 
-dlo.freq_ref = freq_ref
-dhi.freq_ref = freq_ref
+# [SM:] I'll need to explain/document the purpose of freq_ref better... It has nothing to do with the absolute timing of the pulses
+# What was happening was that because a "weird" reference frequency was being used for dedispersion, the pulse was wrapped around to the other side of the window -- which DOES obviously affect the absolute timing of the pulse
+dlo.set_freq_ref(mwa_params['freq_ref'])
+dhi.set_freq_ref(parkes_params['freq_ref'])
+
 DM = 275
 
 #dlo.dedisperse(DM, freq_ref='low')
+dlo.add_dm_padding(DM)
+dhi.add_dm_padding(DM)
 dlo.dedisperse(DM)
 dhi.dedisperse(DM)
 
