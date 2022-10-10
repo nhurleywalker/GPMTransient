@@ -5,10 +5,18 @@ from scipy.optimize import curve_fit
 
 from matplotlib.ticker import FormatStrFormatter
 
+import matplotlib.font_manager
+from matplotlib import rc
+# Nature requires sans-serif fonts
 plt.rcParams.update({
     "text.usetex": True,
-    "font.family": "serif",
-    "font.size": 14})
+    "font.size": 7,
+    "font.sans-serif": ["Helvetica"]})
+
+#plt.rcParams.update({
+#    "text.usetex": True,
+#    "font.family": "serif",
+#    "font.size": 14})
 
 cm = 1/2.54
 
@@ -16,13 +24,13 @@ cm = 1/2.54
 #TOPCSV = 'three_point_spectrum.csv'
 
 markers = {
-    'MWA':{'marker':'.', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.5},
-    'MeerKAT':{'marker':'s', 'color':'green', 'label':'MeerKAT', 'markersize':2},
-    'ASKAP':{'marker':'x', 'color':'blue', 'label':'ASKAP', 'markersize':2},
+    'MWA':{'marker':'o', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':1},
+    'MeerKAT':{'marker':'s', 'color':'green', 'label':'MeerKAT', 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':1},
+    'ASKAP':{'marker':'x', 'color':'blue', 'label':'ASKAP', 'markersize':0.5},
     'Parkes':{'marker':'+', 'color':'red', 'label':'Parkes'}
 }
 
-ref_nu = 150
+ref_nu = 1000
 
 def pl(nu, norm, alpha):
     return norm * nu **alpha 
@@ -45,7 +53,7 @@ def make_ax1(ax1, nu, df):
         **markers['MWA']
     )
 # MeerKAT
-    corr = 0.09
+    corr = 0.085
     df3 = pd.read_csv("radio_SED3.csv")
     df3['flux'] /= corr
     df3['fluxerr'] /= corr
@@ -72,6 +80,8 @@ def make_ax1(ax1, nu, df):
         absolute_sigma=True
     )
 
+    best_p = fit_res[0]
+
     no_samps = 1000
     samps = np.random.multivariate_normal(
         fit_res[0], fit_res[1], size=no_samps
@@ -84,8 +94,10 @@ def make_ax1(ax1, nu, df):
     )
 
     q16, q50, q84 = np.percentile(models, [16, 50, 84], axis=1)
-    alpha = fit_res[0][1]
-    q = fit_res[0][2]
+
+    alpha = best_p[1]
+    q = best_p[2]
+    S1GHz = curved_law(1000, *best_p)
     
     ax1.plot(
         nu,
@@ -96,6 +108,18 @@ def make_ax1(ax1, nu, df):
         nu,
         q16, q84, alpha=0.3
     )
+    #print("fit res=", fit_res)
+
+    covar = fit_res[1]
+    err_p = np.sqrt(np.diag(covar))
+    print(err_p)
+    dof = len(df.freq) - 2
+    chi2 = np.sum(
+        ((df.flux - curved_law(df.freq, *best_p)) / df.fluxerr)**2
+        )
+    rchi2 = chi2 / dof
+
+# Power-law (just for comparison, not used)
 
     model = (pl, (np.median(df.flux), -0.7), 'Power Law')
 
@@ -110,7 +134,6 @@ def make_ax1(ax1, nu, df):
         sigma=df.fluxerr,
         absolute_sigma=True
     )
-    print(fit_res[0])
 
     no_samps = 1000
     samps = np.random.multivariate_normal(
@@ -141,24 +164,29 @@ def make_ax1(ax1, nu, df):
         xlabel='Frequency (MHz)',
         ylabel='Flux density (Jy)',
     )
-    ax1.xaxis.set_major_formatter(FormatStrFormatter('%3.2f'))
+    ax1.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.2f'))
-    return alpha, q
+# For ATCA points
+#    ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.5f'))
+    return S1GHz, alpha, q, rchi2
 
 def make_sed_figure(df, output='radio_SED.pdf'):
 
-    example_nu_large = np.geomspace(70, 3000, 100)
+# For ATCA points, eventually?
+#    example_nu_large = np.geomspace(70, 9000, 100)
+
+    example_nu_large = np.geomspace(70,2000, 100)
 
     ax1_loc = (0.1, 0.1, 0.8, 0.8)
 
-    fig = plt.figure(figsize=(8.5, 6))
+    fig = plt.figure(figsize=(7*cm, 7*cm))
 
     ax1 = fig.add_axes(ax1_loc)
-    alpha, q = make_ax1(ax1, example_nu_large, df)
+    S1GHz, alpha, q, rchi2 = make_ax1(ax1, example_nu_large, df)
 
     fig.savefig(output, bbox_inches="tight")
 
-    return alpha, q
+    return S1GHz, alpha, q, rchi2
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -186,14 +214,14 @@ if __name__ == '__main__':
 
     df = pd.concat([df1, df2, df4])
 
-    print(df)
+    #print(df)
     
-    alpha, q = make_sed_figure(df,
+    S1GHz, alpha, q, rchi2 = make_sed_figure(df,
         output=args.output
     )
 
 
-    print(alpha, q)
+    print(S1GHz, alpha, q, rchi2)
     # From Wolfram Alpha
     # integrate (Power[\(40)Divide[x,Power[10,9]]\(41),-1.08])*exp(-0.60*ln(Power[\(40)Divide[x,Power[10,9]]\(41),2])) over x = Power[10,7] to Power[10,14]
 
@@ -208,11 +236,11 @@ if __name__ == '__main__':
 
     # Very small opening angle
     rho = 0.2
-    print("Radio luminosity {0:2.2e} erg/s for rho={1}deg".format(intr * Jy2Wm * Wm2ergs *(2*np.pi*((d * kpc)**2)/(0.06))*(1-np.cos(np.radians(rho))),rho))
+    print("Radio luminosity {0:2.2e} erg/s for rho={1}deg".format(S1GHz * intr * Jy2Wm * Wm2ergs *(2*np.pi*((d * kpc)**2)/(0.06))*(1-np.cos(np.radians(rho))),rho))
 
     # More reasonable, maybe?
     rho = 2
-    print("Radio luminosity {0:2.2e} erg/s for rho={1}deg".format(intr * Jy2Wm * Wm2ergs *(2*np.pi*((d * kpc)**2)/(0.06))*(1-np.cos(np.radians(rho))),rho))
+    print("Radio luminosity {0:2.2e} erg/s for rho={1}deg".format(S1GHz * intr * Jy2Wm * Wm2ergs *(2*np.pi*((d * kpc)**2)/(0.06))*(1-np.cos(np.radians(rho))),rho))
 
     # Spin-down luminosity
     P = 1318.19578
