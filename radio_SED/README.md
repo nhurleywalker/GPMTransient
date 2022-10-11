@@ -32,7 +32,7 @@ which implies a beaming fraction
 
 $$ \sin^2\left(\frac{\rho}{2}\right) = \sin^2\left(\frac{\pi}{2}\delta\right) \sin^2\alpha. $$
 
-### Small opening angle approximation
+### $\rho(\nu)$
 
 The most straightforward justification for the assumption of small $\rho$ is that the extremely large period implies a large light cylinder radius, which in turn implies a very small polar cap region.
 In this limit, the beam opening angle is
@@ -63,7 +63,7 @@ Hence,
 
 $$ \rho(\nu) \approx 1.^\circ24 \sqrt{40} \left( \frac{\nu}{\text{GHz}} \right)^{\beta/2} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.035} \left( \frac{P}{\text{s}} \right)^{-0.35}, $$
 
-$$ \rho^2 \approx 0.0187 \left( \frac{\nu}{\text{GHz}} \right)^\beta \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{-0.7}, $$
+$$ \rho^2(\nu) \approx 0.0187 \left( \frac{\nu}{\text{GHz}} \right)^\beta \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{-0.7}, $$
 
 or, separating out all the factors that do not depend on frequency, and keeping the factor of 4 with the $\rho^2$,
 
@@ -73,6 +73,13 @@ $$ f(P,\dot{P}) = 4.68\times10^{-3} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.0
 
 #### Derivation #1: Constant duty cycle, single power law
 
-The luminosity is
+Unfortunately, $\alpha$ is overloaded, being both the magnetic inclination (as used above), and the usual symbol for the spectral index.
+Therefore, in this derivation, I'll use $\gamma$ for the spectral index, making the observed mean flux
 
-$$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} \frac{S_m(\nu)}{\delta} \text{d}\nu. $$
+$$ S_m(\nu) = S_m(\nu_0) \left( \frac{\nu}{\nu_0} \right)^\gamma, $$
+
+for some reference frequency, $\nu_0$.
+
+$$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} \frac{S_m(\nu)}{\delta} \text{d}\nu $$
+
+$$ = 4 \pi d^2 f(P,\dot{P}) \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\text{GHz}} \right)^\beta \frac{S_m(\nu)}{\delta} \text{d}\nu $$
