@@ -56,18 +56,18 @@ $$ \rho = 1.^\circ24 \left( \frac{r}{10\text{km}} \right)^{1/2} \left( \frac{P}{
 
 (see Erkut's equation (13)), where
 
-$$ \frac{r}{10\text{km}} \approx 40 \left( \frac{\nu}{\text{GHz}} \right)^\beta \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{0.30}, $$
+$$ \frac{r}{10\text{km}} \approx 40 \left( \frac{\nu}{\nu_s} \right)^\beta \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{0.30}, $$
 
-(see Erkut's equation (14)), where $\beta \approx -0.26$ is the radius-to-frequency index, not to be confused with the impact angle above.
+(see Erkut's equation (14)), where $\nu_s = 1$ GHz, and $\beta \approx -0.26$ is the radius-to-frequency index, not to be confused with the impact angle above.
 Hence,
 
-$$ \rho(\nu) \approx 1.^\circ24 \sqrt{40} \left( \frac{\nu}{\text{GHz}} \right)^{\beta/2} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.035} \left( \frac{P}{\text{s}} \right)^{-0.35}, $$
+$$ \rho(\nu) \approx 1.^\circ24 \sqrt{40} \left( \frac{\nu}{\nu_s} \right)^{\beta/2} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.035} \left( \frac{P}{\text{s}} \right)^{-0.35}, $$
 
-$$ \rho^2(\nu) \approx 0.0187 \left( \frac{\nu}{\text{GHz}} \right)^\beta \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{-0.7}, $$
+$$ \rho^2(\nu) \approx 0.0187 \left( \frac{\nu}{\nu_s} \right)^\beta \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{-0.7}, $$
 
 or, separating out all the factors that do not depend on frequency, and keeping the factor of 4 with the $\rho^2$,
 
-$$ \frac{\rho(\nu)^2}{4} \approx f(P,\dot{P}) \left( \frac{\nu}{\text{GHz}} \right)^\beta, $$
+$$ \frac{\rho(\nu)^2}{4} \approx f(P,\dot{P}) \left( \frac{\nu}{\nu_s} \right)^\beta, $$
 
 $$ f(P,\dot{P}) = 4.68\times10^{-3} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{-0.7}. $$
 
@@ -78,8 +78,10 @@ Therefore, in this derivation, I'll use $\gamma$ for the spectral index, making 
 
 $$ S_m(\nu) = S_m(\nu_0) \left( \frac{\nu}{\nu_0} \right)^\gamma. $$
 
-If we choose the reference frequency to be $\nu_0 = 1$ GHz, then the luminosity is
+The luminosity is then
 
 $$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} \frac{S_m(\nu)}{\delta} \text{d}\nu $$
 
-$$ = 4 \pi d^2 f(P,\dot{P}) \frac{S_m(\nu_0)}{\delta} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\text{GHz}} \right)^{\gamma + \beta} \text{d}\nu $$
+$$ = 4 \pi d^2 f(P,\dot{P}) \frac{S_m(\nu_0)}{\delta} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu^{\gamma + \beta}}{\nu_s^\beta \nu_0^\gamma} \right) \text{d}\nu $$
+
+$$ = 4 \pi d^2 f(P,\dot{P}) \frac{S_m(\nu_0)}{\delta} \frac{\nu_\text{max}^{\gamma + \beta + 1} - \nu_\text{min}^{\gamma + \beta + 1}}{\gamma + \beta + 1} \frac{S_m(\nu_0)}{\delta \nu_s^\beta \nu_0^\gamma} $$
