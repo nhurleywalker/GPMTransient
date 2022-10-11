@@ -32,7 +32,7 @@ which implies a beaming fraction
 
 $$ \sin^2\left(\frac{\rho}{2}\right) = \sin^2\left(\frac{\pi}{2}\delta\right) \sin^2\alpha. $$
 
-### $\rho(\nu)$
+### The consequences of $\rho$'s dependence on $\nu$
 
 The most straightforward justification for the assumption of small $\rho$ is that the extremely large period implies a large light cylinder radius, which in turn implies a very small polar cap region.
 In this limit, the beam opening angle is
@@ -84,4 +84,8 @@ $$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} \f
 
 $$ = 4 \pi d^2 f(P,\dot{P}) \frac{S_m(\nu_0)}{\delta} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu^{\gamma + \beta}}{\nu_s^\beta \nu_0^\gamma} \right) \text{d}\nu $$
 
-$$ = 4 \pi d^2 f(P,\dot{P}) \frac{S_m(\nu_0)}{\delta} \frac{\nu_\text{max}^{\gamma + \beta + 1} - \nu_\text{min}^{\gamma + \beta + 1}}{\gamma + \beta + 1} \frac{S_m(\nu_0)}{\delta \nu_s^\beta \nu_0^\gamma} $$
+$$ = 4 \pi d^2 f(P,\dot{P}) \frac{\nu_\text{max}^{\gamma + \beta + 1} - \nu_\text{min}^{\gamma + \beta + 1}}{\gamma + \beta + 1} \frac{S_m(\nu_0)}{\delta \nu_s^\beta \nu_0^\gamma}, $$
+
+which is Erkut's Equation (17).
+
+#### Derivation #2: Assumed profile evolution ($\delta \propto \nu$)
