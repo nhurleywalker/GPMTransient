@@ -88,4 +88,8 @@ $$ = 4 \pi d^2 f(P,\dot{P}) \frac{\nu_\text{max}^{\gamma + \beta + 1} - \nu_\tex
 
 which is Erkut's Equation (17).
 
-#### Derivation #2: Assumed profile evolution ($\delta \propto \nu$)
+#### Derivation #2: Assumed profile evolution
+
+With the estimated dependence of $\delta$ on $\rho$ (see above), the luminosity integral becomes
+
+$$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\pi \sin\alpha}{2} \frac{\rho(\nu)}{2} \frac{S_m(\nu)}{\delta} \text{d}\nu $$
