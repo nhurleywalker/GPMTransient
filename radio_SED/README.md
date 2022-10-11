@@ -92,4 +92,11 @@ which is Erkut's Equation (17).
 
 With the estimated dependence of $\delta$ on $\rho$ (see above), the luminosity integral becomes
 
-$$ L = 2 \pi^2 d^2 \sin\alpha \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)}{2} \frac{S_m(\nu)}{\delta} \text{d}\nu $$
+$$ L = 2 \pi^2 d^2 \sin\alpha \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)}{2} S_m(\nu) \text{d}\nu $$
+
+$$ = 2 \pi^2 d^2 \sin\alpha \sqrt{f(P,\dot{P})} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu^{\gamma + \beta/2}}{\nu_s^{\beta/2} \nu_0^\gamma} \right) \text{d}\nu $$
+
+which evaluates to
+
+$$ = 2 \pi^2 d^2 \sqrt{f(P,\dot{P})} \frac{\nu_\text{max}^{\gamma + \beta/2 + 1} - \nu_\text{min}^{\gamma + \beta/2 + 1}}{\gamma + \beta/2 + 1} \frac{S_m(\nu_0)}{\delta \nu_s^{\beta/2} \nu_0^\gamma}. $$
+
