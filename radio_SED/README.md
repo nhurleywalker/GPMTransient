@@ -61,7 +61,13 @@ $$ \frac{r}{10\text{km}} \approx 40 \left( \frac{\nu}{\text{GHz}} \right)^\beta 
 (see Erkut's equation (14)), where $\beta \approx -0.26$ is the radius-to-frequency index, not to be confused with the impact angle above.
 Hence,
 
-$$ \rho \approx 1.^\circ24 \sqrt{40} 
+$$ \rho \approx 1.^\circ24 \sqrt{40} \left( \frac{\nu}{\text{GHz}} \right)^{\beta/2} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.035} \left( \frac{P}{\text{s}} \right)^{-0.35}, $$
+$$ \rho^2 \approx 0.0187 \left( \frac{\nu}{\text{GHz}} \right)^\beta \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{-0.7}, $$
+
+or, separating out all the factors that do not depend on frequency, and keeping the factor of 4 with the $\rho^2$,
+
+$$ \frac{\rho^2}{4} \approx f(P,\dot{P}) \left( \frac{\nu}{\text{GHz}} \right)^\beta, $$
+$$ f(P,\dot{P}) = 4.68\times10^{-3} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.07} \left( \frac{P}{\text{s}} \right)^{-0.7}. $$
 
 #### Derivation #1: Constant duty cycle, single power law
 
