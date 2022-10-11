@@ -76,10 +76,10 @@ $$ f(P,\dot{P}) = 4.68\times10^{-3} \left( \frac{\dot{P}}{10^{-15}} \right)^{0.0
 Unfortunately, $\alpha$ is overloaded, being both the magnetic inclination (as used above), and the usual symbol for the spectral index.
 Therefore, in this derivation, I'll use $\gamma$ for the spectral index, making the observed mean flux
 
-$$ S_m(\nu) = S_m(\nu_0) \left( \frac{\nu}{\nu_0} \right)^\gamma, $$
+$$ S_m(\nu) = S_m(\nu_0) \left( \frac{\nu}{\nu_0} \right)^\gamma. $$
 
-for some reference frequency, $\nu_0$.
+If we choose the reference frequency to be $\nu_0 = 1$ GHz, then the luminosity is
 
 $$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} \frac{S_m(\nu)}{\delta} \text{d}\nu $$
 
-$$ = 4 \pi d^2 f(P,\dot{P}) \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\text{GHz}} \right)^\beta \frac{S_m(\nu)}{\delta} \text{d}\nu $$
+$$ = 4 \pi d^2 f(P,\dot{P}) \frac{S_m(\nu_0)}{\delta} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\text{GHz}} \right)^{\gamma + \beta} \text{d}\nu $$
