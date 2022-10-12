@@ -41,6 +41,12 @@ def curved_law(nu, s_nu, alpha, q):
     return s_nu * spec_nu ** alpha * \
             np.exp(q * np.log(spec_nu)**2)
 
+def curved_law_integral(nu, s_nu, alpha, q, nu_min, nu_max):
+    pass
+
+def curved_law_luminosity(nu, s_nu, alpha, q, nu_min, nu_max, P, Pdot, d):
+    pass
+
 def make_ax1(ax1, nu, df):
     
     mwa_mask = df.freq < 4000
