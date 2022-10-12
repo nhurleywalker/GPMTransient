@@ -106,7 +106,7 @@ The proposed log-parabolic spectrum is
 
 $$ S_p(\nu) = S_p(\nu_0) \left( \frac{\nu}{\nu_0} \right)^\alpha e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2}, $$
 
-where **$\alpha$ is now a spectral index** (not the magnetic inclination angle, as before), and the peak fluxes are used here (the case for $S_m(\nu)$ is treated later).
+where **$\alpha$ is now a spectral index** (not the magnetic inclination angle, above), and the peak fluxes are used here (the case for $S_m(\nu)$ is treated later).
 Since we're currently using $S_p(\nu)$, we don't need to factor the duty cycle into the luminosity calculation.
 However, it should be understood that this will *overestimate* the (time-averaged) luminosity, since clearly the emission does not maintain the peak luminosity over the whole pulse window.
 
@@ -120,3 +120,20 @@ $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta 
 
 $$ = \frac{4 \pi^{3/2}}{Q} d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta e^{-\left( \frac{\alpha+\beta+1}{Q} \right)^2} \left( \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right) $$
 
+#### Derivation #4: Using a log-parabolic spectrum and the duty cycle
+
+If the mean fluxes are obtained by integrating over (some fraction of) the pulse window, then the proposed log-parabolic spectrum becomes
+
+$$ S_m(\nu) = S_m(\nu_0) \left( \frac{\nu}{\nu_0} \right)^\alpha e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2}, $$
+
+This time we *do* need to factor the duty cycle into the luminosity calculation, similar to before.
+This will produce a "better" estimate of the time-averaged luminosity, while introducing a new parameter to play with: the magnetic inclination.
+Since $\alpha$ is being used in the log-parabolic fit, let $A$ be the sine of the magnetic inclination, so that the above approximation between the duty cycle and the beam opening angle can be unambiguously written
+
+$$ \delta \approx \frac{\rho}{\pi A}. $$
+
+Then, similarly to before, the effect this has on the luminosity integral is
+
+$$ L = 2 \pi^2 d^2 \sin\alpha \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)}{2} S_m(\nu) \text{d}\nu $$
+
+$$ = 2 \pi^2 d^2 \sin\alpha \sqrt{f(P,\dot{P})} S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\nu_0} \right)^{\alpha + \beta/2} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} \text{d}\nu $$
