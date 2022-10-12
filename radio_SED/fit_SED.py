@@ -104,13 +104,13 @@ def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d):
 
     return 4 * np.pi * d**2 * f(P, Pdot) * integral_value
 
-def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, delta):
+def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, sin_mag_incl):
     '''
     See Derivation #4 in README.md
     '''
 
     beta = -0.26
-    return 4 * np.pi**2 * d**2 * np.sqrt(f(P, Pdot)) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta/2, q)
+    return 2 * np.pi**2 * d**2 * sin_mag_incl * np.sqrt(f(P, Pdot)) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta/2, q)
 
 def make_ax1(ax1, nu, df):
     
@@ -320,7 +320,7 @@ if __name__ == '__main__':
     print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc)))
 
     # Doing the integral improperly
-    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
+    print("Radio luminosity {0:2.2e} erg/s, using Smean, for frequency-dependent rho and duty-cycle".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Smean(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc, 1)))
 
     # Very small opening angle
     rho = 0.2
