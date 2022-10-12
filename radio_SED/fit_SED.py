@@ -48,11 +48,12 @@ def curved_law_integral(nu_min, nu_max, s_nu, alpha, q):
     '''
     Q = 2*np.sqrt(q)
     R = (alpha + 1)/Q
-    exp_term = np.exp(-R^2)
-    erfi_min_term = erfi(R + (Q/2)*np.log(nu_min/ref_nu))
-    erfi_max_term = erfi(R + (Q/2)*np.log(nu_max/ref_nu))
+    exp_term = np.exp(-R**2)
+    print(Q, R, exp_term)
+    erfi_min_term = erfi(R - (Q/2)*np.log(nu_min/ref_nu))
+    erfi_max_term = erfi(R - (Q/2)*np.log(nu_max/ref_nu))
 
-    return s_nu * (np.sqrt(np.pi) / Q) * exp_term * (erfi_max_term - erfi_min_term)
+    return -s_nu * (np.sqrt(np.pi) / Q) * exp_term * (erfi_max_term - erfi_min_term)
 
 def f(P, Pdot):
     return 4.68e-3 * (Pdot/1e-15)**0.07 * P**(-0.7)
@@ -63,7 +64,7 @@ def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d):
     '''
 
     beta = -0.26
-    return 4 * pi * d**2 * f(P, Pdot) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta, q)
+    return 4 * np.pi * d**2 * f(P, Pdot) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta, q)
 
 def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, delta):
     '''
@@ -71,7 +72,7 @@ def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, delt
     '''
 
     beta = -0.26
-    return 4 * pi**2 * d**2 * np.sqrt(f(P, Pdot)) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta/2, q)
+    return 4 * np.pi**2 * d**2 * np.sqrt(f(P, Pdot)) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta/2, q)
 
 def make_ax1(ax1, nu, df):
     
@@ -277,8 +278,10 @@ if __name__ == '__main__':
         return (numax ** (2*q + alpha + beta + 1)) / (2*q + alpha + beta + 1) - \
                (numin ** (2*q + alpha + beta + 1)) / (2*q + alpha + beta + 1)
 
-
     # Doing the integral properly
+    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, -q, P, Pdot, d * kpc)))
+
+    # Doing the integral improperly
     print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
 
     # Very small opening angle
