@@ -116,7 +116,7 @@ $$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} S_
 
 $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\nu_0} \right)^{\alpha+\beta} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} \text{d}\nu $$
 
-$$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \left[ \frac12 \sqrt{ \frac{\pi}{q} } e^{-\frac{(\alpha+\beta+1)^2}{4q}} \text{erfi} \left( \frac{a + 2q \ln \left( \frac{\nu}{\nu_0} \right) + 1}{2\sqrt{q}} \right) \right]_{\nu_\text{min}}^{\nu_\text{max}} $$
-
 $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \left[ \frac12 \sqrt{ \frac{\pi}{q} } e^{-\frac{(\alpha+\beta+1)^2}{4q}} \text{erfi} \left( \frac{a + 2q \ln \left( \frac{\nu}{\nu_0} \right) + 1}{2\sqrt{q}} \right) \right]^{\nu_\text{max}}\_{\nu_\text{min}} $$
+
+$$ = \frac{4 \pi^{3/2}}{Q} d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta e^{-\left( \frac{\alpha+\beta+1}{Q} \right)^2} \left[ \text{erfi} \left( \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right) - \text{erfi} \left( \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right) \right] $$
 
