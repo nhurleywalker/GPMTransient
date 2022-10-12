@@ -114,5 +114,7 @@ Still assuming a small $\rho$ (because of the large light cylinder and necessari
 
 $$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} S_p(\nu) \text{d}\nu $$
 
-$$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{nu_0} \right)^{\alpha+\beta} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} $$
+$$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\nu_0} \right)^{\alpha+\beta} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} \text{d}\nu $$
+
+$$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \left[ \frac12 \sqrt{ \frac{\pi}{q} } e^{-\frac{(\alpha+\beta+1)^2}{4q}} \text{erfi} \left( \frac{a + 2q \ln \left( \frac{\nu}{\nu_0} \right) + 1}{2\sqrt{q}} \right) \right]_{\nu_\text{min}}^{\nu_\text{max}} $$
 
