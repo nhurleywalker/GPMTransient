@@ -104,7 +104,7 @@ $$ = 2 \pi^2 d^2 \sqrt{f(P,\dot{P})} \frac{\nu_\text{max}^{\gamma + \beta/2 + 1}
 
 The proposed log-parabolic spectrum is
 
-$$ S_p(\nu) = S_p(\nu_0) \left( \frac{\nu}{nu_0} \right)^\alpha e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2}, $$
+$$ S_p(\nu) = S_p(\nu_0) \left( \frac{\nu}{\nu_0} \right)^\alpha e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2}, $$
 
 where **$\alpha$ is now a spectral index** (not the magnetic inclination angle, as before), and the peak fluxes are used here (the case for $S_m(\nu)$ is treated later).
 Since we're currently using $S_p(\nu)$, we don't need to factor the duty cycle into the luminosity calculation.
@@ -117,4 +117,6 @@ $$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} S_
 $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\nu_0} \right)^{\alpha+\beta} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} \text{d}\nu $$
 
 $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \left[ \frac12 \sqrt{ \frac{\pi}{q} } e^{-\frac{(\alpha+\beta+1)^2}{4q}} \text{erfi} \left( \frac{a + 2q \ln \left( \frac{\nu}{\nu_0} \right) + 1}{2\sqrt{q}} \right) \right]_{\nu_\text{min}}^{\nu_\text{max}} $$
+
+$$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \left[ \frac12 \sqrt{ \frac{\pi}{q} } e^{-\frac{(\alpha+\beta+1)^2}{4q}} \text{erfi} \left( \frac{a + 2q \ln \left( \frac{\nu}{\nu_0} \right) + 1}{2\sqrt{q}} \right) \right]^{\nu_\text{max}}\_{\nu_\text{min}} $$
 
