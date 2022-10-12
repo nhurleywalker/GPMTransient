@@ -190,7 +190,7 @@ def make_ax1(ax1, nu, df):
         )
     rchi2 = chi2 / dof
 
-# Power-law (just for comparison, not used)
+# Power-law (just for comparison)
 
     model = (pl, (np.median(df.flux), -0.7), 'Power Law')
 
@@ -205,6 +205,7 @@ def make_ax1(ax1, nu, df):
         sigma=df.fluxerr,
         absolute_sigma=True
     )
+    print(fit_res)
 
     no_samps = 1000
     samps = np.random.multivariate_normal(
@@ -239,7 +240,11 @@ def make_ax1(ax1, nu, df):
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.2f'))
 # For ATCA points
 #    ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.5f'))
-    return S1GHz, alpha, q, rchi2
+
+    best_p = fit_res[0]
+    pla = best_p[1]
+    plS = pl(1000, *best_p)
+    return S1GHz, alpha, q, rchi2, plS, pla
 
 def make_sed_figure(df, output='radio_SED.pdf'):
 
@@ -253,11 +258,11 @@ def make_sed_figure(df, output='radio_SED.pdf'):
     fig = plt.figure(figsize=(7*cm, 7*cm))
 
     ax1 = fig.add_axes(ax1_loc)
-    S1GHz, alpha, q, rchi2 = make_ax1(ax1, example_nu_large, df)
+    S1GHz, alpha, q, rchi2, plS, pla = make_ax1(ax1, example_nu_large, df)
 
     fig.savefig(output, bbox_inches="tight")
 
-    return S1GHz, alpha, q, rchi2
+    return S1GHz, alpha, q, rchi2, plS, pla
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -287,13 +292,16 @@ if __name__ == '__main__':
 
     #print(df)
     
-    S1GHz, alpha, q, rchi2 = make_sed_figure(df,
+    S1GHz, alpha, q, rchi2, plS, pla = make_sed_figure(df,
         output=args.output
     )
 
 
-    print(S1GHz, alpha, q, rchi2)
-    # From Wolfram Alpha
+    print("Curved spectrum fit parameters: S at 1 GHz = {0:3.2f}mJy, alpha = {1:3.2f}, q = {2:3.2f}, reduced chi^2 = {3:3.2f}".format(1.e3*S1GHz, alpha, q, rchi2))
+    print("Power-law fit parameters: S at 1 GHz = {0:3.2f}mJy, alpha = {1:3.2f}".format(1.e3*plS, pla))
+
+
+# From Wolfram Alpha
     # integrate (Power[\(40)Divide[x,Power[10,9]]\(41),-1.08])*exp(-0.60*ln(Power[\(40)Divide[x,Power[10,9]]\(41),2])) over x = Power[10,7] to Power[10,14]
 
     intr = 3.06e11
@@ -309,6 +317,8 @@ if __name__ == '__main__':
 
     # Formula for prefactor of rho (in degrees)
     rhop = 1.24 * ( 40 * (Pdot/1.e-15)**0.07 * P**0.3 )**(0.5) * (P**-0.5)
+
+    print(rhop * 0.1**(-0.26/2))
     
     # From Wolfram alpha, integral of rho^2 S as a function of frequency:
     # integrate ((Power[v,b])Power[\(40)v\(41),a])*exp(q*ln(Power[\(40)v\(41),2]))
@@ -320,15 +330,13 @@ if __name__ == '__main__':
     print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc)))
 
     # Doing the integral improperly
-    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
+#    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
 
-    # Very small opening angle
-    rho = 0.2
-    print("Radio luminosity {0:2.2e} erg/s for rho={1}deg".format(S1GHz * intr * Jy2Wm * Wm2ergs *(2*np.pi*((d * kpc)**2)/(0.06))*(1-np.cos(np.radians(rho))),rho))
+    rho = 0.2 # degrees
+    # Vs. Lorimer & Kramer 2012 single power-law
+    print("Radio luminosity {0:2.2e} erg/s for simple power-law fit".format(Jy2Wm * Wm2ergs * 2 * np.pi * (d * kpc)**2 * (1- np.cos(np.radians(rho))) * plS * ( (1.e9)** (-pla) / (pla + 1) ) * (2.e9 ** (pla + 1) - 72.e6 ** (pla + 1) ) ) )
+    
 
-    # More reasonable, maybe?
-    rho = 2
-    print("Radio luminosity {0:2.2e} erg/s for rho={1}deg".format(S1GHz * intr * Jy2Wm * Wm2ergs *(2*np.pi*((d * kpc)**2)/(0.06))*(1-np.cos(np.radians(rho))),rho))
 
     # Spin-down luminosity
 
