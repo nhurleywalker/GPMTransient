@@ -136,4 +136,8 @@ Then, similarly to before, the effect this has on the luminosity integral is
 
 $$ L = 2 \pi^2 d^2 \sin\alpha \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)}{2} S_m(\nu) \text{d}\nu $$
 
-$$ = 2 \pi^2 d^2 \sin\alpha \sqrt{f(P,\dot{P})} S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\nu_0} \right)^{\alpha + \beta/2} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} \text{d}\nu $$
+$$ = 2 \pi^2 d^2 A \sqrt{f(P,\dot{P})} S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{\nu_0} \right)^{\alpha + \beta/2} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} \text{d}\nu $$
+
+which evaluates to
+
+$$ L = \frac{4 \pi^{5/2}}{Q} d^2 \sqrt{f(P,\dot{P})} S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} e^{-\left( \frac{\alpha+\beta/2+1}{Q} \right)^2} \left( \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right) $$
