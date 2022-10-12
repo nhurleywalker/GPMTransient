@@ -120,7 +120,7 @@ For $q < 0$,
 
 $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \nu_0 \left( \frac{\nu_0}{\nu_s} \right)^\beta \left[ \frac12 \sqrt{ \frac{\pi}{|q|} } e^{-\frac{(\alpha+\beta+1)^2}{4q}} \text{erf} \left( -\frac{\alpha + \beta + 2q \ln \left( \frac{\nu}{\nu_0} \right) + 1}{2\sqrt{|q|}} \right) \right]^{\nu_\text{max}}\_{\nu_\text{min}} $$
 
-$$ = \frac{4 \pi^{3/2}}{Q} d^2 f(P,\dot{P}) S_p(\nu_0) \nu_0 \left( \frac{\nu_0}{\nu_s} \right)^\beta e^{R^2} \left( \text{erfi} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right), $$
+$$ = \frac{4 \pi^{3/2}}{Q} d^2 f(P,\dot{P}) S_p(\nu_0) \nu_0 \left( \frac{\nu_0}{\nu_s} \right)^\beta e^{R^2} \left( \text{erf} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erf} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right), $$
 
 where I've used the slight abbreviations $Q = 2\sqrt{q}$ and $R = (\alpha + \beta + 1)/Q$.
 
@@ -144,6 +144,6 @@ $$ = 2 \pi^2 d^2 A \sqrt{f(P,\dot{P})} S_m(\nu_0) \nu_0 \left( \frac{\nu_0}{\nu_
 
 which evaluates (again, for $q < 0$) to
 
-$$ L = \frac{2 \pi^{5/2}}{Q} d^2 A \sqrt{f(P,\dot{P})} S_m(\nu_0) \nu_0 \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} e^{R^2} \left( \text{erf} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right), $$
+$$ L = \frac{2 \pi^{5/2}}{Q} d^2 A \sqrt{f(P,\dot{P})} S_m(\nu_0) \nu_0 \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} e^{R^2} \left( \text{erf} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erf} \left[ -R - \frac{2q}{Q} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right), $$
 
 where this time $R = (\alpha + \beta/2 + 1)/Q$.
