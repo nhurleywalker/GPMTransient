@@ -118,7 +118,9 @@ $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta 
 
 $$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \left[ \frac12 \sqrt{ \frac{\pi}{q} } e^{-\frac{(\alpha+\beta+1)^2}{4q}} \text{erfi} \left( \frac{a + 2q \ln \left( \frac{\nu}{\nu_0} \right) + 1}{2\sqrt{q}} \right) \right]^{\nu_\text{max}}\_{\nu_\text{min}} $$
 
-$$ = \frac{4 \pi^{3/2}}{Q} d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta e^{-\left( \frac{\alpha+\beta+1}{Q} \right)^2} \left( \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right) $$
+$$ = \frac{4 \pi^{3/2}}{Q} d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta e^{-\left( \frac{\alpha+\beta+1}{Q} \right)^2} \left( \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ \frac{a + 1}{Q} + \frac{Q}{2} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right), $$
+
+where I've used the slight abbreviation $Q = 2\sqrt{q}$.
 
 #### Derivation #4: Using a log-parabolic spectrum and the duty cycle
 
