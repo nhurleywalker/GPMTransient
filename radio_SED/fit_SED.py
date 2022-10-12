@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy.special import erfi
 
 from matplotlib.ticker import FormatStrFormatter
 
@@ -41,10 +42,26 @@ def curved_law(nu, s_nu, alpha, q):
     return s_nu * spec_nu ** alpha * \
             np.exp(q * np.log(spec_nu)**2)
 
-def curved_law_integral(nu, s_nu, alpha, q, nu_min, nu_max):
-    pass
+def curved_law_integral(nu_min, nu_max, s_nu, alpha, q):
+    '''
+    Definite integral for the function defined in curved_law()
+    '''
+    Q = 2*np.sqrt(q)
+    R = (alpha + 1)/Q
+    exp_term = np.exp(-R^2)
+    erfi_min_term = erfi(R + (Q/2)*np.log(nu_min/ref_nu))
+    erfi_max_term = erfi(R + (Q/2)*np.log(nu_max/ref_nu))
 
-def curved_law_luminosity(nu, s_nu, alpha, q, nu_min, nu_max, P, Pdot, d):
+    return s_nu * exp_term * (erfi_max_term - erfi_min_term)
+
+def f(P, Pdot):
+    return 4.68e-3 * (Pdot/1e-15)**0.07 * P**(-0.7)
+
+def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d):
+    '''
+    See Derivation #3 in README.md
+    '''
+
     pass
 
 def make_ax1(ax1, nu, df):
