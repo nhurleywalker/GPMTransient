@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from scipy.special import erfi
+from scipy.special import erfi, erf
 
 from matplotlib.ticker import FormatStrFormatter
 
@@ -46,14 +46,45 @@ def curved_law_integral(nu_min, nu_max, s_nu, alpha, q):
     '''
     Definite integral for the function defined in curved_law()
     '''
-    Q = 2*np.sqrt(q)
+    Q = 2*np.sqrt(np.abs(q))
     R = (alpha + 1)/Q
-    exp_term = np.exp(-R**2)
-    print(Q, R, exp_term)
-    erfi_min_term = erfi(R - (Q/2)*np.log(nu_min/ref_nu))
-    erfi_max_term = erfi(R - (Q/2)*np.log(nu_max/ref_nu))
+    if q > 0:
+        exp_term = np.exp(-R**2)
+        erf_min_term = erfi(R + 2*q*np.log(nu_min/ref_nu)/Q)
+        erf_max_term = erfi(R + 2*q*np.log(nu_max/ref_nu)/Q)
+    else:
+        exp_term = np.exp(R**2)
+        erf_min_term = erf(-(R + 2*q*np.log(nu_min/ref_nu)/Q))
+        erf_max_term = erf(-(R + 2*q*np.log(nu_max/ref_nu)/Q))
 
-    return -s_nu * (np.sqrt(np.pi) / Q) * exp_term * (erfi_max_term - erfi_min_term)
+    frontmatter = s_nu * np.sqrt(np.pi) / Q
+    return frontmatter * exp_term * (erf_max_term - erf_min_term)
+
+def curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha, q, nsteps):
+    '''
+    Numerical integration of curved law, used to check the analytic expression for errors
+    '''
+
+    # Area divided up into NSTEPS slivers in log-space, with the top of each sliver
+    # being approximated with a power law: S = Kν^α
+    nus = np.logspace(np.log10(nu_min), np.log10(nu_max), nsteps+1)
+    Ss  = curved_law(nus, s_nu, alpha, q) # curved_law does the division by reference frequency, so don't do it here.
+                                          # (They should be in MHz at this point.)
+
+    nus_lo = nus[:-1]
+    nus_hi = nus[1:]
+    Ss_lo  = Ss[:-1]
+    Ss_hi  = Ss[1:]
+
+    alphas = np.log(Ss_hi/Ss_lo) / np.log(nus_hi/nus_lo)
+    Ks = Ss_hi / (nus_hi/ref_nu)**alphas
+
+    # The area of each sliver is the integral of a power law:
+    # ∫ Kν^α dν = K ν^(α+1) / (α+1)
+    areas = (Ks / (alphas + 1)) * ((nus_hi/ref_nu)**(alphas + 1) - (nus_lo/ref_nu)**(alphas + 1))
+
+    # Return the total area
+    return np.sum(areas)
 
 def f(P, Pdot):
     return 4.68e-3 * (Pdot/1e-15)**0.07 * P**(-0.7)
@@ -64,7 +95,14 @@ def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d):
     '''
 
     beta = -0.26
-    return 4 * np.pi * d**2 * f(P, Pdot) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta, q)
+    integral_value = curved_law_integral(nu_min, nu_max, s_nu, alpha + beta, q)
+    print("integral = ", integral_value)
+
+    nsteps = 10000
+    numeric_integral_value = curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha + beta, q, nsteps)
+    print("numeric integral for ", nsteps, " steps = ", numeric_integral_value)
+
+    return 4 * np.pi * d**2 * f(P, Pdot) * integral_value
 
 def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, delta):
     '''
@@ -279,7 +317,7 @@ if __name__ == '__main__':
                (numin ** (2*q + alpha + beta + 1)) / (2*q + alpha + beta + 1)
 
     # Doing the integral properly
-    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, -q, P, Pdot, d * kpc)))
+    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc)))
 
     # Doing the integral improperly
     print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
