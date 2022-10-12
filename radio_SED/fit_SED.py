@@ -195,7 +195,7 @@ def make_ax1(ax1, nu, df):
 
     model = (pl, (np.median(df.flux), -0.7), 'Power Law')
 
-    nu = np.geomspace(70, 3000, 100)
+    nu = np.geomspace(70, 2000, 100)
     fit_func = model[0]
     fit_p0 = model[1]
     fit_res = curve_fit(
@@ -256,7 +256,7 @@ def make_sed_figure(df, output='radio_SED.pdf'):
 
     ax1_loc = (0.1, 0.1, 0.8, 0.8)
 
-    fig = plt.figure(figsize=(7*cm, 7*cm))
+    fig = plt.figure(figsize=(8.9*cm, 8*cm))
 
     ax1 = fig.add_axes(ax1_loc)
     S1GHz, alpha, q, rchi2, plS, pla = make_ax1(ax1, example_nu_large, df)
