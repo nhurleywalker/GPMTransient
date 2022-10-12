@@ -8,7 +8,7 @@ Dynamic spectrum:
   Transpose: true
 ObsID: 1342379534
 Reference frequency (MHz): centre
-Telescope: MWA
+Telescope: MeerKAT
 RFI Mask:
   Freq bins:
     - 1
