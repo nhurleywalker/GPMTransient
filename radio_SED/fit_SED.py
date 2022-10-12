@@ -233,6 +233,21 @@ if __name__ == '__main__':
     kpc = 3.086e+19
     Jy2Wm = 1.e-26
     Wm2ergs = 1.e7
+    P = 1318.19578
+    Pdot = 1.e-13
+
+    # Formula for prefactor of rho (in degrees)
+    rhop = 1.24 * ( 40 * (Pdot/1.e-15)**0.07 * P**0.3 )**(0.5) * (P**-0.5)
+    
+    # From Wolfram alpha, integral of rho^2 S as a function of frequency:
+    # integrate ((Power[v,b])Power[\(40)v\(41),a])*exp(q*ln(Power[\(40)v\(41),2]))
+    def integral(numin, numax, q, alpha, beta=-0.26):
+        return (numax ** (2*q + alpha + beta + 1)) / (2*q + alpha + beta + 1) - \
+               (numin ** (2*q + alpha + beta + 1)) / (2*q + alpha + beta + 1)
+
+
+    # Doing the integral properly
+    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
 
     # Very small opening angle
     rho = 0.2
@@ -243,8 +258,6 @@ if __name__ == '__main__':
     print("Radio luminosity {0:2.2e} erg/s for rho={1}deg".format(S1GHz * intr * Jy2Wm * Wm2ergs *(2*np.pi*((d * kpc)**2)/(0.06))*(1-np.cos(np.radians(rho))),rho))
 
     # Spin-down luminosity
-    P = 1318.19578
-    Pdot = 1.e-13
 
     print("Spin-down luminosity < {0:2.2e} erg/s".format((4*np.pi*np.pi*1.e45*Pdot)/(P**3)))
 
