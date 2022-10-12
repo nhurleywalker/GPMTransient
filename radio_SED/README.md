@@ -98,7 +98,7 @@ $$ = 2 \pi^2 d^2 \sin\alpha \sqrt{f(P,\dot{P})} \int_{\nu_\text{min}}^{\nu_\text
 
 which evaluates to
 
-$$ = 2 \pi^2 d^2 \sqrt{f(P,\dot{P})} \frac{\nu_\text{max}^{\gamma + \beta/2 + 1} - \nu_\text{min}^{\gamma + \beta/2 + 1}}{\gamma + \beta/2 + 1} \frac{S_m(\nu_0)}{\delta \nu_s^{\beta/2} \nu_0^\gamma}. $$
+$$ = 2 \pi^2 d^2 \sin\alpha \sqrt{f(P,\dot{P})} \frac{\nu_\text{max}^{\gamma + \beta/2 + 1} - \nu_\text{min}^{\gamma + \beta/2 + 1}}{\gamma + \beta/2 + 1} \frac{S_m(\nu_0)}{\delta \nu_s^{\beta/2} \nu_0^\gamma}. $$
 
 #### Derivation #3: Using a log-parabolic spectrum
 
@@ -142,6 +142,6 @@ $$ = 2 \pi^2 d^2 A \sqrt{f(P,\dot{P})} S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \ri
 
 which evaluates to
 
-$$ L = \frac{4 \pi^{5/2}}{Q} d^2 \sqrt{f(P,\dot{P})} S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} e^{-R^2} \left( \text{erfi} \left[ R + \frac{Q}{2} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ R + \frac{Q}{2} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right), $$
+$$ L = \frac{2 \pi^{5/2}}{Q} d^2 A \sqrt{f(P,\dot{P})} S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^{\beta/2} e^{-R^2} \left( \text{erfi} \left[ R + \frac{Q}{2} \ln \left( \frac{\nu_\text{max}}{\nu_0} \right) \right] - \text{erfi} \left[ R + \frac{Q}{2} \ln \left( \frac{\nu_\text{min}}{\nu_0} \right) \right] \right), $$
 
 where this time $R = (\alpha + \beta/2 + 1)/Q$.

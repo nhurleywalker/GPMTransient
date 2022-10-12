@@ -57,7 +57,7 @@ def curved_law_integral(nu_min, nu_max, s_nu, alpha, q):
         erf_min_term = erf(-(R + 2*q*np.log(nu_min/ref_nu)/Q))
         erf_max_term = erf(-(R + 2*q*np.log(nu_max/ref_nu)/Q))
 
-    frontmatter = s_nu * np.sqrt(np.pi) / Q
+    frontmatter = s_nu * (ref_nu*1e6) * np.sqrt(np.pi) / Q
     return frontmatter * exp_term * (erf_max_term - erf_min_term)
 
 def curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha, q, nsteps):
@@ -69,7 +69,6 @@ def curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha, q, nsteps):
     # being approximated with a power law: S = Kν^α
     nus = np.logspace(np.log10(nu_min), np.log10(nu_max), nsteps+1)
     Ss  = curved_law(nus, s_nu, alpha, q) # curved_law does the division by reference frequency, so don't do it here.
-                                          # (They should be in MHz at this point.)
 
     nus_lo = nus[:-1]
     nus_hi = nus[1:]
@@ -82,6 +81,8 @@ def curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha, q, nsteps):
     # The area of each sliver is the integral of a power law:
     # ∫ Kν^α dν = K ν^(α+1) / (α+1)
     areas = (Ks / (alphas + 1)) * ((nus_hi/ref_nu)**(alphas + 1) - (nus_lo/ref_nu)**(alphas + 1))
+    # but dν needs to be converted from GHz to Hz as well, so the area is stretched by
+    areas *= 1e9
 
     # Return the total area
     return np.sum(areas)
@@ -104,13 +105,13 @@ def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d):
 
     return 4 * np.pi * d**2 * f(P, Pdot) * integral_value
 
-def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, delta):
+def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, sin_mag_incl):
     '''
     See Derivation #4 in README.md
     '''
 
     beta = -0.26
-    return 4 * np.pi**2 * d**2 * np.sqrt(f(P, Pdot)) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta/2, q)
+    return 2 * np.pi**2 * d**2 * sin_mag_incl * np.sqrt(f(P, Pdot)) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta/2, q)
 
 def make_ax1(ax1, nu, df):
     
@@ -329,8 +330,11 @@ if __name__ == '__main__':
     # Doing the integral properly
     print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc)))
 
-    # Doing the integral improperly
-#    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
+    # Doing the integral properly
+    print("Radio luminosity {0:2.2e} erg/s, using Smean, for frequency-dependent rho and duty-cycle".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Smean(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc, 1)))
+
+    # Treating it as a power law
+    #print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(S1GHz * Jy2Wm * Wm2ergs *(np.pi*((d * kpc)**2)) * rhop**2 * integral(1.e7/1.e9, 1.e15/1.e9, q, alpha)))
 
     rho = 0.2 # degrees
     # Vs. Lorimer & Kramer 2012 single power-law
