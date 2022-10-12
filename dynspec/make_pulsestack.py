@@ -75,7 +75,9 @@ if __name__ == '__main__':
             phase = (gpstimes - gps_ref + P/2) % P - P/2
             x = phase
             y = 0.7*flux_density/np.nanmax(flux_density) + yticks[-1]
-            plt.plot(x, y[np.isfinite(y)], lw=0.5, color=cm1((freq - 88.)/(215.-88.)))
+# Log shows the frequencies a little better than linear
+            plt.plot(x, y[np.isfinite(y)], lw=0.5, color=cm1((np.log10(freq) - np.log10(88.))/(np.log10(500.)-np.log10(88.))))
+            #plt.plot(x, y[np.isfinite(y)], lw=0.5, color=cm1((freq - 88.)/(500.-88.)))
             url = "../dedispersed_spectra/" + obsname + "_dedispersed.png"
             if args.dates is True:
                 plt.text(xt, yticks[-1], f"{t[0]:04d}-{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}", url=url, bbox = dict(color='w', alpha=0.01, url=url), fontsize=5)
