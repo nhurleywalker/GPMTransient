@@ -100,3 +100,19 @@ which evaluates to
 
 $$ = 2 \pi^2 d^2 \sqrt{f(P,\dot{P})} \frac{\nu_\text{max}^{\gamma + \beta/2 + 1} - \nu_\text{min}^{\gamma + \beta/2 + 1}}{\gamma + \beta/2 + 1} \frac{S_m(\nu_0)}{\delta \nu_s^{\beta/2} \nu_0^\gamma}. $$
 
+#### Derivation #3: Using a log-parabolic spectrum
+
+The proposed log-parabolic spectrum is
+
+$$ S_p(\nu) = S_p(\nu_0) \left( \frac{\nu}{nu_0} \right)^\alpha e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2}, $$
+
+where **$\alpha$ is now a spectral index** (not the magnetic inclination angle, as before), and the peak fluxes are used here (the case for $S_m(\nu)$ is treated later).
+Since we're currently using $S_p(\nu)$, we don't need to factor the duty cycle into the luminosity calculation.
+However, it should be understood that this will *overestimate* the (time-averaged) luminosity, since clearly the emission does not maintain the peak luminosity over the whole pulse window.
+
+Still assuming a small $\rho$ (because of the large light cylinder and necessarily small polar cap), and also assuming the other empirical relations between $\rho$ and $\nu$ determined for normal pulsars (stated above), the luminosity is
+
+$$ L = 4 \pi d^2 \int_{\nu_\text{min}}^{\nu_\text{max}} \frac{\rho(\nu)^2}{4} S_p(\nu) \text{d}\nu $$
+
+$$ = 4 \pi d^2 f(P,\dot{P}) S_p(\nu_0) \left( \frac{\nu_0}{\nu_s} \right)^\beta \int_{\nu_\text{min}}^{\nu_\text{max}} \left( \frac{\nu}{nu_0} \right)^{\alpha+\beta} e^{q \left[ \ln \left( \frac{\nu}{\nu_0} \right) \right]^2} $$
+
