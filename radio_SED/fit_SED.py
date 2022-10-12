@@ -52,7 +52,7 @@ def curved_law_integral(nu_min, nu_max, s_nu, alpha, q):
     erfi_min_term = erfi(R + (Q/2)*np.log(nu_min/ref_nu))
     erfi_max_term = erfi(R + (Q/2)*np.log(nu_max/ref_nu))
 
-    return s_nu * exp_term * (erfi_max_term - erfi_min_term)
+    return s_nu * (np.sqrt(np.pi) / Q) * exp_term * (erfi_max_term - erfi_min_term)
 
 def f(P, Pdot):
     return 4.68e-3 * (Pdot/1e-15)**0.07 * P**(-0.7)
@@ -62,7 +62,16 @@ def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d):
     See Derivation #3 in README.md
     '''
 
-    pass
+    beta = -0.26
+    return 4 * pi * d**2 * f(P, Pdot) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta, q)
+
+def curved_law_luminosity_Smean(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, delta):
+    '''
+    See Derivation #4 in README.md
+    '''
+
+    beta = -0.26
+    return 4 * pi**2 * d**2 * np.sqrt(f(P, Pdot)) * curved_law_integral(nu_min, nu_max, s_nu, alpha + beta/2, q)
 
 def make_ax1(ax1, nu, df):
     
