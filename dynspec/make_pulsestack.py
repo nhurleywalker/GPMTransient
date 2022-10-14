@@ -41,6 +41,7 @@ if __name__ == '__main__':
     cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["c","m"])
 
 # Some pulses have low signal-to-noise or we only catch a very small amount of the pulse; don't display these
+    n = 0
     for i in range(len(args.lightcurves)):
         file = args.lightcurves[i]
         obsname = file[:10]
@@ -64,6 +65,7 @@ if __name__ == '__main__':
                 pulse_numbers = ["0"]
                 gps_ref = gpstimes[0]
                 xt = -580
+                t0 = ti
             else:
                 pulse_number = int(np.round((gpstimes[0] - gps_ref)/P))
                 if pulse_number == pulse_numbers[-1]:
@@ -79,6 +81,7 @@ if __name__ == '__main__':
             plt.plot(x, y[np.isfinite(y)], lw=0.5, color=cm1((np.log10(freq) - np.log10(88.))/(np.log10(500.)-np.log10(88.))))
             #plt.plot(x, y[np.isfinite(y)], lw=0.5, color=cm1((freq - 88.)/(500.-88.)))
             url = "../dedispersed_spectra/" + obsname + "_dedispersed.png"
+            n+=1
             if args.dates is True:
                 plt.text(xt, yticks[-1], f"{t[0]:04d}-{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}", url=url, bbox = dict(color='w', alpha=0.01, url=url), fontsize=5)
             elif args.gpstimes is True:
@@ -89,6 +92,8 @@ if __name__ == '__main__':
     plt.xlim([-600, 600])
     plt.ylim([yticks[0]-1, yticks[-1]+1])
 
+    plt.axvline(-100, lw=0.5, color="k", alpha=0.5, ls="--")
+    plt.axvline(250, lw=0.5, color="k", alpha=0.5, ls="--")
     plt.xlabel("Time (s)")
     #plt.ylabel("Pulse number")
     if args.title is True:
@@ -103,3 +108,6 @@ if __name__ == '__main__':
 
     if args.show_plot == True:
         plt.show()
+
+    timedelta = (ti - t0) / 365.25
+    print(f"Displayed {n} light curves over {timedelta.value:2.1f} years.")
