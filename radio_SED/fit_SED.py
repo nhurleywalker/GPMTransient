@@ -125,7 +125,7 @@ def make_ax1(ax1, nu, df):
         **markers['MWA']
     )
 # MeerKAT
-    corr = 0.085
+    corr = 0.072
     df3 = pd.read_csv("radio_SED3.csv")
     df3['flux'] /= corr
     df3['fluxerr'] /= corr
@@ -190,6 +190,88 @@ def make_ax1(ax1, nu, df):
         ((df.flux - curved_law(df.freq, *best_p)) / df.fluxerr)**2
         )
     rchi2 = chi2 / dof
+
+
+# Broken power-law -- two different power laws
+
+#    model = (pl, (np.median(df.flux[df.freq < 500]), -0.7), 'Power Law')
+#
+#    nu = np.geomspace(70, 500, 100)
+#    fit_func = model[0]
+#    fit_p0 = model[1]
+#    fit_res = curve_fit(
+#        fit_func,
+#        df.freq[df.freq < 500],
+#        df.flux[df.freq < 500],
+#        fit_p0,
+#        sigma=df.fluxerr[df.freq < 500],
+#        absolute_sigma=True
+#    )
+#
+#    no_samps = 1000
+#    samps = np.random.multivariate_normal(
+#        fit_res[0], fit_res[1], size=no_samps
+#    ).swapaxes(0,1)
+#    
+#    freq = nu
+#    models = fit_func(
+#        nu[:, None],
+#        *samps
+#    )
+#
+#    q16, q50, q84 = np.percentile(models, [16, 50, 84], axis=1)
+#    
+#    ax1.plot(
+#        nu,
+#            q50,
+#            lw=0.5,
+#            color='green'
+#        )
+#    ax1.fill_between(
+#        nu,
+#        q16, q84, alpha=0.3,
+#        color='green'
+#        )
+#
+#
+#    model = (pl, (np.median(df.flux[df.freq > 500]), -3), 'Power Law')
+#
+#    nu = np.geomspace(500, 2000, 100)
+#    fit_func = model[0]
+#    fit_p0 = model[1]
+#    fit_res = curve_fit(
+#        fit_func,
+#        df.freq[df.freq > 500],
+#        df.flux[df.freq > 500],
+#        fit_p0,
+#        sigma=df.fluxerr[df.freq > 500],
+#        absolute_sigma=True
+#    )
+#
+#    no_samps = 1000
+#    samps = np.random.multivariate_normal(
+#        fit_res[0], fit_res[1], size=no_samps
+#    ).swapaxes(0,1)
+#    
+#    freq = nu
+#    models = fit_func(
+#        nu[:, None],
+#        *samps
+#    )
+#
+#    q16, q50, q84 = np.percentile(models, [16, 50, 84], axis=1)
+#    
+#    ax1.plot(
+#        nu,
+#            q50,
+#            lw=0.5,
+#            color='green'
+#        )
+#    ax1.fill_between(
+#        nu,
+#        q16, q84, alpha=0.3,
+#        color='green'
+#        )
 
 # Power-law (just for comparison)
 
@@ -261,7 +343,7 @@ def make_sed_figure(df, output='radio_SED.pdf'):
     ax1 = fig.add_axes(ax1_loc)
     S1GHz, alpha, q, rchi2, plS, pla = make_ax1(ax1, example_nu_large, df)
 
-    fig.savefig(output, bbox_inches="tight")
+    fig.savefig(output, bbox_inches="tight", dpi=300)
 
     return S1GHz, alpha, q, rchi2, plS, pla
 
@@ -284,7 +366,7 @@ if __name__ == '__main__':
     df1['fluxerr'] /= corr
 
 # ASKAP
-    corr = 0.95
+    corr = 0.7
     df4 = pd.read_csv("radio_SED4.csv")
     df4['flux'] /= corr
     df4['fluxerr'] /= corr
