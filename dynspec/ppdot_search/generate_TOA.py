@@ -52,13 +52,18 @@ def main(args):
     # Inverse FFT
     lightcurve_filtered = np.fft.irfft(lightcurve_filtered_rffted, n=newN, norm='ortho')
 
+    # Construct the relevant time axes
     t = lightcurve_data[:,0]
     new_t0 = t[0] - dt/2 + new_dt/2
     new_t = np.arange(new_t0, new_t0 + newN*new_dt, new_dt)
-    plt.plot(t, lightcurve, label="Original")
-    plt.plot(new_t, lightcurve_filtered*500, label="Filtered")
-    plt.legend()
-    plt.show()
+
+    if args.show_plot:
+        fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
+        axs[0].plot(t, lightcurve, label="Original")
+        axs[1].plot(new_t, lightcurve_filtered, label="Filtered")
+        axs[0].legend()
+        axs[1].legend()
+        plt.show()
 
 if __name__ == '__main__':
     # Parse the command line
@@ -67,6 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('lightcurve', type=str, help='The two-column ASCII file containing the lightcurve data')
     parser.add_argument('kernel_width', type=float, help='The 1σ width of the Gaussian used for the filter (in seconds)')
     parser.add_argument('--toa_precision', type=float, default=None, help='The precision of the reported TOA (in seconds). Only changes precision if the desired precision is higher than the data time resolution. Default: Same as data time resolution')
+    parser.add_argument('--show_plot', action='store_true', help='Shows a plot of the original light curve, the filtered light curve, and the TOA')
 
     args = parser.parse_args()
 
