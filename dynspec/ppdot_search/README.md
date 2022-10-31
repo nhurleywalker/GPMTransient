@@ -9,10 +9,15 @@ The lightcurves need to be
 - *not* barycentred.
 
 To do this, fresh `yaml` files need to be made that explicitly turn barycentring off.
-This is done via an `awk` command in [`Makefile`](Makefile), which is invoked via
+This is done via an `awk` command in [`Makefile`](Makefile), which is invoked with
 
 ```
 make prepare_yaml_files
 ```
 
 which puts the revised `yaml` files into this directory.
+Now we are ready to make the lightcurves themselves, by running the `dedisperse_dynspec.py` script on the new `yaml` files, which can be invoked with
+
+```
+make prepare_lightcurves
+```
