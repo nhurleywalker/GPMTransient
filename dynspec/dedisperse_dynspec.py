@@ -428,6 +428,10 @@ def parse_yaml(yaml_file):
         obj['padding'] = yaml_params['Padding']
     except:
         pass
+    try:
+        obj['telescope'] = yaml_params['Telescope']
+    except:
+        pass
 
     return obj
 

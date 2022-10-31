@@ -3,6 +3,7 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 import yaml
 import argparse
+from astropy.time import Time
 
 import sys
 from os import path
@@ -57,13 +58,38 @@ def main(args):
     new_t0 = t[0] - dt/2 + new_dt/2
     new_t = np.arange(new_t0, new_t0 + newN*new_dt, new_dt)
 
-    if args.show_plot:
+    # Get the maximum in the filtered lightcurve and call that the TOA
+    TOA_idx = np.argmax(lightcurve_filtered)
+    TOA_gps = new_t[TOA_idx]
+
+    # Convert the (GPS) TOA to MJD
+    TOA_mjd = Time(TOA_gps, format='gps').mjd
+
+    # Convert the error (the width of the kernel) to ms
+    TOA_err_ms = args.kernel_width*1e3
+
+    # Get the reference frequency (cf. Dynspec.set_freq_ref())
+    dynspec = dd.Dynspec(**metadata)
+    dynspec.set_freq_ref(metadata['freq_ref'])
+    freq_MHz = dynspec.freq_ref
+
+    # Print out the TOA in the format expected of timing software
+    print(args.lightcurve, freq_MHz, TOA_mjd, TOA_err_ms, metadata['telescope'])
+
+    # Make a plot, if requested
+    if args.save_plot:
         fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
         axs[0].plot(t, lightcurve, label="Original")
         axs[1].plot(new_t, lightcurve_filtered, label="Filtered")
+        axs[1].scatter(TOA_gps, lightcurve_filtered[TOA_idx], color='k', label="TOA")
+        axs[1].set_xlabel("Time (GPS seconds)")
         axs[0].legend()
         axs[1].legend()
-        plt.show()
+
+        if args.save_plot == 'SHOW':
+            plt.show()
+        else:
+            plt.savefig(args.save_plot)
 
 if __name__ == '__main__':
     # Parse the command line
@@ -72,7 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('lightcurve', type=str, help='The two-column ASCII file containing the lightcurve data')
     parser.add_argument('kernel_width', type=float, help='The 1σ width of the Gaussian used for the filter (in seconds)')
     parser.add_argument('--toa_precision', type=float, default=None, help='The precision of the reported TOA (in seconds). Only changes precision if the desired precision is higher than the data time resolution. Default: Same as data time resolution')
-    parser.add_argument('--show_plot', action='store_true', help='Shows a plot of the original light curve, the filtered light curve, and the TOA')
+    parser.add_argument('--save_plot', type=str, help='Saves a plot of the original light curve, the filtered light curve, and the TOA. If the argument equals "SHOW", it will only display the plot on the screen.')
 
     args = parser.parse_args()
 
