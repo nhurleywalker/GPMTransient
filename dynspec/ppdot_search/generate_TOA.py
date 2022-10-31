@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.stats import norm
+import matplotlib.pyplot as plt
 import yaml
 import argparse
 
@@ -12,8 +14,35 @@ def main(args):
     metadata = dd.parse_yaml(args.yaml)
     print(metadata)
 
-    # Generate a Gaussian with the specified width, but with the
-    #width_
+    # Generate a Gaussian with the specified width, with the same time resolution as the data
+    dt = metadata['sample_time']
+    nsamples_gaussian_half = int(np.ceil(5*args.kernel_width_in_sec/dt))
+
+    t = np.arange(-nsamples_gaussian_half, nsamples_gaussian_half+1)*dt
+    kernel = norm.pdf(t, scale=args.kernel_width_in_sec)
+
+
+    # Read in the lightcurve and FFT it
+    lightcurve_data = np.loadtxt(args.lightcurve)
+    lightcurve = lightcurve_data[:,1]
+    lightcurve_rffted = np.fft.rfft(lightcurve)
+
+    # Convert the kernel into a filter
+    kernel_rffted = np.fft.rfft(kernel)
+
+    # We want to end up with "dt" time resolution.
+    # Therefore, if the lightcurve has more samples than the kernel, zero pad its FFT. Otherwise, truncate it.
+    Nk = len(kernel_rffted)
+    Nl = len(lightcurve_rffted)
+    if Nl > Nk:
+        lightcurve_rffted = lightcurve_rffted[:Nk]
+    elif Nk > Nl:
+        kernel_rffted = kernel_rffted[:Nl]
+
+    # Apply the filter
+    lightcurve_filtered = lightcurve_rffted * kernel_rffted
+    plt.plot(np.abs(lightcurve_filtered))
+    plt.show()
 
 if __name__ == '__main__':
     # Parse the command line
