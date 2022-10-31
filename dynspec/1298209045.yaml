@@ -10,6 +10,7 @@ ObsID: 1298209045
 Reference frequency (MHz): low
 Telescope: VLA
 RFI Mask:
+  Value: 0.0
 RA: 18.6505
 Dec: -10.5304
 Padding: DM

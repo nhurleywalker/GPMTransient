@@ -27,11 +27,14 @@ make pulsestacks/pulsestack_<P>s_DM_<DM>.png
 ```
 where `<P>` is the desired folding period in seconds, and `<DM>` must match the `DM` variable set in `Makefile`.
 
-## Dedispersed to 288 pc/cm^3
+### Making interactive SVG pulsestacks
 
-![1318.2 seconds, DM = 288](pulsestack_1318.2s_DM_288.png)
+(Also in the parent directory to this one:)
+```
+make pulsestacks/pulsestack_<P>s_DM_<DM>.svg
+```
 
-## Dedispersed to 288 pc/cm^3
+## Dedispersed to 275 pc/cm^3
 
 ![1318.2 seconds, DM = 275](pulsestack_1318.2s_DM_275.png)
 

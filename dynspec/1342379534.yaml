@@ -10,6 +10,7 @@ ObsID: 1342379534
 Reference frequency (MHz): centre
 Telescope: MeerKAT
 RFI Mask:
+  Value: 0.0
   Freq bins:
     - 1
     - 2

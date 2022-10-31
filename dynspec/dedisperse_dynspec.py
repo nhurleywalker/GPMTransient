@@ -354,7 +354,7 @@ def main(**kwargs):
                 raise Exception("Barycentric correction requested but source coordinates not given")
 
         # Create verbose header for lightcurve output files
-        header += 'Using dedispersion delay of {} s (for reference frequency {})\n\n'.format(dynspec.dmdelay, dynspec.freq_ref)
+        header += 'Using dedispersion delay of {} s for reference frequency {} MHz\n\n'.format(dynspec.dmdelay, dynspec.freq_ref)
         header += "Time (s) | Flux density (a.u.)"
 
         # Construct array to be written out and write it out
