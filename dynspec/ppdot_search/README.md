@@ -1,5 +1,7 @@
 # Using pulsar timing software to get constraints on P and Pdot
 
+**NB:** All `make` commands below can be safely (and efficiently) run with parallelism (the `-j` option).
+
 We estimate TOAs by convolving the pulses with a Gaussian that is (approximately) as wide as the known pulse window.
 The pulse TOAs will be the peak lag, and the width of this Gaussian will be the errors on the TOAs.
 
@@ -21,3 +23,15 @@ Now we are ready to make the lightcurves themselves, by running the `dedisperse_
 ```
 make prepare_lightcurves
 ```
+
+Finally, the script for generating the TOAs can be run.
+The script deals with one lightcurve (i.e. one pulse) at a time.
+To generate all the TOAs, and compile them into a single file (`all_toas.tim`), run
+
+```
+make all_toas.tim
+```
+
+This command will also generate plots of the lightcurves along with their low-pass filtered equivalents and their TOAs, which can be visually inspected to make sure the results are sensible.
+
+The `all_toas.tim` file is also added to this repo so that it can be version controlled.

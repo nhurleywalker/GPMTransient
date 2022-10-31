@@ -47,7 +47,7 @@ def main(args):
     newN = N
     if args.toa_precision is not None:
         if args.toa_precision < dt:
-            newN = N*int(np.round(dt / args.toa_precision))
+            newN *= int(np.round(dt / args.toa_precision))
     new_dt = dt*(N/newN)
 
     # Inverse FFT
@@ -56,7 +56,7 @@ def main(args):
     # Construct the relevant time axes
     t = lightcurve_data[:,0]
     new_t0 = t[0] - dt/2 + new_dt/2
-    new_t = np.arange(new_t0, new_t0 + newN*new_dt, new_dt)
+    new_t = np.arange(newN)*new_dt + new_t0
 
     # Get the maximum in the filtered lightcurve and call that the TOA
     TOA_idx = np.argmax(lightcurve_filtered)
