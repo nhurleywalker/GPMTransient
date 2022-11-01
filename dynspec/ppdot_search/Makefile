@@ -3,7 +3,7 @@ GPSTIMES = $(patsubst %.yaml,%,$(YAML_FILES))
 LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))
 TOAS = $(patsubst %,%.tim,$(GPSTIMES))
 
-TOA_ERR_SEC = 150
+TOA_ERR_SEC = 30
 
 BEST_DM = 275
 

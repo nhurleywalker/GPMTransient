@@ -10,6 +10,14 @@ from os import path
 sys.path.append("..")
 import dedisperse_dynspec as dd
 
+tempo_telescope_names = {"murriyang": "pks",
+                         "parkes": "pks",
+                         "pks": "pks",
+                         "mwa": "mwa",
+                         "meerkat": "meerkat",
+                         "vla": "vla",
+                         "gmrt": "gmrt"}
+
 def main(args):
     # Read in the metadata from the YAML file
     metadata = dd.parse_yaml(args.yaml)
@@ -66,7 +74,7 @@ def main(args):
     TOA_mjd = Time(TOA_gps, format='gps').mjd
 
     # Convert the error (the width of the kernel) to ms
-    TOA_err_ms = args.kernel_width*1e3
+    TOA_err_us = args.kernel_width*1e6
 
     # Get the reference frequency (cf. Dynspec.set_freq_ref())
     dynspec = dd.Dynspec(**metadata)
@@ -74,7 +82,7 @@ def main(args):
     freq_MHz = dynspec.freq_ref
 
     # Print out the TOA in the format expected of timing software
-    print(args.lightcurve, freq_MHz, TOA_mjd, TOA_err_ms, metadata['telescope'])
+    print(args.lightcurve, freq_MHz, TOA_mjd, TOA_err_us, tempo_telescope_names[metadata['telescope'].lower()])
 
     # Make a plot, if requested
     if args.save_plot:
