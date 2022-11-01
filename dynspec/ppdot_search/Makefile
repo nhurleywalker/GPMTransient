@@ -3,7 +3,7 @@ GPSTIMES = $(patsubst %.yaml,%,$(YAML_FILES))
 LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))
 TOAS = $(patsubst %,%.tim,$(GPSTIMES))
 
-TOA_ERR_SEC = 30
+TOA_ERR_SEC = 300
 
 BEST_DM = 275
 
@@ -13,7 +13,7 @@ prepare_lightcurves: $(LIGHTCURVES)
 
 all_toas.tim: $(TOAS)
 	echo "FORMAT 1" > $@
-	cat $^ >> $@
+	cat $^ | awk '{$$4 = 60000000; print}' >> $@
 
 #------------------------------------------
 
