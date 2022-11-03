@@ -1,5 +1,6 @@
 IMAGES = orig.png \
-		 fitted.png
+		 fitted.png \
+		 second_island.png
 
 all_images: $(IMAGES)
 
