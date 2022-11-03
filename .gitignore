@@ -1,1 +1,4 @@
 *_lightcurve.txt
+dynspec/ppdot_search/*.yaml
+dynspec/ppdot_search/*.tim
+dynspec/ppdot_search/*.png

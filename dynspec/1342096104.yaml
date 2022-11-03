@@ -9,6 +9,8 @@ Dynamic spectrum:
 ObsID: 1342096104
 Reference frequency (MHz): high
 Telescope: MWA
+RFI Mask:
+  Value: 0.0
 RA: 18.6505
 Dec: -10.5304
 Padding: DM

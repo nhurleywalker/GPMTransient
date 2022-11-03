@@ -10,6 +10,7 @@ ObsID: 1343567456
 Reference frequency (MHz): centre
 Telescope: MWA
 RFI Mask:
+  Value: 0.0
   Time bins:
     - 14
     - 15
