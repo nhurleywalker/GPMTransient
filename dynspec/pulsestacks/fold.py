@@ -51,6 +51,7 @@ if __name__ == '__main__':
     parser.add_argument('lightcurves', type=str, nargs='*', help='The ASCII files containing lightcurve data. Expected to contain two columns: (1) Time (GPS seconds), (2) Flux density')
     parser.add_argument('--p0_gps', type=float, help='Number the pulses from this GPS time (default: set earliest pulse to pulse #0)')
     parser.add_argument('--add_phase', type=float, default=0, help='Add phase rotation (0 to 1) to each pulse on stack for display (default: 0)')
+    parser.add_argument('--plot_image', type=str, help='Write the plot image to the named file. If not provided, the plot will be shown on screen.')
 
     args = parser.parse_args()
 
@@ -103,4 +104,8 @@ if __name__ == '__main__':
         color = cm1((np.log10(freq) - np.log10(88.))/(np.log10(500.)-np.log10(88.)))
         plt.plot(ph, I/np.max(I) + i, lw=0.5, color=color)
     plt.yticks(ticks=range(npulses), labels=pulses)
-    plt.show()
+
+    if args.plot_image:
+        plt.savefig(args.plot_image)
+    else:
+        plt.show()
