@@ -1,4 +1,4 @@
-Apply barycentric correction: false
+Apply barycentric correction: true
 Dynamic spectrum:
   Centre of lowest channel (MHz): 340.8
   Channel width (MHz): 38.2
