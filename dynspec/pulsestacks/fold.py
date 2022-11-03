@@ -12,7 +12,6 @@ plt.rcParams.update({
 
 # inches to cm
 cm = 1/2.54
-cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["c","m"])
 
 from astropy.time import Time, TimeDelta
 from astropy.coordinates import SkyCoord
@@ -51,6 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('par', type=argparse.FileType('r'), help='The ephemeris file to use for folding')
     parser.add_argument('lightcurves', type=str, nargs='*', help='The ASCII files containing lightcurve data. Expected to contain two columns: (1) Time (GPS seconds), (2) Flux density')
     parser.add_argument('--p0_gps', type=float, help='Number the pulses from this GPS time (default: set earliest pulse to pulse #0)')
+    parser.add_argument('--add_phase', type=float, default=0, help='Add phase rotation (0 to 1) to each pulse on stack for display (default: 0)')
 
     args = parser.parse_args()
 
@@ -60,25 +60,32 @@ if __name__ == '__main__':
     phs = []
     pulses = []
     Is = []
+    freqs = []
 
     # Collect all the data and calculate the phases, pulse numbers, etc
     npulses = len(args.lightcurves)
     for i in range(npulses):
         data = np.loadtxt(args.lightcurves[i])
+        with open(args.lightcurves[i], 'r') as f:
+            for line in f.readlines():
+                if 'frequency' in line:
+                    freqs.append(float(line.split(' ')[10]))
         t = TimeDelta(data[:,0] - eph.pepoch.gps, format='sec').to(u.second)
         I = data[:,1] * u.jansky
-        N = eph.f0*t + 0.5*eph.f1*t**2
+        N = eph.f0*t + 0.5*eph.f1*t**2 + args.add_phase
         pulse, ph = np.divmod(N, 1)
         ph -= 0.5
 
         Is.append(I)
         phs.append(ph)
-        pulses.append(pulse[len(t)//2])
+        pulses.append(int(pulse[len(t)//2]))
 
     # Sort the pulses by pulse number
     sidxs = np.argsort(pulses)
 
     # Change pulse numbers relative to the chosen reference
+    fig = plt.figure(figsize=(8.9*cm,16*cm))
+    cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["c","m"])
     if args.p0_gps:
         t0 = TimeDelta(args.p0_gps - eph.pepoch.gps, format='sec').to(u.second)
         pulse0 = int(np.round(eph.f0*t0 + 0.5*eph.f1*t0**2))
@@ -92,6 +99,8 @@ if __name__ == '__main__':
         ph = phs[sidxs[i]]
         pulse = pulses[sidxs[i]]
         I = Is[sidxs[i]]
-        plt.plot(ph, I/np.max(I) + i)
+        freq = freqs[sidxs[i]]
+        color = cm1((np.log10(freq) - np.log10(88.))/(np.log10(500.)-np.log10(88.)))
+        plt.plot(ph, I/np.max(I) + i, lw=0.5, color=color)
     plt.yticks(ticks=range(npulses), labels=pulses)
     plt.show()
