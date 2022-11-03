@@ -13,7 +13,17 @@ mkdir -p dedispersed_spectra
 make all_dedispersed_spectra
 ```
 
-## Making the pulsestacks
+## Making the pulsestacks (new method with `fold.py`)
+
+Unlike the old method (see below), this method uses $\dot{P}$ as well as $P$ for folding.
+
+To use `fold.py`, you need dedispersed lightcurves and a pulsar-style ephemeris (e.g. [gpm.par](gpm.par)).
+The, assuming the (barycentred, dedispersed to infinite frequency) lightcurves are in the parent folder, you would plot the pulsestack with
+```
+python fold.py --add_phase 0.18 gpm.par ../*_lightcurve.txt
+```
+
+## Making the pulsestacks (old method)
 
 In the parent folder, open the `Makefile` and set the `DM` variable to the desired DM.
 Then, run
