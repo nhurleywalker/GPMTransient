@@ -98,12 +98,16 @@ if __name__ == '__main__':
     # Plot everything
     for i in range(npulses):
         ph = phs[sidxs[i]]
+        t = ph*eph.p0
         pulse = pulses[sidxs[i]]
         I = Is[sidxs[i]]
         freq = freqs[sidxs[i]]
         color = cm1((np.log10(freq) - np.log10(88.))/(np.log10(500.)-np.log10(88.)))
-        plt.plot(ph, I/np.max(I) + i, lw=0.5, color=color)
+        plt.plot(t, I/np.max(I) + i, lw=0.5, color=color)
     plt.yticks(ticks=range(npulses), labels=pulses)
+    plt.xlabel(f"Time ({t.unit})")
+    plt.ylabel("Pulse number")
+    plt.tight_layout()
 
     if args.plot_image:
         plt.savefig(args.plot_image)
