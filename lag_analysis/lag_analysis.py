@@ -33,6 +33,13 @@ def rr(number):
 
     return np.round(number * 2) / 2
 
+def sc(data, level=3, loops=4):
+    ''' some sigma-clipping '''
+    std = np.nanstd(data)
+    for i in range(0, loops):
+        std = np.nanstd(data[data<level*std])
+    return std
+
 P = rr(1318.19578)
 
 cs = sorted(glob("*_lightcurve.txt"))
@@ -72,14 +79,14 @@ for i in range(0, len(cs)):
         # light curves have a very short gap (<10s)
             elif t2[0] - t1[-1] <= 1:
                 print(f"joining {cs[i]} and {cs[i+1]} ({i}th check)")
-                s3 = np.concatenate((s1, np.zeros(int((t2[0]-t1[-1])/0.5)-1), s2))
+                s3 = np.concatenate((s1/np.nanmax(s1), np.zeros(int((t2[0]-t1[-1])/0.5)-1), s2/np.nanmax(s2)))
                 t3 = np.concatenate((t1, np.arange(t1[-1] + 0.5, t2[0], 0.5), t2))
                 skipnext = True
                 combine = np.stack([t3,s3], axis=1)
         # unique light curve that stands alone
             else:
                 print(f"solo: {cs[i]} ({cs[i+1]} is not connected)")
-                s3 = s1
+                s3 = s1/np.nanmax(s1)
                 t3 = t1
             final_list.append(np.stack([t3, s3], axis=1))
             final_cs.append(cs[i])
@@ -140,8 +147,8 @@ for i in range(0, len(final_list)):
                     t3_start = 0
                     t3_end = -1
                 if (t1_start or t1_start == 0) and (t1_end or t1_end == 0) and (t3_start or t3_start == 0) and (t3_end or t3_end == 0):
-                    s1_crop = s1[t1_start:t1_end]/np.nanmax(s1)
-                    s3_crop = s2[t3_start:t3_end]/np.nanmax(s2)
+                    s1_crop = s1[t1_start:t1_end] #/np.nanmax(s1)
+                    s3_crop = s2[t3_start:t3_end] #/np.nanmax(s2)
                     if len(s1_crop) == len(s3_crop):
                         corr_matrix[i, j] = np.correlate(s1_crop, s3_crop)
                     else:
@@ -162,13 +169,8 @@ for i in range(0, len(final_list)):
 #        else:
 #            print(f"{final_cs[i]} and {final_cs[i+1]} do not match (tdiff = {tdiff})")
 
-fig = plt.figure(figsize=(6,6))
-ax = fig.add_subplot(111)
-ax.imshow(corr_matrix, origin="lower", extent = [lags[0], lags[-1], 0, len(final_list)], aspect="auto")
-ax.set_ylabel("observation pair")
-ax.set_xlabel("lag / seconds")
-fig.savefig("correlation_matrix.png", bbox_inches="tight")
 
+weights = np.zeros(len(final_list))
 best_lags = np.argmax(corr_matrix, axis=1)
 for i in range(0, len(final_list)):
     if best_lags[i] != 0:
@@ -179,15 +181,32 @@ for i in range(0, len(final_list)):
         s1 = arr1[:,1]
         s2 = arr2[:,1]
         t3 = t2 + lags[best_lags[i]] - nP[i]*P
+        weights[i] = 1/np.sqrt(sc(s1)**2 + sc(s2)**2)
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(t1, s1/np.nanmax(s1), alpha=0.5, lw=1, color="blue", label=final_cs[i][0:10])
-        ax.plot(t3, s2/np.nanmax(s2), alpha=0.5, lw=1, color="red", label=final_cs[i+1][0:10])
+        ax.plot(t1, s1, alpha=0.5, lw=1, color="blue", label=final_cs[i][0:10])
+        ax.plot(t3, s2, alpha=0.5, lw=1, color="red", label=final_cs[i+1][0:10])
         ax.legend(loc="upper right")
         ax.set_ylim([-0.5, 1.2])
-        ax.set_title(f"Optimum lag = {lags[best_lags[i]]} s")
+        ax.set_title(f"pair {i}: Optimum lag = {lags[best_lags[i]]} s")
         helper = f"{final_cs[i][0:10]}_{final_cs[i+1][0:10]}_optimum_lag{lags[best_lags[i]]}.png"
         fig.savefig(helper, bbox_inches="tight")
+
+fig = plt.figure(figsize=(6,6))
+ax = fig.add_subplot(111)
+ax.imshow(np.tile(weights, (corr_matrix.shape[1],1)).T *corr_matrix, origin="lower", extent = [lags[0], lags[-1], 0, len(final_list)], aspect="auto", interpolation="none")
+ax.set_ylabel("observation pair")
+ax.set_xlabel("lag / seconds")
+fig.savefig("correlation_matrix.png", bbox_inches="tight")
+
+fig = plt.figure(figsize=(6,6))
+ax = fig.add_subplot(111)
+ax.plot(lags, np.average(corr_matrix, axis=0, weights = weights))
+ax.set_xlabel("lag / seconds")
+ax.set_ylabel("summed correlation coefficients (a.u.) ")
+fig.savefig("correlation_matrix_average.png", bbox_inches="tight")
+
+# TODO: highlight the 2Ps in some way
 
             # Some QA to add back in at some point
             # Some QA to add back in at some point
