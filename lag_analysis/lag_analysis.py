@@ -46,8 +46,13 @@ def sc(data, level=3, loops=4):
 P = rr(1318.19578) #Period in seconds
 tscat200 = 0.5 # Scattering at 200MHz in seconds
 
-
-cs = sorted(glob("*_lightcurve.txt"))
+# Don't try to do anything complicated with the VLA/GMRT detections
+cs = sorted(glob("13*_lightcurve.txt"))
+# Remove Parkes data, since it is on a different time scale and is difficult to average with the MWA data
+try:
+    cs.remove("1342096266_lightcurve.txt")
+except ValueError:
+    pass
 
 final_list = []
 final_cs = []
