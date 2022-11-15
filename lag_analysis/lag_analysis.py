@@ -246,50 +246,42 @@ fig = plt.figure(figsize=(6,6))
 
 # Auto-correlations
 for i in range(0, len(final_list)):
-    # skip VLA: not enough information
-    if int(final_cs[i][0:10]) >  1340000000:
-    # TODO: read from .yaml files
-        if final_cs[i] == "1342379534_lightcurve.txt":
-            ts = 2
-        else:
-            ts = 0.5
-    # TODO: read the frequency from the .yaml files, then predict the scattering; plot with a red vertical line
-        yaml_file = "../dynspec/{0}.yaml".format(final_cs[i][0:10])
-        with open(yaml_file, "r") as stream:
-            yaml_params = yaml.safe_load(stream)
-        nu = float(yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)'])
-        tscat = tscat200 * (nu / 200.)**-4
-        arr1 = final_list[i]
-        s1 = arr1[:,1]
-        ns1 = s1 - np.mean(s1)
-        var = np.var(s1)
-        t1 = arr1[:,0]
-        acorr = np.correlate(ns1, ns1, 'full')[len(ns1)-1:]
-        acorr = acorr / var / len(ns1)
-        fig = plt.figure()
-        ax = fig.add_subplot(211)
-        ax.plot(ts*np.arange(0,len(acorr),1), s1, alpha=1, lw=1, color="blue")
-        ax.set_ylabel("light curve (a.u.)")
-        ax.set_title(f"{final_cs[i][0:10]}: autocorrelation")
-        ax = fig.add_subplot(212)
-        ax.plot(ts*np.arange(0,len(acorr),1), acorr, alpha=1, lw=1, color="blue")
-        ax.set_xlabel("lag / seconds")
-        ax.set_ylabel("correlated power (a.u.)")
-        ax.axvline(50., alpha=0.3, color='k')
-        ax.axvline(100., alpha=0.3, color='k')
-        ax.axvspan(0, tscat, alpha=0.3, color='r')
-        #ax.set_ylim([-0.5, 1.2])
-        helper = f"{final_cs[i][0:10]}_acf.png"
-        fig.savefig(helper, bbox_inches="tight")
+    yaml_file = "../dynspec/{0}.yaml".format(final_cs[i][0:10])
+    with open(yaml_file, "r") as stream:
+        yaml_params = yaml.safe_load(stream)
+    nu = float(yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)'])
+    ts = float(yaml_params['Dynamic spectrum']['Sample time (s)'])
+    tscat = tscat200 * (nu / 200.)**-4
+    arr1 = final_list[i]
+    s1 = arr1[:,1]
+    ns1 = s1 - np.mean(s1)
+    var = np.var(s1)
+    t1 = arr1[:,0]
+    acorr = np.correlate(ns1, ns1, 'full')[len(ns1)-1:]
+    acorr = acorr / var / len(ns1)
+    fig = plt.figure()
+    ax = fig.add_subplot(211)
+    ax.plot(ts*np.arange(0,len(acorr),1), s1, alpha=1, lw=1, color="blue")
+    ax.set_ylabel("light curve (a.u.)")
+    ax.set_title(f"{final_cs[i][0:10]}: autocorrelation")
+    ax = fig.add_subplot(212)
+    ax.plot(ts*np.arange(0,len(acorr),1), acorr, alpha=1, lw=1, color="blue")
+    ax.set_xlabel("lag / seconds")
+    ax.set_ylabel("correlated power (a.u.)")
+    ax.axvline(50., alpha=0.3, color='k')
+    ax.axvline(100., alpha=0.3, color='k')
+    ax.axvspan(0, tscat, alpha=0.3, color='r')
+    #ax.set_ylim([-0.5, 1.2])
+    helper = f"{final_cs[i][0:10]}_acf.png"
+    fig.savefig(helper, bbox_inches="tight")
+    plt.close(fig)
 
+# TODO: highlight the 2Ps in some way
 
-
-    # TODO: highlight the 2Ps in some way
-
-                # Some QA to add back in at some point
-                # Some QA to add back in at some point
-        #        if np.isnan(s1).any() or np.isnan(s2).any():
-        #            print(f"found some nans for {cs[i]} or cs[i+1], not proceeding further")
-            #        elif cs[i] == "1342096266" or cs[i+1] == "1342096266":
-            #            print("Skipping Parkes data")
-        #        else:
+            # Some QA to add back in at some point
+            # Some QA to add back in at some point
+    #        if np.isnan(s1).any() or np.isnan(s2).any():
+    #            print(f"found some nans for {cs[i]} or cs[i+1], not proceeding further")
+        #        elif cs[i] == "1342096266" or cs[i+1] == "1342096266":
+        #            print("Skipping Parkes data")
+    #        else:
