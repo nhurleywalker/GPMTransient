@@ -54,6 +54,7 @@ final_cs = []
 # deal with light curves that overlap
 skipnext = False
 for i in range(0, len(cs)):
+    outfile = cs[i].replace(".txt", "_mod.txt")
     if i < len(cs) -1:
         arr1 = np.loadtxt(cs[i])
         t1 = rr(arr1.T[0])
@@ -72,6 +73,7 @@ for i in range(0, len(cs)):
                 s3 = avg_signal(s1/np.nanmax(s1), s2/np.nanmax(s2), 0, tdiff)
                 t3 = avg_signal(t1, t2, 0, tdiff)
                 skipnext = True
+                np.savetxt(outfile, np.stack([t3, s3], axis=1))
 #                fig = plt.figure()
 #                ax = fig.add_subplot(111)
 #                ax.plot(t1, s1/np.nanmax(s1), alpha=0.5, lw=2, color="blue", label="t1")
@@ -88,6 +90,7 @@ for i in range(0, len(cs)):
                 t3 = np.concatenate((t1, np.arange(t1[-1] + 0.5, t2[0], 0.5), t2))
                 skipnext = True
                 combine = np.stack([t3,s3], axis=1)
+                np.savetxt(outfile, combine)
         # unique light curve that stands alone
             else:
                 print(f"solo: {cs[i]} ({cs[i+1]} is not connected)")
