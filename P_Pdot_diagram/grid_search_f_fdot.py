@@ -69,10 +69,10 @@ def main():
 
     # Dump the output to a CSV file
     grid_f0, grid_f1 = np.meshgrid(F0.value, F1.value)
-    with open("chi2_grid.txt", "w") as f:
-        f.write("# F0, F1, chi2\n")
+    with open("chi2_grid.txt", "w") as chi2file:
+        chi2file.write("# F0, F1, chi2\n")
         for en, i in enumerate(np.ndindex(chi2grid.shape)):
-            f.write(f"{grid_f0[i]},{grid_f1[i]},{chi2grid[i]}\n")
+            chi2file.write(f"{grid_f0[i]},{grid_f1[i]},{chi2grid[i]}\n")
 
 
     # 1, 2, and 3 sigma confidence limits
