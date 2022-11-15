@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import numpy as np
 from glob import glob
 from matplotlib import pyplot as plt
@@ -46,14 +47,21 @@ def sc(data, level=3, loops=4):
 P = rr(1318.19578) #Period in seconds
 tscat200 = 0.5 # Scattering at 200MHz in seconds
 
-
-cs = sorted(glob("*_lightcurve.txt"))
+path = "../dynspec/ppdot_search/"
+# Don't try to do anything complicated with the VLA/GMRT detections
+cs = sorted(glob(path+"13*_lightcurve.txt"))
+# Remove Parkes data, since it is on a different time scale and is difficult to average with the MWA data
+try:
+    cs.remove(path+"1342096266_lightcurve.txt")
+except ValueError:
+    pass
 
 final_list = []
 final_cs = []
 # deal with light curves that overlap
 skipnext = False
 for i in range(0, len(cs)):
+    outfile = cs[i].replace(".txt", "_mod.txt")
     if i < len(cs) -1:
         arr1 = np.loadtxt(cs[i])
         t1 = rr(arr1.T[0])
@@ -72,6 +80,7 @@ for i in range(0, len(cs)):
                 s3 = avg_signal(s1/np.nanmax(s1), s2/np.nanmax(s2), 0, tdiff)
                 t3 = avg_signal(t1, t2, 0, tdiff)
                 skipnext = True
+                np.savetxt(outfile, np.stack([t3, s3], axis=1))
 #                fig = plt.figure()
 #                ax = fig.add_subplot(111)
 #                ax.plot(t1, s1/np.nanmax(s1), alpha=0.5, lw=2, color="blue", label="t1")
@@ -88,6 +97,7 @@ for i in range(0, len(cs)):
                 t3 = np.concatenate((t1, np.arange(t1[-1] + 0.5, t2[0], 0.5), t2))
                 skipnext = True
                 combine = np.stack([t3,s3], axis=1)
+                np.savetxt(outfile, combine)
         # unique light curve that stands alone
             else:
                 print(f"solo: {cs[i]} ({cs[i+1]} is not connected)")
@@ -113,16 +123,18 @@ for i in range(0, len(final_list)):
         s1 = arr1[:,1]
         s2 = arr2[:,1]
         tdiff = t2[0] - t1[-1]
+        obsid1 = os.path.split(final_cs[i])[-1][0:10]
+        obsid2 = os.path.split(final_cs[i+1])[-1][0:10]
 #        print(f"Checking {final_cs[i]} (spans {t1[0]}--{t1[-1]}) and {final_cs[i+1]} (spans {t2[0]}--{t2[-1]}); tdiff = {tdiff}")
         if tdiff < 2*P and tdiff > 0 :
         # Normalise so the time axes are the same
         # This will allow us to crop the data in each lag
             if tdiff < P:
-                print(f"{final_cs[i]} and {final_cs[i+1]} match (tdiff = {tdiff}), subtracting one period")
+                print(f"{obsid1} and {obsid2} match (tdiff = {tdiff}), subtracting one period")
                 t2 -= P
                 nP[i] = 1
             else:
-                print(f"{final_cs[i]} and {final_cs[i+1]} nearly match (tdiff = {tdiff}), subtracting two periods")
+                print(f"{obsid1} and {obsid2} nearly match (tdiff = {tdiff}), subtracting two periods")
                 t2 -= 2*P
                 nP[i] = 2
             for j in range(0, len(lags)):
@@ -157,9 +169,9 @@ for i in range(0, len(final_list)):
                     if len(s1_crop) == len(s3_crop):
                         corr_matrix[i, j] = np.correlate(s1_crop, s3_crop)
                     else:
-                        print(f"{final_cs[i][0:10]} and {final_cs[i+1][0:10]} have different lengths {len(s1_crop)} {len(s3_crop)} for lag {lags[j]}")
+                        print(f"{obsid1} and {obsid2} have different lengths {len(s1_crop)} {len(s3_crop)} for lag {lags[j]}")
                 else:
-                    print(f"{final_cs[i][0:10]} and {final_cs[i+1][0:10]} have no overlapping time for lag {lags[j]}?")
+                    print(f"{obsid1} and {obsid2} have no overlapping time for lag {lags[j]}?")
 #                fig = plt.figure()
 #                ax = fig.add_subplot(111)
 #                ax.plot(t1, s1/np.nanmax(s1), alpha=0.5, lw=2, color="blue")
@@ -186,14 +198,16 @@ for i in range(0, len(final_list)):
         s2 = arr2[:,1]
         t3 = t2 + lags[best_lags[i]] - nP[i]*P
         weights[i] = 1/np.sqrt(sc(s1)**2 + sc(s2)**2)
+        obsid1 = os.path.split(final_cs[i])[-1][0:10]
+        obsid2 = os.path.split(final_cs[i+1])[-1][0:10]
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(t1, s1, alpha=0.5, lw=1, color="blue", label=final_cs[i][0:10])
-        ax.plot(t3, s2, alpha=0.5, lw=1, color="red", label=final_cs[i+1][0:10])
+        ax.plot(t1, s1, alpha=0.5, lw=1, color="blue", label=obsid1)
+        ax.plot(t3, s2, alpha=0.5, lw=1, color="red", label=obsid2)
         ax.legend(loc="upper right")
         ax.set_ylim([-0.5, 1.2])
         ax.set_title(f"pair {i}: Optimum lag = {lags[best_lags[i]]} s")
-        helper = f"{final_cs[i][0:10]}_{final_cs[i+1][0:10]}_optimum_lag{lags[best_lags[i]]}.png"
+        helper = f"{obsid1}_{obsid2}_optimum_lag{lags[best_lags[i]]}.png"
         fig.savefig(helper, bbox_inches="tight")
 
 fig = plt.figure(figsize=(6,6))
@@ -216,6 +230,8 @@ print(final_best)
 # Try plotting all the light curves with the globally optimised lag
 for i in range(0, len(final_list)):
     if best_lags[i] != 0:
+        obsid1 = os.path.split(final_cs[i])[-1][0:10]
+        obsid2 = os.path.split(final_cs[i+1])[-1][0:10]
         arr1 = final_list[i]
         arr2 = final_list[i+1]
         t1 = np.copy(arr1[:,0])
@@ -231,57 +247,50 @@ for i in range(0, len(final_list)):
         ax.legend(loc="upper right")
         ax.set_ylim([-0.5, 1.2])
         ax.set_title(f"pair {i}: Applied global optimum {final_best} s")
-        helper = f"{final_cs[i][0:10]}_{final_cs[i+1][0:10]}_force_{final_best}.png"
+        helper = f"{obsid1}_{obsid2}_force_{final_best}.png"
         fig.savefig(helper, bbox_inches="tight")
 
 fig = plt.figure(figsize=(6,6))
 
 # Auto-correlations
 for i in range(0, len(final_list)):
-    # skip VLA: not enough information
-    if int(final_cs[i][0:10]) >  1340000000:
-    # TODO: read from .yaml files
-        if final_cs[i] == "1342379534_lightcurve.txt":
-            ts = 2
-        else:
-            ts = 0.5
-    # TODO: read the frequency from the .yaml files, then predict the scattering; plot with a red vertical line
-        yaml_file = "../dynspec/{0}.yaml".format(final_cs[i][0:10])
-        with open(yaml_file, "r") as stream:
-            yaml_params = yaml.safe_load(stream)
-        nu = float(yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)'])
-        tscat = tscat200 * (nu / 200.)**-4
-        arr1 = final_list[i]
-        s1 = arr1[:,1]
-        ns1 = s1 - np.mean(s1)
-        var = np.var(s1)
-        t1 = arr1[:,0]
-        acorr = np.correlate(ns1, ns1, 'full')[len(ns1)-1:]
-        acorr = acorr / var / len(ns1)
-        fig = plt.figure()
-        ax = fig.add_subplot(211)
-        ax.plot(ts*np.arange(0,len(acorr),1), s1, alpha=1, lw=1, color="blue")
-        ax.set_ylabel("light curve (a.u.)")
-        ax.set_title(f"{final_cs[i][0:10]}: autocorrelation")
-        ax = fig.add_subplot(212)
-        ax.plot(ts*np.arange(0,len(acorr),1), acorr, alpha=1, lw=1, color="blue")
-        ax.set_xlabel("lag / seconds")
-        ax.set_ylabel("correlated power (a.u.)")
-        ax.axvline(50., alpha=0.3, color='k')
-        ax.axvline(100., alpha=0.3, color='k')
-        ax.axvspan(0, tscat, alpha=0.3, color='r')
-        #ax.set_ylim([-0.5, 1.2])
-        helper = f"{final_cs[i][0:10]}_acf.png"
-        fig.savefig(helper, bbox_inches="tight")
+    obsid1 = os.path.split(final_cs[i])[-1][0:10]
+    yaml_file = "../dynspec/{0}.yaml".format(obsid1)
+    with open(yaml_file, "r") as stream:
+        yaml_params = yaml.safe_load(stream)
+    nu = float(yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)'])
+    ts = float(yaml_params['Dynamic spectrum']['Sample time (s)'])
+    tscat = tscat200 * (nu / 200.)**-4
+    arr1 = final_list[i]
+    s1 = arr1[:,1]
+    ns1 = s1 - np.mean(s1)
+    var = np.var(s1)
+    t1 = arr1[:,0]
+    acorr = np.correlate(ns1, ns1, 'full')[len(ns1)-1:]
+    acorr = acorr / var / len(ns1)
+    fig = plt.figure()
+    ax = fig.add_subplot(211)
+    ax.plot(ts*np.arange(0,len(acorr),1), s1, alpha=1, lw=1, color="blue")
+    ax.set_ylabel("light curve (a.u.)")
+    ax.set_title(f"{obsid1}: autocorrelation")
+    ax = fig.add_subplot(212)
+    ax.plot(ts*np.arange(0,len(acorr),1), acorr, alpha=1, lw=1, color="blue")
+    ax.set_xlabel("lag / seconds")
+    ax.set_ylabel("correlated power (a.u.)")
+    ax.axvline(50., alpha=0.3, color='k')
+    ax.axvline(100., alpha=0.3, color='k')
+    ax.axvspan(0, tscat, alpha=0.3, color='r')
+    #ax.set_ylim([-0.5, 1.2])
+    helper = f"{obsid1}_acf.png"
+    fig.savefig(helper, bbox_inches="tight")
+    plt.close(fig)
 
+# TODO: highlight the 2Ps in some way
 
-
-    # TODO: highlight the 2Ps in some way
-
-                # Some QA to add back in at some point
-                # Some QA to add back in at some point
-        #        if np.isnan(s1).any() or np.isnan(s2).any():
-        #            print(f"found some nans for {cs[i]} or cs[i+1], not proceeding further")
-            #        elif cs[i] == "1342096266" or cs[i+1] == "1342096266":
-            #            print("Skipping Parkes data")
-        #        else:
+            # Some QA to add back in at some point
+            # Some QA to add back in at some point
+    #        if np.isnan(s1).any() or np.isnan(s2).any():
+    #            print(f"found some nans for {cs[i]} or cs[i+1], not proceeding further")
+        #        elif cs[i] == "1342096266" or cs[i+1] == "1342096266":
+        #            print("Skipping Parkes data")
+    #        else:
