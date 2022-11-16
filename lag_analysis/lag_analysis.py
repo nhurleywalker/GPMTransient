@@ -48,8 +48,7 @@ P = rr(1318.19578) #Period in seconds
 tscat200 = 0.5 # Scattering at 200MHz in seconds
 
 path = "../dynspec/ppdot_search/"
-# Don't try to do anything complicated with the VLA/GMRT detections
-cs = sorted(glob(path+"13*_lightcurve.txt"))
+cs = sorted(glob(path+"*_lightcurve.txt"))
 # Remove Parkes data, since it is on a different time scale and is difficult to average with the MWA data
 try:
     cs.remove(path+"1342096266_lightcurve.txt")
@@ -69,18 +68,25 @@ for i in range(0, len(cs)):
         arr2 = np.loadtxt(cs[i+1])
         t2 = rr(arr2.T[0])
         s2 = arr2.T[1]
+        obsid1 = os.path.split(cs[i])[-1][0:10]
+        yaml_file = "../dynspec/{0}.yaml".format(obsid1)
+        with open(yaml_file, "r") as stream:
+            yaml_params = yaml.safe_load(stream)
+        nu = float(yaml_params['Dynamic spectrum']['Centre of lowest channel (MHz)'])
+        ts = float(yaml_params['Dynamic spectrum']['Sample time (s)'])
         if skipnext is False:
         # light curves overlap
             if np.isin(t1,t2).any():
                 print(f"merging {cs[i]} and {cs[i+1]}")
-        # normalise by the average brightness of the overlapping timesteps
+        # don't normalise
+        # TODO: normalise by the differences in the radio SED
 #                rescale = np.nanmean(s1[np.isin(t1,t2)]/s2[np.isin(t2,t1)])
 # This gave bad results at times
                 tdiff = np.squeeze(np.where(t1 == t1[np.isin(t1,t2)][0]))
-                s3 = avg_signal(s1/np.nanmax(s1), s2/np.nanmax(s2), 0, tdiff)
+                s3 = avg_signal(s1, s2, 0, tdiff)
+                #s3 = avg_signal(s1/np.nanmax(s1), s2/np.nanmax(s2), 0, tdiff)
                 t3 = avg_signal(t1, t2, 0, tdiff)
                 skipnext = True
-                np.savetxt(outfile, np.stack([t3, s3], axis=1))
 #                fig = plt.figure()
 #                ax = fig.add_subplot(111)
 #                ax.plot(t1, s1/np.nanmax(s1), alpha=0.5, lw=2, color="blue", label="t1")
@@ -90,21 +96,29 @@ for i in range(0, len(cs)):
 #                ax.set_title(tdiff)
 #                helper = f"merge_{cs[i][0:10]}_{cs[i+1][0:10]}.png"
 #                fig.savefig(helper)
-        # light curves have a very short gap (<10s)
-            elif t2[0] - t1[-1] <= 1:
+        # light curves have a very short gap (<3min)
+            elif t2[0] - t1[-1] <= 360:
                 print(f"joining {cs[i]} and {cs[i+1]} ({i}th check)")
-                s3 = np.concatenate((s1/np.nanmax(s1), np.zeros(int((t2[0]-t1[-1])/0.5)-1), s2/np.nanmax(s2)))
-                t3 = np.concatenate((t1, np.arange(t1[-1] + 0.5, t2[0], 0.5), t2))
+                #s3 = np.concatenate((s1/np.nanmax(s1), np.zeros(int((t2[0]-t1[-1])/0.5)-1), s2/np.nanmax(s2)))
+
+                pad = np.arange(t1[-1] + ts, t2[0], ts)
+                t3 = np.concatenate((t1, pad, t2))
+ # Try interpolating
+                s3 = np.concatenate((s1, np.array(((s2[0] - s1[-1])/(t2[0] - t1[-1]))*(pad - t1[-1]) + s1[-1]), s2))
+# np.zeros(len(pad)), s2))
                 skipnext = True
-                combine = np.stack([t3,s3], axis=1)
-                np.savetxt(outfile, combine)
         # unique light curve that stands alone
             else:
                 print(f"solo: {cs[i]} ({cs[i+1]} is not connected)")
+                #s3 = s1/np.nanmax(s1)
                 s3 = s1/np.nanmax(s1)
                 t3 = t1
-            final_list.append(np.stack([t3, s3], axis=1))
+            #combine = np.stack([t3,s3], axis=1)
+            # New change: normalise here
+            combine = np.stack([t3,s3/np.nanmax(s3)], axis=1)
+            final_list.append(combine)
             final_cs.append(cs[i])
+            np.savetxt(outfile, combine)
         else:
             skipnext = False
 
@@ -242,8 +256,8 @@ for i in range(0, len(final_list)):
         weights[i] = 1/np.sqrt(sc(s1)**2 + sc(s2)**2)
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(t1, s1, alpha=0.5, lw=1, color="blue", label=final_cs[i][0:10])
-        ax.plot(t3, s2, alpha=0.5, lw=1, color="red", label=final_cs[i+1][0:10])
+        ax.plot(t1, s1, alpha=0.5, lw=1, color="blue", label=f"{obsid1}")
+        ax.plot(t3, s2, alpha=0.5, lw=1, color="red", label=f"{obsid2}")
         ax.legend(loc="upper right")
         ax.set_ylim([-0.5, 1.2])
         ax.set_title(f"pair {i}: Applied global optimum {final_best} s")
