@@ -181,9 +181,9 @@ ax.scatter(magnetars_l[0], magnetars_l[1], marker=align_marker(r"$\downarrow$", 
 ax.scatter(75.88, 2.25e-13, marker=".", color="black", s=1)
 ax.scatter(1091.17, 1.2e-9, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="blue", label="GLEAM-X J162759.5$-$523504.3", s=50)
 #ax.scatter(1318.57, 8e-14, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", label="GPM J1839$-$10", s=50)
-ax.scatter(1318.57, 2.3e-12, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", s=50, alpha=0.2)
-ax.scatter(1318.57, 1.7e-12, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", s=50, alpha=0.5)
-ax.scatter(1318.57, 1.0e-12, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", s=50, label="GPM J1839$-$10")
+ax.scatter(1318.57, 2.3e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.2)
+ax.scatter(1318.57, 1.7e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.5)
+ax.scatter(1318.57, 1.0e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, label="GPM J1839$-$10")
 
 # Long-period magnetar at the center of RCW 103
 #ax.errorbar(6.67*3600, 7.e-10, label="1E 161348–5055", color="magenta", xerr=0, yerr=3.e-10, uplims=1)
