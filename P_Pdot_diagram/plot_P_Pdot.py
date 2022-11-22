@@ -158,7 +158,7 @@ for B in [1.e10, 1.e12, 1.e14, 1.e16]:
 
 #labelLines(plt.gca().get_lines(),zorder=2.5)
 for E in [1.e26, 1.e30, 1.e34, 1.e38]:
-    Pplot = E**(-1./4.) * 10**10
+    Pplot = E**(-1./3.) * 10**13
     ax.plot(Prange, Pdot_from_P_E(Prange, E), color="darkcyan", alpha=1.0, linestyle="dotted", zorder=1, lw=0.5)
     ax.text(Pplot, Pdot_from_P_E(Pplot, E), sci_notation(E)+"erg s$^{-1}$", color="darkcyan", ha="center", va="top", linespacing=1,  rotation=60., fontsize=5)#, transform=ax.transAxes)
 # FRB death line (Wadiasingh+2020)
@@ -173,21 +173,21 @@ ax.scatter(magnetars[0], magnetars[1], facecolors="red", edgecolors="red", marke
 ax.scatter(magnetars_r[0], magnetars_r[1], facecolors="black", edgecolors="red", marker="o", label="Radio/X-ray magnetars", s=5, zorder=2)
 ax.scatter(pulsars[0], pulsars[1], color="black", marker=".", label="Radio pulsars", s=1, zorder=2)
 #ax.errorbar(magnetars_l[0], magnetars_l[1], xerr=0, yerr=magnetars_l[1]/2, uplims=1, color="red")
-ax.scatter(magnetars_l[0], magnetars_l[1], marker=align_marker(r"$\downarrow$", valign="top"), color="red", s=50, zorder=2)
+ax.scatter(magnetars_l[0], magnetars_l[1], marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="red", s=50, zorder=2)
 # Our source
 #ax.errorbar(1091.17, 6.e-10, color="blue", xerr=0, yerr=3.e-10, uplims=1, label="GLEAM-X\,J\,162759.5$-$523504.3")
 #ax.scatter(1091.17, 6.e-10, marker=align_marker(r"$\downarrow$", valign="top"), color="blue", label="GLEAM-X\,J\,162759.5$-$523504.3", s=150)
 # MTP 13
 ax.scatter(75.88, 2.25e-13, marker=".", color="black", s=1)
-ax.scatter(1091.17, 1.2e-9, marker=align_marker(r"$\downarrow$", valign="top"), color="blue", label="GLEAM-X J162759.5$-$523504.3", s=50)
+ax.scatter(1091.17, 1.2e-9, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="blue", label="GLEAM-X J162759.5$-$523504.3", s=50)
 #ax.scatter(1318.57, 8e-14, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", label="GPM J1839$-$10", s=50)
-ax.scatter(1318.57, 2.3e-12, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", s=50, alpha=0.2)
-ax.scatter(1318.57, 1.7e-12, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", s=50, alpha=0.5)
-ax.scatter(1318.57, 1.0e-12, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", s=50, label="GPM J1839$-$10")
+ax.scatter(1318.57, 2.3e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.2)
+ax.scatter(1318.57, 1.7e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.5)
+ax.scatter(1318.57, 1.0e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, label="GPM J1839$-$10")
 
 # Long-period magnetar at the center of RCW 103
 #ax.errorbar(6.67*3600, 7.e-10, label="1E 161348–5055", color="magenta", xerr=0, yerr=3.e-10, uplims=1)
-ax.scatter(6.67*3600, 7.e-10, marker=align_marker(r"$\downarrow$", valign="top"), color="red", s=50) #, label="1E 161348–5055")
+ax.scatter(6.67*3600, 7.e-10, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="red", s=50) #, label="1E 161348–5055")
 ax.set_xlabel("$P$ / s")
 ax.set_ylabel("$\dot{P}$ / s s$^{-1}$")
 ax.set_xscale("log")
