@@ -69,11 +69,11 @@ print(f"Contour levels for {nsigma} sigma and 2 parameters: {contour_levels}")
 
 
 #https://www.nature.com/nature/for-authors/final-submission#:~:text=For%20guidance%2C%20Nature's%20standard%20figure,(120%E2%80%93136%20mm).
-fig = plt.figure(figsize=(8.9*cm,8.9*cm))
+fig = plt.figure(figsize=(8.9*cm,7.8*cm))
 ax = fig.add_subplot(111)
 twod = ax.contour(
-    F0,
-    F1,
+    1.e9*(F0 - best_f0),
+    1.e18*F1,
     arr - bestfit,
     levels=contour_levels,
     colors="b",
@@ -82,39 +82,39 @@ twod = ax.contour(
 
 xy = twod.collections[2].get_paths()[0].vertices
 sig3_f0, sig3_f1 = xy[np.argmin(xy.T[1])]
-sig3_P = P(sig3_f0)
-sig3_Pdot = Pdot(sig3_f0, sig3_f1)
+sig3_P = P(sig3_f0/1.e9 + best_f0)
+sig3_Pdot = Pdot(sig3_f0/1.e9 + best_f0, sig3_f1/1.e18)
 xy = twod.collections[1].get_paths()[0].vertices
 sig2_f0, sig2_f1 = xy[np.argmin(xy.T[1])]
-sig2_P = P(sig2_f0)
-sig2_Pdot = Pdot(sig2_f0, sig2_f1)
+sig2_P = P(sig2_f0/1.e9 + best_f0)
+sig2_Pdot = Pdot(sig2_f0/1.e9 + best_f0, sig2_f1/1.e18)
 xy = twod.collections[0].get_paths()[0].vertices
 sig1_f0, sig1_f1 = xy[np.argmin(xy.T[1])]
-sig1_P = P(sig1_f0)
-sig1_Pdot = Pdot(sig1_f0, sig1_f1)
+sig1_P = P(sig1_f0/1.e9 + best_f0)
+sig1_Pdot = Pdot(sig1_f0/1.e9 + best_f0, sig1_f1/1.e18)
 
-im = ax.imshow(np.log(arr), origin="lower", extent=[np.nanmin(df['F0']), np.nanmax(df['F0']), np.nanmin(df['F1']), np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="plasma_r")
-#ax.set_xlim([2.2e-9 + 7.5861e-4, 3.3e-9 + 7.5861e-4])
-#ax.set_ylim([-0.6e-17, 0.6e-17])
-ax.set_xlabel('F0')
-ax.set_ylabel('F1')
-ax.scatter(best_f0, best_f1, marker="+", zorder=30, lw=0.5)
-ax.scatter(sig1_f0, sig1_f1, marker="x", zorder=30, lw=0.5)
-ax.scatter(sig2_f0, sig2_f1, marker="x", zorder=30, lw=0.5)
-ax.scatter(sig3_f0, sig3_f1, marker="x", zorder=30, lw=0.5)
-plt.colorbar(im)
-fig.savefig("test.png", bbox_inches="tight", dpi=300)
+#print(np.nanmin(df['F0'])- best_f0)
+#print(np.nanmax(df['F0'])- best_f0)
+im = ax.imshow(np.log(arr), origin="lower", extent=[1.e9*(np.nanmin(df['F0'])- best_f0), 1.e9*(np.nanmax(df['F0'])-best_f0), 1.e18*np.nanmin(df['F1']), 1.e18*np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="plasma_r")
+ax.set_xlabel(r'$\Delta F$  / nHz')
+ax.set_ylabel(r'$\Delta \dot{F}$ / $10^{-18}$')
+ax.scatter(best_f0 - best_f0, best_f1, marker="+", zorder=30, lw=0.5)
+ax.scatter(sig1_f0 - best_f0/1.e9, sig1_f1, marker="x", color="magenta", alpha=1, zorder=30, lw=0.5)
+ax.scatter(sig2_f0 - best_f0/1.e9, sig2_f1, marker="x", color="magenta", alpha=0.5, zorder=30, lw=0.5)
+ax.scatter(sig3_f0 - best_f0/1.e9, sig3_f1, marker="x", color="magenta", alpha=0.2, zorder=30, lw=0.5)
+plt.colorbar(im, label=r"Reduced $\chi^2$")
+fig.savefig("Ppdot_search.pdf", bbox_inches="tight", dpi=300)
 
 print(f"Best F0 = {best_f0}, Best F1 = {best_f1}")
 print(f"Best P = {best_P}, Best Pdot = {best_Pdot}")
 
-print(f"1-sigma limit F0 = {sig1_f0}, 1-sigma limit F1 = {sig1_f1}")
+print(f"1-sigma limit F0 = {sig1_f0/1.e9 + best_f0}, 1-sigma limit F1 = {sig1_f1/1.e18}")
 print(f"1-sigma limit P = {sig1_P}, 1-sigma limit Pdot = {sig1_Pdot}")
 
-print(f"2-sigma limit F0 = {sig2_f0}, 2-sigma limit F1 = {sig2_f1}")
+print(f"2-sigma limit F0 = {sig2_f0/1.e9 + best_f0}, 2-sigma limit F1 = {sig2_f1/1.e18}")
 print(f"2-sigma limit P = {sig2_P}, 2-sigma limit Pdot = {sig2_Pdot}")
 
-print(f"3-sigma limit F0 = {sig3_f0}, 3-sigma limit F1 = {sig3_f1}")
+print(f"3-sigma limit F0 = {sig3_f0/1.e9 + best_f0}, 3-sigma limit F1 = {sig3_f1/1.e18}")
 print(f"3-sigma limit P = {sig3_P}, 3-sigma limit Pdot = {sig3_Pdot}")
 
 
