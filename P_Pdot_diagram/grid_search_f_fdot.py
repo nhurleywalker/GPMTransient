@@ -37,14 +37,17 @@ def main():
     f.fit_toas()
     bestfit = f.resids.chi2
     print(f"Initial fit chi2: {bestfit}")
-    f.get_summary()
+    print(f"Free parameters: {f.model.free_params}")
+    print("Fitter summary:")
+    print(f.get_summary(nodmx=True))
 
+    # Set up the gridding
     nsig_grid_f0 = 75  # Number of sigma to search around nominal value
     npts_f0 = 150  # Number of grid points for this parameter
     nsig_grid_f1 = 75
     npts_f1 = 300
 
-    print("Setting up F0 grid")
+    print(f"Setting up F0 grid ({npts_f0} points around nominal value +\- {nsig_grid_f0}-sigma)")
     print(f"  F0 = {f.model.F0.quantity} +/- {nsig_grid_f0 * f.model.F0.uncertainty}")
     F0 = np.linspace(
         f.model.F0.quantity - nsig_grid_f0 * f.model.F0.uncertainty,
@@ -52,7 +55,7 @@ def main():
         npts_f0,
     )
 
-    print("Setting up F1 grid")
+    print(f"Setting up F1 grid ({npts_f1} points around nominal value +\- {nsig_grid_f1}-sigma)")
     print(f"  F1 = {f.model.F1.quantity} +/- {nsig_grid_f1 * f.model.F1.uncertainty}")
     F1 = np.linspace(
         f.model.F1.quantity - nsig_grid_f1 * f.model.F1.uncertainty,
@@ -62,10 +65,12 @@ def main():
 
     # Change PEPOCH to be in the middle of the TOA time span.
     # This is standard practice and can often help reduce degeneracies.
+    print(f"Changing to PEPOCH {f.toas.get_mjds().mean()}")
     f.model.change_pepoch(f.toas.get_mjds().mean())
 
     # Compute the grid, where all parameters are frozen and sampled at
     # grid points, and the fitter is used to compute the fit statistic.
+    print("Starting grid search...")
     chi2grid = pint.gridutils.grid_chisq(f, ("F0", "F1"), (F0, F1))[0]
 
     # Dump the output to a CSV file
@@ -73,17 +78,16 @@ def main():
     with open("chi2_grid.csv", "w") as chi2file:
         chi2file.write("F0,F1,chi2,delta_chi2\n")
         for en, i in enumerate(np.ndindex(chi2grid.shape)):
-            chi2file.write(f"{grid_f0[i]},{grid_f1[i]},{chi2grid[i]},{chi2grid[i]-bestfit}\n")
+            chi2file.write(f"{grid_f0[i]},{grid_f1[i]},{chi2grid[i]},{chi2grid[i] - bestfit}\n")
 
-
-    delta_chi2_min_idx = np.argmin(chi2grid-bestfit)
+    # Get some of the grid statistics and nominal best values
+    delta_chi2_min_idx = np.argmin(chi2grid - bestfit)
     nominal_best_f0 = grid_f0.flatten()[delta_chi2_min_idx]
     nominal_best_f1 = grid_f1.flatten()[delta_chi2_min_idx]
     print(f"Nominal best F0: {nominal_best_f0} Hz")
     print(f"Nominal best P0: {1/nominal_best_f0} s")
     print(f"Nominal best F1: {nominal_best_f1} Hz/s")
     print(f"Nominal best P1: {-nominal_best_f1/nominal_best_f0**2} s/s")
-
     print(f"Chi2 @ min. delta-chi2: {chi2grid.flatten()[delta_chi2_min_idx]}")
     print(f"Min. delta-chi2: {(chi2grid.flatten()-bestfit)[delta_chi2_min_idx]}")
     print(f"Min Chi2: {chi2grid.min()}")
@@ -108,7 +112,7 @@ def main():
     print(f"Contour levels for {nsigma} sigma and 1 parameter: {contour_levels_1param}")
 
 
-    plots=False
+    plots = True
     if plots:
         # Plot the grid/contour results
         fig, ax = plt.subplots(figsize=(16, 9))
