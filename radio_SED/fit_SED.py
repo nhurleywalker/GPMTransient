@@ -42,7 +42,7 @@ def curved_law(nu, s_nu, alpha, q):
     return s_nu * spec_nu ** alpha * \
             np.exp(q * np.log(spec_nu)**2)
 
-def curved_law_integral(nu_min, nu_max, s_nu, alpha, q):
+def curved_law_integral(nu_min, nu_max, s_nu, alpha, q, print_terms=False):
     '''
     Definite integral for the function defined in curved_law()
     '''
@@ -58,6 +58,12 @@ def curved_law_integral(nu_min, nu_max, s_nu, alpha, q):
         erf_max_term = erf(-(R + 2*q*np.log(nu_max/ref_nu)/Q))
 
     frontmatter = s_nu * (ref_nu*1e6) * np.sqrt(np.pi) / Q
+
+    if print_terms:
+        print(f"s_nu ν0 (1/2) √(π/q)    = {frontmatter}")
+        print(f"exp(|R|^2)              = {exp_term}")
+        print(f"-R                      = {-R}")
+        print(f"-2q/Q                   = {-2*q/Q}")
     return frontmatter * exp_term * (erf_max_term - erf_min_term)
 
 def curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha, q, nsteps):
@@ -90,18 +96,26 @@ def curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha, q, nsteps):
 def f(P, Pdot):
     return 4.68e-3 * (Pdot/1e-15)**0.07 * P**(-0.7)
 
-def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d):
+def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, print_terms=False):
     '''
     See Derivation #3 in README.md
     '''
 
     beta = -0.26
-    integral_value = curved_law_integral(nu_min, nu_max, s_nu, alpha + beta, q)
-    print("integral = ", integral_value)
+    integral_value = curved_law_integral(nu_min, nu_max, s_nu, alpha + beta, q, print_terms=print_terms)
+
+    if print_terms:
+        print("integral = ", integral_value)
 
     nsteps = 10000
     numeric_integral_value = curved_law_numeric_integral(nu_min, nu_max, s_nu, alpha + beta, q, nsteps)
-    print("numeric integral for ", nsteps, " steps = ", numeric_integral_value)
+
+    if print_terms:
+        print("numeric integral for ", nsteps, " steps = ", numeric_integral_value)
+
+    if print_terms:
+        print(f"4πd²        = {4*np.pi*d**2}")
+        print(f"f(P, Pdot)  = {f(P, Pdot)}")
 
     return 4 * np.pi * d**2 * f(P, Pdot) * integral_value
 
@@ -410,7 +424,8 @@ if __name__ == '__main__':
                (numin ** (2*q + alpha + beta + 1)) / (2*q + alpha + beta + 1)
 
     # Doing the integral properly
-    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc)))
+    print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc, print_terms=True)))
+    print(f"Unit factors: Jy2Wm * Wm2ergs    = {Jy2Wm * Wm2ergs}")
 
     # Doing the integral properly
     print("Radio luminosity {0:2.2e} erg/s, using Smean, for frequency-dependent rho and duty-cycle".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Smean(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc, 1)))
