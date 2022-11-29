@@ -116,6 +116,7 @@ def curved_law_luminosity_Speak(nu_min, nu_max, s_nu, alpha, q, P, Pdot, d, prin
     if print_terms:
         print(f"4πd²        = {4*np.pi*d**2}")
         print(f"f(P, Pdot)  = {f(P, Pdot)}")
+        print(f"α + β       = {alpha + beta}")
 
     return 4 * np.pi * d**2 * f(P, Pdot) * integral_value
 
@@ -426,6 +427,7 @@ if __name__ == '__main__':
     # Doing the integral properly
     print("Radio luminosity {0:2.2e} erg/s for frequency-dependent rho".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Speak(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc, print_terms=True)))
     print(f"Unit factors: Jy2Wm * Wm2ergs    = {Jy2Wm * Wm2ergs}")
+    print(f"S1GHz                            = {S1GHz}")
 
     # Doing the integral properly
     print("Radio luminosity {0:2.2e} erg/s, using Smean, for frequency-dependent rho and duty-cycle".format(Jy2Wm * Wm2ergs * curved_law_luminosity_Smean(1.e7/1.e6, 1.e15/1.e6, S1GHz, alpha, q, P, Pdot, d * kpc, 1)))
