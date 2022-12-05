@@ -20,6 +20,19 @@ def P(f0):
 def Pdot(f0, f1):
    return - f1 / (f0**2)
 
+# https://www.cv.nrao.edu/~sransom/web/Ch6.html
+def Edot(P, Pdot, I=1.e45):
+   return 4 * np.pi**2 * I * Pdot / P**3
+
+def B(P, Pdot):
+   return 3.2e19 * np.sqrt(P*Pdot)
+
+def tau(P, Pdot):
+   return P / (2*Pdot)
+
+def s_to_Myr(t):
+   return t / (60 * 60 * 24 * 365.25 * 1.e6)
+
 # Nature requires sans-serif fonts
 plt.rcParams.update({
     "font.size": 7,
@@ -91,14 +104,25 @@ xy = twod.collections[2].get_paths()[0].vertices
 sig3_f0, sig3_f1 = xy[np.argmin(xy.T[1])]
 sig3_P = P(sig3_f0/1.e9 + best_f0)
 sig3_Pdot = Pdot(sig3_f0/1.e9 + best_f0, sig3_f1/1.e18)
+sig3_B = B(sig3_P, sig3_Pdot)
+sig3_Edot = Edot(sig3_P, sig3_Pdot)
+sig3_tau = s_to_Myr(tau(sig3_P, sig3_Pdot))
+
 xy = twod.collections[1].get_paths()[0].vertices
 sig2_f0, sig2_f1 = xy[np.argmin(xy.T[1])]
 sig2_P = P(sig2_f0/1.e9 + best_f0)
 sig2_Pdot = Pdot(sig2_f0/1.e9 + best_f0, sig2_f1/1.e18)
+sig2_B = B(sig2_P, sig2_Pdot)
+sig2_Edot = Edot(sig2_P, sig2_Pdot)
+sig2_tau = s_to_Myr(tau(sig2_P, sig2_Pdot))
+
 xy = twod.collections[0].get_paths()[0].vertices
 sig1_f0, sig1_f1 = xy[np.argmin(xy.T[1])]
 sig1_P = P(sig1_f0/1.e9 + best_f0)
 sig1_Pdot = Pdot(sig1_f0/1.e9 + best_f0, sig1_f1/1.e18)
+sig1_B = B(sig1_P, sig1_Pdot)
+sig1_Edot = Edot(sig1_P, sig1_Pdot)
+sig1_tau = s_to_Myr(tau(sig1_P, sig1_Pdot))
 
 #print(np.nanmin(df['F0'])- best_f0)
 #print(np.nanmax(df['F0'])- best_f0)
@@ -117,13 +141,15 @@ print(f"Best P = {best_P}, Best Pdot = {best_Pdot}")
 
 print(f"1-sigma limit F0 = {sig1_f0/1.e9 + best_f0}, 1-sigma limit F1 = {sig1_f1/1.e18}")
 print(f"1-sigma limit P = {sig1_P}, 1-sigma limit Pdot = {sig1_Pdot}")
+print(f"1-sigma limit Edot = {sig1_Edot:2.2g} erg/s, B = {sig1_B:2.2g} G, tau = {sig1_tau:2.2g} Myr")
 
 print(f"2-sigma limit F0 = {sig2_f0/1.e9 + best_f0}, 2-sigma limit F1 = {sig2_f1/1.e18}")
 print(f"2-sigma limit P = {sig2_P}, 2-sigma limit Pdot = {sig2_Pdot}")
+print(f"2-sigma limit Edot = {sig2_Edot:2.2g} erg/s, B = {sig2_B:2.2g} G, tau = {sig2_tau:2.2g} Myr")
 
 print(f"3-sigma limit F0 = {sig3_f0/1.e9 + best_f0}, 3-sigma limit F1 = {sig3_f1/1.e18}")
 print(f"3-sigma limit P = {sig3_P}, 3-sigma limit Pdot = {sig3_Pdot}")
-
+print(f"3-sigma limit Edot = {sig3_Edot:2.2g} erg/s, B = {sig3_B:2.2g} G, tau = {sig3_tau:2.2g} Myr")
 
 
 
