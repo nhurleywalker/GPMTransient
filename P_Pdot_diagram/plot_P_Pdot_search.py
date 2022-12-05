@@ -12,6 +12,8 @@ from matplotlib import rc
 import pandas as pd
 import scipy.stats
 
+from plot_P_Pdot import align_marker
+
 def P(f0):
    return 1/f0
 
@@ -79,6 +81,11 @@ twod = ax.contour(
     colors="b",
     linewidths=[0.5],
 )
+fmt = {}
+strs = ['$1\\sigma$', '$2\\sigma$', '$3\\sigma$']
+for l, s in zip(twod.levels, strs):
+    fmt[l] = s
+ax.clabel(twod, twod.levels, inline=True, fmt=fmt, fontsize=5)
 
 xy = twod.collections[2].get_paths()[0].vertices
 sig3_f0, sig3_f1 = xy[np.argmin(xy.T[1])]
@@ -95,14 +102,14 @@ sig1_Pdot = Pdot(sig1_f0/1.e9 + best_f0, sig1_f1/1.e18)
 
 #print(np.nanmin(df['F0'])- best_f0)
 #print(np.nanmax(df['F0'])- best_f0)
-im = ax.imshow(np.log(arr), origin="lower", extent=[1.e9*(np.nanmin(df['F0'])- best_f0), 1.e9*(np.nanmax(df['F0'])-best_f0), 1.e18*np.nanmin(df['F1']), 1.e18*np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="plasma_r")
+im = ax.imshow(np.log10(arr), origin="lower", extent=[1.e9*(np.nanmin(df['F0'])- best_f0), 1.e9*(np.nanmax(df['F0'])-best_f0), 1.e18*np.nanmin(df['F1']), 1.e18*np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="plasma_r")
 ax.set_xlabel(r'$\Delta f$  / nHz')
 ax.set_ylabel(r'$\Delta \dot{f}$ / $10^{-18}$')
-ax.scatter(best_f0 - best_f0, best_f1, marker="+", zorder=30, lw=0.5)
-ax.scatter(sig1_f0 - best_f0/1.e9, sig1_f1, marker="x", color="magenta", alpha=1, zorder=30, lw=0.5)
-ax.scatter(sig2_f0 - best_f0/1.e9, sig2_f1, marker="x", color="magenta", alpha=0.5, zorder=30, lw=0.5)
-ax.scatter(sig3_f0 - best_f0/1.e9, sig3_f1, marker="x", color="magenta", alpha=0.2, zorder=30, lw=0.5)
-plt.colorbar(im, label=r"$\ln(\chi^2)$")
+ax.scatter(best_f0 - best_f0, 1.e18*best_f1, marker="+", zorder=30, lw=0.5, s=5)
+ax.scatter(sig1_f0 - best_f0/1.e9, sig1_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=1, zorder=30, lw=0.45)
+ax.scatter(sig2_f0 - best_f0/1.e9, sig2_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.5, zorder=30, lw=0.45)
+ax.scatter(sig3_f0 - best_f0/1.e9, sig3_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.2, zorder=30, lw=0.45)
+plt.colorbar(im, label=r"$\log_{10}(\chi^2)$")
 fig.savefig("Ppdot_search.pdf", bbox_inches="tight", dpi=300)
 
 print(f"Best F0 = {best_f0}, Best F1 = {best_f1}")
