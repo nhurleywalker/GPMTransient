@@ -181,19 +181,22 @@ ax.scatter(magnetars_l[0], magnetars_l[1], marker=align_marker(r"$\downarrow$", 
 ax.scatter(75.88, 2.25e-13, marker=".", color="black", s=1)
 ax.scatter(1091.17, 1.2e-9, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="blue", label="GLEAM-X J162759.5$-$523504.3", s=50)
 #ax.scatter(1318.57, 8e-14, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", label="GPM J1839$-$10", s=50)
-ax.scatter(1318.57, 8.5e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.2)
-ax.scatter(1318.57, 5.6e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.5)
-ax.scatter(1318.57, 2.6e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, label="GPM J1839$-$10")
+ax.scatter(1318.57, 8.1e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.2)
+ax.scatter(1318.57, 5.1e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.5)
+ax.scatter(1318.57, 2.0e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, label="GPM J1839$-$10")
 
-
-#Best F0 = 0.0007586127324823, Best F1 = 1.0970083669854188e-19
-#Best P = 1318.195644736733, Best Pdot = -1.9062053531162877e-13
-#1-sigma limit F0 = 0.0007586126732763, 1-sigma limit F1 = -1.5165177150214443e-19
-#1-sigma limit P = 1318.1957476154403, 1-sigma limit Pdot = 2.635161886356539e-13
-#2-sigma limit F0 = 0.0007586126338057, 2-sigma limit F1 = -3.2362886947046905e-19
-#2-sigma limit P = 1318.1958162011385, 2-sigma limit Pdot = 5.623505366602442e-13
-#3-sigma limit F0 = 0.000758612594335, 3-sigma limit F1 = -4.923362469600878e-19
-#3-sigma limit P = 1318.1958847870173, 3-sigma limit Pdot = 8.555033485084466e-13
+#Best F0 = 0.0007586127453181, Best F1 = 1.6033199209786888e-19
+#Best P = 1318.1956224327369, Best Pdot = -2.7859923448914437e-13
+#1-sigma limit F0 = 0.0007586126937226, 1-sigma limit F1 = -1.1848193422408998e-19
+#1-sigma limit P = 1318.195712087132, 1-sigma limit Pdot = 2.0587894052705616e-13
+#1-sigma limit Edot = 3.5e+24 erg/s, B = 5.3e+14 G, tau = 1e+02 Myr
+#2-sigma limit F0 = 0.0007586126580026, 2-sigma limit F1 = -2.9531130775020267e-19
+#2-sigma limit P = 1318.1957741556334, 2-sigma limit Pdot = 5.131447700354042e-13
+#2-sigma limit Edot = 8.8e+24 erg/s, B = 8.3e+14 G, tau = 41 Myr
+#3-sigma limit F0 = 0.0007586126262515, 3-sigma limit F1 = -4.678408175918226e-19
+#3-sigma limit P = 1318.1958293276202, 3-sigma limit Pdot = 8.129390326470923e-13
+#3-sigma limit Edot = 1.4e+25 erg/s, B = 1e+15 G, tau = 26 Myr
+#Reduced chi^2 of fit = 1.1202251973260615
 
 
 # Long-period magnetar at the center of RCW 103
