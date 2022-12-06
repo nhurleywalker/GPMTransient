@@ -7,10 +7,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import markers
 from matplotlib.path import Path
+from matplotlib.colors import LogNorm
 import matplotlib.font_manager
 from matplotlib import rc
 import pandas as pd
 import scipy.stats
+from matplotlib.ticker import FormatStrFormatter
 
 from plot_P_Pdot import align_marker
 
@@ -39,6 +41,8 @@ plt.rcParams.update({
     "font.sans-serif": ["Helvetica"]})
 
 cm = 1/2.54  # centimeters in inches
+
+DOF = 56 # 58 TOAs minus 2 fitted parameters
 
 #df = pd.read_csv("chi2_grid_orig.csv", delimiter=",")
 df = pd.read_csv("chi2_grid.csv", delimiter=",")
@@ -80,7 +84,6 @@ print(f"Contour levels for {nsigma} sigma and 2 parameters: {contour_levels}")
 # Plot the grid/contour results
 #fig, ax = plt.subplots(figsize=(16, 9))
 # Just plot the values offset from the best-fit values
-
 
 
 #https://www.nature.com/nature/for-authors/final-submission#:~:text=For%20guidance%2C%20Nature's%20standard%20figure,(120%E2%80%93136%20mm).
@@ -126,14 +129,19 @@ sig1_tau = s_to_Myr(tau(sig1_P, sig1_Pdot))
 
 #print(np.nanmin(df['F0'])- best_f0)
 #print(np.nanmax(df['F0'])- best_f0)
-im = ax.imshow(np.log10(arr), origin="lower", extent=[1.e9*(np.nanmin(df['F0'])- best_f0), 1.e9*(np.nanmax(df['F0'])-best_f0), 1.e18*np.nanmin(df['F1']), 1.e18*np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="plasma_r")
+im = ax.imshow(arr/DOF, origin="lower", extent=[1.e9*(np.nanmin(df['F0'])- best_f0), 1.e9*(np.nanmax(df['F0'])-best_f0), 1.e18*np.nanmin(df['F1']), 1.e18*np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="bone_r", norm=LogNorm(vmin=1, vmax=10))
+ax.set_ylim([-1.5, 1.5])
+ax.set_xlim([-0.2, 0.2])
 ax.set_xlabel(r'$\Delta f$  / nHz')
 ax.set_ylabel(r'$\Delta \dot{f}$ / $10^{-18}$')
+ax.axvline(0, lw=0.5, ls="--", color="k", alpha=0.5)
+ax.axhline(0, lw=0.5, ls="--", color="k", alpha=0.5)
 ax.scatter(best_f0 - best_f0, 1.e18*best_f1, marker="+", zorder=30, lw=0.5, s=5)
-ax.scatter(sig1_f0 - best_f0/1.e9, sig1_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=1, zorder=30, lw=0.45)
-ax.scatter(sig2_f0 - best_f0/1.e9, sig2_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.5, zorder=30, lw=0.45)
-ax.scatter(sig3_f0 - best_f0/1.e9, sig3_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.2, zorder=30, lw=0.45)
-plt.colorbar(im, label=r"$\log_{10}(\chi^2)$")
+ax.scatter(sig1_f0 - best_f0/1.e9, sig1_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=1, zorder=30, lw=0.5)
+ax.scatter(sig2_f0 - best_f0/1.e9, sig2_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.5, zorder=30, lw=0.5)
+ax.scatter(sig3_f0 - best_f0/1.e9, sig3_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.2, zorder=30, lw=0.5)
+cb = plt.colorbar(im, label=r"reduced $\chi^2$", format=FormatStrFormatter('%2.0f'))
+cb.ax.yaxis.set_minor_formatter(FormatStrFormatter('%2.0f'))
 fig.savefig("Ppdot_search.pdf", bbox_inches="tight", dpi=300)
 
 print(f"Best F0 = {best_f0}, Best F1 = {best_f1}")
@@ -151,7 +159,7 @@ print(f"3-sigma limit F0 = {sig3_f0/1.e9 + best_f0}, 3-sigma limit F1 = {sig3_f1
 print(f"3-sigma limit P = {sig3_P}, 3-sigma limit Pdot = {sig3_Pdot}")
 print(f"3-sigma limit Edot = {sig3_Edot:2.2g} erg/s, B = {sig3_B:2.2g} G, tau = {sig3_tau:2.2g} Myr")
 
-
+print(f"Reduced chi^2 of fit = {bestfit/DOF}")
 
 #fig.savefig("P_Pdot.pdf", bbox_inches="tight", dpi=300)
 
