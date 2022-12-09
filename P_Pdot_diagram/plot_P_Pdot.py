@@ -181,9 +181,23 @@ ax.scatter(magnetars_l[0], magnetars_l[1], marker=align_marker(r"$\downarrow$", 
 ax.scatter(75.88, 2.25e-13, marker=".", color="black", s=1)
 ax.scatter(1091.17, 1.2e-9, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="blue", label="GLEAM-X J162759.5$-$523504.3", s=50)
 #ax.scatter(1318.57, 8e-14, marker=align_marker(r"$\downarrow$", valign="top"), color="magenta", label="GPM J1839$-$10", s=50)
-ax.scatter(1318.57, 2.3e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.2)
-ax.scatter(1318.57, 1.7e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.5)
-ax.scatter(1318.57, 1.0e-12, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, label="GPM J1839$-$10")
+ax.scatter(1318.57, 8.1e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.2)
+ax.scatter(1318.57, 5.1e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, alpha=0.5)
+ax.scatter(1318.57, 2.0e-13, marker=align_marker(r"$\downarrow$", valign="top"), linewidth=0.25, color="magenta", s=50, label="GPM J1839$-$10")
+
+#Best F0 = 0.0007586127453181, Best F1 = 1.6033199209786888e-19
+#Best P = 1318.1956224327369, Best Pdot = -2.7859923448914437e-13
+#1-sigma limit F0 = 0.0007586126937226, 1-sigma limit F1 = -1.1848193422408998e-19
+#1-sigma limit P = 1318.195712087132, 1-sigma limit Pdot = 2.0587894052705616e-13
+#1-sigma limit Edot = 3.5e+24 erg/s, B = 5.3e+14 G, tau = 1e+02 Myr
+#2-sigma limit F0 = 0.0007586126580026, 2-sigma limit F1 = -2.9531130775020267e-19
+#2-sigma limit P = 1318.1957741556334, 2-sigma limit Pdot = 5.131447700354042e-13
+#2-sigma limit Edot = 8.8e+24 erg/s, B = 8.3e+14 G, tau = 41 Myr
+#3-sigma limit F0 = 0.0007586126262515, 3-sigma limit F1 = -4.678408175918226e-19
+#3-sigma limit P = 1318.1958293276202, 3-sigma limit Pdot = 8.129390326470923e-13
+#3-sigma limit Edot = 1.4e+25 erg/s, B = 1e+15 G, tau = 26 Myr
+#Reduced chi^2 of fit = 1.1202251973260615
+
 
 # Long-period magnetar at the center of RCW 103
 #ax.errorbar(6.67*3600, 7.e-10, label="1E 161348–5055", color="magenta", xerr=0, yerr=3.e-10, uplims=1)
