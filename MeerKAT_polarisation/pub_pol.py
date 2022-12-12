@@ -56,10 +56,19 @@ ax3 = fig.add_subplot(513, sharex=ax1)
 s = np.where(ratio > 0.)
 #s = np.where(1000.0*pol_data["ampPeakPIfit"] > 15)
 d = np.intersect1d(np.where(ratio < 15.), np.where(1000.0*pol_data["ampPeakPIfit"] > 15))
+
 plot, = ax3.plot(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s], marker=".", ls="None", color="darkblue", **kwargs)
 ax3.errorbar(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s], yerr=pol_data["dPolAngle0Chan_deg"][s], fmt="o", color="darkblue", **ewargs)
 ax3.scatter(pol_data["t"][d], pol_data["polAngle0Chan_deg"][d], marker="x", color="red", s=10)
+
+# Repeat the plot in the range 180-360 deg
+ax3.plot(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s] + 180, marker=".", ls="None", color="darkblue", **kwargs)
+ax3.errorbar(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s] + 180, yerr=pol_data["dPolAngle0Chan_deg"][s], fmt="o", color="darkblue", **ewargs)
+ax3.scatter(pol_data["t"][d], pol_data["polAngle0Chan_deg"][d] + 180, marker="x", color="red", s=10)
+
 ax3.set_ylabel("PA / $^\circ$")
+ax3.set_yticks([0, 180, 360])
+ax3.set_ylim([0, 360])
 
 ax4 = fig.add_subplot(514, sharex=ax1)
 plot, = ax4.plot(pol_data["t"][s], pol_data["phiPeakPIfit_rm2"][s], marker='.', ls="None", color="darkblue",  **kwargs)
