@@ -18,7 +18,8 @@ plt.rcParams.update({
     "font.sans-serif": ["Helvetica"]})
 
 #pol_data = ascii.read("pol_data_with_alpha.csv", format='csv')
-pol_data = ascii.read("pol_data_after_dedispersion.csv", format='csv')
+#pol_data = ascii.read("pol_data_after_dedispersion.csv", format='csv')
+pol_data = ascii.read("pol_data_dedispersed_with_fits.csv", format='csv')
 #t,ampPeakPIfit,dAmpPeakPIfit,phiPeakPIfit_rm2,dPhiPeakPIfit_rm2,polAngle0Chan_deg,dPolAngle0Chan_deg,polAngleChan_deg,dPolAngleChan_deg
 t = Time(pol_data["t"]/(24*60*60), format="mjd")
 # to align with observation start time, like other plots in the paper
@@ -28,75 +29,92 @@ t0 = Time("2022-07-20T19:11:53", scale="utc", format="isot")
 t -= t0
 pol_data["t"] = t.value*24*60*60
 
-kwargs = { "lw" : "0.5" , 'markersize':1}
-ewargs = { 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':1}
+kwargs = { "lw" : "0.5" , 'markersize':1, 'marker' : '.'}
+ewargs = { 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':1, 'fmt' : "o"}
+
+# Renormalise the Stokes I fit to zero off-pulse
+pol_data["Ifreq0Jy"] -= np.nanmean(pol_data["Ifreq0Jy"][0:50])
+rms = np.nanstd(pol_data["Ifreq0Jy"][0:50])
 
 # Plot the RMSF
 fig = plt.figure(figsize=(8.9*cm, 12.5*cm))
-ax1 = fig.add_subplot(511)
-
-plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["IJy"], marker='.', label="I", color="lightblue", **kwargs)
-plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], marker='.', color="darkblue", label="P", **kwargs)
-ax1.errorbar(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], yerr=1000*pol_data["dAmpPeakPIfit"], fmt="o", color="darkblue", **ewargs)
+ax1 = fig.add_subplot(411)
+#plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["ImeanJy"], label="ImeanJy", color="blue", **kwargs)
+plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["Ifreq0Jy"], label="Stokes I", color="lightblue", **kwargs)
+plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], color="darkblue", label="P", **kwargs)
+ax1.errorbar(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], yerr=1000*pol_data["dAmpPeakPIfit"], color="darkblue", **ewargs)
 ax1.legend()
 ax1.set_ylabel("$S$ / mJy beam$^{-1}$")
 
-ax2 = fig.add_subplot(512, sharex=ax1)
-#plot, = ax2.plot(pol_data["t"], 100000*pol_data["ampPeakPIfit"]/pol_data["ImJy"], marker='.', color="darkblue", label="P%", **kwargs)
-# Error budget is dominated by that of the polarised intensity
-ratio = 100*pol_data["ampPeakPIfit"]/pol_data["IJy"]
-yerr = ratio * pol_data["dAmpPeakPIfit"]/pol_data["ampPeakPIfit"]
+ax2 = fig.add_subplot(412, sharex=ax1)
+#plot, = ax2.plot(pol_data["t"], 100000*pol_data["ampPeakPIfit"]/pol_data["ImJy"], color="darkblue", label="P%", **kwargs)
+ratio = 100*pol_data["ampPeakPIfit"]/pol_data["Ifreq0Jy"]
+# Errors are quadrature sum of errors on PI and I
+yerr = np.abs(ratio * np.sqrt((pol_data["dAmpPeakPIfit"]/pol_data["ampPeakPIfit"])**2 + (rms / pol_data["Ifreq0Jy"])**2))
 s = np.where(yerr < 50)
-ax2.errorbar(pol_data["t"][s], ratio[s], yerr=yerr[s], fmt="o", color="darkblue", **ewargs)
+plot, = ax2.plot(pol_data["t"][s], ratio[s], color="darkblue", ls="None",  **kwargs)
+ax2.errorbar(pol_data["t"][s], ratio[s], yerr=yerr[s], color="darkblue", **ewargs)
+#ax2.errorbar(pol_data["t"], 100*pol_data["fracPol"], yerr=yerr, color="green", **ewargs)
 ax2.set_ylabel("$\\frac{P}{I}$ / %")
 ax2.set_ylim([0, 100])
 
-ax3 = fig.add_subplot(513, sharex=ax1)
+ax3 = fig.add_subplot(413, sharex=ax1)
 #s = np.where(pol_data["dPolAngle0Chan_deg"]<50)
-s = np.where(ratio > 0.)
+#s = np.where(ratio > 0.)
 #s = np.where(1000.0*pol_data["ampPeakPIfit"] > 15)
-d = np.intersect1d(np.where(ratio < 15.), np.where(1000.0*pol_data["ampPeakPIfit"] > 15))
-
-plot, = ax3.plot(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s], marker=".", ls="None", color="darkblue", **kwargs)
-ax3.errorbar(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s], yerr=pol_data["dPolAngle0Chan_deg"][s], fmt="o", color="darkblue", **ewargs)
-ax3.scatter(pol_data["t"][d], pol_data["polAngle0Chan_deg"][d], marker="x", color="red", s=10)
+# Low polarisation data where there's enough S/N that we can tell it's depolarised
+#d = np.intersect1d(np.where(ratio < 15.), np.where(1000.0*pol_data["ampPeakPIfit"] > 15))
+ax3.axhline(168+180., color='k', ls='-', lw=0.5, alpha=0.2)
+ax3.axhline(168., color='k', ls='-', lw=0.5, alpha=0.2)
+ax3.axhline(168.+90, color='r', ls=':', lw=0.5, alpha=0.5)
+ax3.axhline(168.-90, color='r', ls=':', lw=0.5, alpha=0.5)
+plot, = ax3.plot(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s], ls="None", color="darkblue", **kwargs)
+ax3.errorbar(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s], yerr=pol_data["dPolAngle0Chan_deg"][s], color="darkblue", **ewargs)
+#ax3.scatter(pol_data["t"][d], pol_data["polAngle0Chan_deg"][d], marker="x", color="red", s=10)
 
 # Repeat the plot in the range 180-360 deg
-ax3.plot(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s] + 180, marker=".", ls="None", color="darkblue", **kwargs)
-ax3.errorbar(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s] + 180, yerr=pol_data["dPolAngle0Chan_deg"][s], fmt="o", color="darkblue", **ewargs)
-ax3.scatter(pol_data["t"][d], pol_data["polAngle0Chan_deg"][d] + 180, marker="x", color="red", s=10)
+ax3.plot(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s] + 180, ls="None", color="darkblue", **kwargs)
+ax3.errorbar(pol_data["t"][s], pol_data["polAngle0Chan_deg"][s] + 180, yerr=pol_data["dPolAngle0Chan_deg"][s], color="darkblue", **ewargs)
+#ax3.scatter(pol_data["t"][d], pol_data["polAngle0Chan_deg"][d] + 180, marker="x", color="red", s=10)
 
 ax3.set_ylabel("PA / $^\circ$")
 ax3.set_yticks([0, 180, 360])
 ax3.set_ylim([0, 360])
 
-ax4 = fig.add_subplot(514, sharex=ax1)
-plot, = ax4.plot(pol_data["t"][s], pol_data["phiPeakPIfit_rm2"][s], marker='.', ls="None", color="darkblue",  **kwargs)
-ax4.errorbar(pol_data["t"][s], pol_data["phiPeakPIfit_rm2"][s], yerr=pol_data["dPhiPeakPIfit_rm2"][s], fmt="o", color="darkblue", **ewargs)
-ax4.scatter(pol_data["t"][d], pol_data["phiPeakPIfit_rm2"][d], marker="x", color="red", s=10)
+ax4 = fig.add_subplot(414, sharex=ax1)
+plot, = ax4.plot(pol_data["t"][s], pol_data["phiPeakPIfit_rm2"][s], ls="None", color="darkblue",  **kwargs)
+ax4.errorbar(pol_data["t"][s], pol_data["phiPeakPIfit_rm2"][s], yerr=pol_data["dPhiPeakPIfit_rm2"][s], color="darkblue", **ewargs)
+#ax4.scatter(pol_data["t"][d], pol_data["phiPeakPIfit_rm2"][d], marker="x", color="red", s=10)
 ax4.set_xlabel("Time / s")
 ax4.set_ylabel("RM / rad m$^{-2}$")
 ax4.set_ylim(-570, -500)
 
-ax5 = fig.add_subplot(515, sharex=ax1)
-plot, = ax5.plot(pol_data["t"], pol_data["alpha"], marker='.', ls="None", color="darkblue",  **kwargs)
-ax5.errorbar(pol_data["t"], pol_data["alpha"], yerr=pol_data["alphaerr"], fmt="o", color="darkblue", **ewargs)
-ax5.set_xlabel("Time / s")
-ax5.set_ylabel("$\\alpha$")
+#ax5 = fig.add_subplot(515, sharex=ax1)
+#plot, = ax5.plot(pol_data["t"][s], pol_data["alpha"][s], ls="None", color="darkblue",  **kwargs)
+#ax5.errorbar(pol_data["t"][s], pol_data["alpha"][s], yerr=pol_data["alphaerr"][s], fmt="o", color="darkblue", **ewargs)
+##ax5.scatter(pol_data["t"][d], pol_data["alpha"][d], marker="x", color="red", s=10)
+#ax5.set_xlabel("Time / s")
+#ax5.set_ylabel("$\\alpha$")
 
 ax1.set_xlim(100,350)
 
 # Since we used a shared x-axis, we have to be careful when selecting which x-tick labels to hide
 # https://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one#:~:text=This%20is%20a%20common%20gotcha,invisible%20on%20just%20one%20axis.
-for ax in [ax1, ax2, ax3, ax4]:
+for ax in [ax1, ax2, ax3]:
     plt.setp(ax.get_xticklabels(), visible=False)
 fig.savefig("MeerKAT_corr_pol.pdf", bbox_inches="tight")
 fig.savefig("MeerKAT_corr_pol.png", bbox_inches="tight", dpi=300)
 plt.close()
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.hist(pol_data["ampPeakPIfit"])
-ax.set_xlabel("polarised intensity")
-ax.set_ylabel("N")
-fig.savefig("PI_hist.png", bbox_inches="tight")
+#pol_data = ascii.read("pol_data_after_dedispersion.csv", format='csv')
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#t = np.intersect1d(np.where(pol_data["tindex"]>=363), np.where(pol_data["tindex"]<=465))
+#ax.plot(pol_data["IJy"][t], label="after dedispersion")
+#pol_data = ascii.read("pol_data_with_alpha.csv", format='csv')
+#t = np.intersect1d(np.where(pol_data["tindex"]>=363), np.where(pol_data["tindex"]<=465))
+#ax.plot(pol_data["IJy"][t], label="before dedispersion")
+#ax.set_ylabel("Stokes I flux density / Jy")
+#ax.set_xlabel("timestep")
+#ax.legend()
+#fig.savefig("I_comparison.png", bbox_inches="tight")
