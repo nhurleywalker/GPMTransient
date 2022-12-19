@@ -17,6 +17,11 @@ plt.rcParams.update({
     "font.size": 7,
     "font.sans-serif": ["Helvetica"]})
 
+v_data = np.loadtxt("MKT_1342378934_V_dynamic_spectrum_dedispersed.csv")
+v_profile = np.nanmean(v_data, axis=0)
+print(v_profile.shape)
+print(v_profile)
+
 #pol_data = ascii.read("pol_data_with_alpha.csv", format='csv')
 #pol_data = ascii.read("pol_data_after_dedispersion.csv", format='csv')
 pol_data = ascii.read("pol_data_dedispersed_with_fits.csv", format='csv')
@@ -31,6 +36,7 @@ pol_data["t"] = t.value*24*60*60
 
 kwargs = { "lw" : "0.5" , 'markersize':1, 'marker' : '.'}
 ewargs = { 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':1, 'fmt' : "o"}
+targs = { "color" : "black" , "fontweight" : "bold"}
 
 # Renormalise the Stokes I fit to zero off-pulse
 pol_data["Ifreq0Jy"] -= np.nanmean(pol_data["Ifreq0Jy"][0:50])
@@ -41,22 +47,33 @@ fig = plt.figure(figsize=(8.9*cm, 12.5*cm))
 ax1 = fig.add_subplot(411)
 #plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["ImeanJy"], label="ImeanJy", color="blue", **kwargs)
 plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["Ifreq0Jy"], label="Stokes I", color="lightblue", **kwargs)
+plot, = ax1.plot(pol_data["t"], 1000.0*v_profile[294:568], label="Stokes V", color="lightgreen", **kwargs)
 plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], color="darkblue", label="P", **kwargs)
 ax1.errorbar(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], yerr=1000*pol_data["dAmpPeakPIfit"], color="darkblue", **ewargs)
-ax1.legend()
+ax1.legend(fontsize=5)
 ax1.set_ylabel("$S$ / mJy beam$^{-1}$")
 
 ax2 = fig.add_subplot(412, sharex=ax1)
 #plot, = ax2.plot(pol_data["t"], 100000*pol_data["ampPeakPIfit"]/pol_data["ImJy"], color="darkblue", label="P%", **kwargs)
 ratio = 100*pol_data["ampPeakPIfit"]/pol_data["Ifreq0Jy"]
+ratio_v = 100*v_profile[294:568]/pol_data["Ifreq0Jy"]
 # Errors are quadrature sum of errors on PI and I
 yerr = np.abs(ratio * np.sqrt((pol_data["dAmpPeakPIfit"]/pol_data["ampPeakPIfit"])**2 + (rms / pol_data["Ifreq0Jy"])**2))
+# Errors on V are quadrature sum of errors on V and I -- which are the same, so sqrt(2) * I
+yerr_v = 100*np.abs(np.sqrt(2)*rms / v_profile[294:568])
+# Select good polarised intensity points
 s = np.where(yerr < 50)
-plot, = ax2.plot(pol_data["t"][s], ratio[s], color="darkblue", ls="None",  **kwargs)
+plot, = ax2.plot(pol_data["t"][s], ratio[s], color="darkblue", ls="None", label="P/I",  **kwargs)
 ax2.errorbar(pol_data["t"][s], ratio[s], yerr=yerr[s], color="darkblue", **ewargs)
+# Select good Stokes V intensity points
+s = np.where(yerr_v < 50)
+plot, = ax2.plot(pol_data["t"][s], ratio_v[s], color="lightgreen", ls="None", label="V/I", **kwargs)
+ax2.errorbar(pol_data["t"][s], ratio_v[s], yerr=yerr_v[s], color="lightgreen", **ewargs)
+ax2.axhline(0, color='k', lw=0.5, alpha=1)
 #ax2.errorbar(pol_data["t"], 100*pol_data["fracPol"], yerr=yerr, color="green", **ewargs)
-ax2.set_ylabel("$\\frac{P}{I}$ / %")
-ax2.set_ylim([0, 100])
+ax2.set_ylabel("fract. pol. / %")
+ax2.set_ylim([-10, 100])
+ax2.legend(fontsize=5)
 
 ax3 = fig.add_subplot(413, sharex=ax1)
 #s = np.where(pol_data["dPolAngle0Chan_deg"]<50)
@@ -96,8 +113,20 @@ ax4.set_ylim(-570, -500)
 #ax5.set_xlabel("Time / s")
 #ax5.set_ylabel("$\\alpha$")
 
-ax1.set_xlim(100,350)
+# Label a, b... etc as per Nature
+x = 105
+y = 450
+ax1.text(x, y, "a", **targs)
+y = 85
+ax2.text(x, y, "b", **targs)
+y = 310
+ax3.text(x, y, "c", **targs)
+y = -510
+ax4.text(x, y, "d", **targs)
 
+
+# Shared axes so affects all
+ax1.set_xlim(100,350)
 # Since we used a shared x-axis, we have to be careful when selecting which x-tick labels to hide
 # https://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one#:~:text=This%20is%20a%20common%20gotcha,invisible%20on%20just%20one%20axis.
 for ax in [ax1, ax2, ax3]:
