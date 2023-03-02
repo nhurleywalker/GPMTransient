@@ -2,11 +2,11 @@ Apply barycentric correction: true
 Dynamic spectrum:
   Centre of lowest channel (MHz): 322.0
   Channel width (MHz): 33.
-  Input file: 1105500791_dyn_dynamic_spectrum.csv
-  Sample time (s): 16.107692315028263
-  T0 (s): 1105500803.6
+  Input file: 1105500762_dyn_dynamic_spectrum.csv
+  Sample time (s): 2.0
+  T0 (s): 1105500762.3
   Transpose: true
-ObsID: 1105500791
+ObsID: 1105500762
 Reference frequency (MHz): low
 Telescope: GMRT
 RFI Mask:
