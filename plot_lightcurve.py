@@ -48,7 +48,7 @@ std = []
 # Get time delta in seconds
 d0 = Time(fits.open(hdus[0])[0].header["DATE-OBS"])
 d1 = Time(fits.open(hdus[1])[0].header["DATE-OBS"])
-ts = round((d1 - d0).sec)
+ts = (d1 - d0).sec
 
 # Find maximum
 h = fits.open(hdus[0])
