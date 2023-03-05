@@ -51,37 +51,28 @@ scale=`echo "$basescale / $chan" | bc -l` # At least 4 pix per synth beam for ea
 # Same clean settings as main GLEAM-X
 multiscale="-multiscale -mgain 0.85 -multiscale-gain 0.15"
 
-echo "Shifting co-ordinates of measurement set to transient at $coords, with zenith shiftback."
-chgcentre \
-        "${obsnum}.ms" \
-        ${coords}
-
-# Now shift the pointing centre to point straight up,
-# which approximates minw without making the phase centre rattle around
-chgcentre \
-        -zenith \
-        -shiftback \
-        "${obsnum}.ms"
 
 # If the model already exists, copy it and use it
 
-if compgen -G ../../D0038_202?-??-??/${obsnum}/${obsnum}_masked-0000-model.fits >> /dev/null
-then
-    dir=`ls -d ../../D0038_202?-??-??/${obsnum}`
-    cp $dir/*masked*-model.fits ./
-    # Predict in the model
-    wsclean \
-        -abs-mem ${GXMEMORY} \
-        -predict \
-        -name ${obsnum}_masked \
-        -size ${imsize} ${imsize} \
-        -scale ${scale:0:8} \
-        -pol I \
-        -weight briggs ${robust} \
-        -channels-out 4 \
-        -data-column ${datacolumn} \
-        "${obsnum}.ms" | tee wsclean.log
-else
+#if compgen -G ../../D0038_202?-??-??/${obsnum}/${obsnum}_masked-0000-model.fits >> /dev/null
+#    dir=`ls -d ../../D0038_202?-??-??/${obsnum}`
+#if compgen -G ../../3HT_previous_runs/${obsnum}/${obsnum}_masked-0000-model.fits >> /dev/null
+#then
+#    dir=`ls -d ../../3HT_previous_runs/${obsnum}`
+#    cp $dir/*masked*-model.fits ./
+#    # Predict in the model
+#    wsclean \
+#        -abs-mem ${GXMEMORY} \
+#        -predict \
+#        -name ${obsnum}_masked \
+#        -size ${imsize} ${imsize} \
+#        -scale ${scale:0:8} \
+#        -pol I \
+#        -weight briggs ${robust} \
+#        -channels-out 4 \
+#        -data-column ${datacolumn} \
+#        "${obsnum}.ms" | tee wsclean.log
+#else
 
     # First we need to image but with a mask in place
     # Create a template image that has all the same properties as our eventual WSClean image
@@ -128,22 +119,34 @@ else
             -data-column ${datacolumn} \
             "${obsnum}.ms"
 
-fi
+#fi
+echo "Shifting co-ordinates of measurement set to transient at $coords, with zenith shiftback."
+chgcentre \
+        "${obsnum}.ms" \
+        ${coords}
 
-# Full time resolution
+# Now shift the pointing centre to point straight up,
+# which approximates minw without making the phase centre rattle around
+chgcentre \
+        -zenith \
+        -shiftback \
+        "${obsnum}.ms"
+
+# New version of birli deletes timesteps instead of flagging them
+nscans=`singularity exec $GXCONTAINER taql "calc count([select distinct(TIME) from ${obsnum}.ms])"`
+
 # Variable frequency resolution to account for dispersion smearing
-nscans=`pyhead.py -p NSCANS ${metafits} | awk '{print $3}'`
 if [[ $chan -eq 69 ]]
 then
-     nchans=384
+     nchans=24
 elif [[ $chan -eq 93 ]]
 then
-     nchans=192
+     nchans=12
 elif [[ $chan -eq 121 ]]
 then
-     nchans=96
+     nchans=4
 else
-     nchans=48
+     nchans=2
 fi
 
 # -subtract-model for the image which has been deep-cleaned first
