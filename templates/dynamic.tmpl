@@ -133,7 +133,7 @@ chgcentre \
         "${obsnum}.ms"
 
 # New version of birli deletes timesteps instead of flagging them
-nscans=`singularity exec $GXCONTAINER taql "calc count([select distinct(TIME) from ${obsnum}.ms])"`
+nscans=`taql "calc count([select distinct(TIME) from ${obsnum}.ms])"`
 
 # Variable frequency resolution to account for dispersion smearing
 if [[ $chan -eq 69 ]]
