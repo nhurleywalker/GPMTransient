@@ -32,13 +32,28 @@ def GetBeamAtCoords(obsid, freq, ra_deg, dec_deg):
     vals = (beam_x + beam_y) / 2
     return vals
 
+#https://stackoverflow.com/questions/24838629/round-off-float-to-nearest-0-5-in-python
+def round_off_rating(number):
+    """Round a number to the closest half integer.
+    >>> round_off_rating(1.3)
+    1.5
+    >>> round_off_rating(2.6)
+    2.5
+    >>> round_off_rating(3.0)
+    3.0
+    >>> round_off_rating(4.1)
+    4.0"""
+
+    return round(number * 2) / 2
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 #for pol, alpha in zip(["I", "Q", "U", "V"], [1, 0.5, 0.5, 0.5]):
 pol="I"
 alpha=1
 #hdus = sorted(glob("*-t05??-image.fits"))
-hdus = sorted(glob(f"{prefix}_time-t????-image.fits"))
+#hdus = sorted(glob(f"{prefix}_time-t????-image.fits"))
+hdus = sorted(glob(f"{prefix}_dyn-t????-MFS-image.fits"))
 
 val = []
 std = []
@@ -46,13 +61,14 @@ std = []
 #freqs = []
 
 # Get time delta in seconds
+# Inaccurate due to occasional rounding errors! So take a long baseline.
 d0 = Time(fits.open(hdus[0])[0].header["DATE-OBS"])
-d1 = Time(fits.open(hdus[1])[0].header["DATE-OBS"])
-ts = (d1 - d0).sec
+d1 = Time(fits.open(hdus[-1])[0].header["DATE-OBS"])
+ts = round_off_rating(((d1 - d0).sec)/len(hdus))
 
 # Find maximum
 h = fits.open(hdus[0])
-box = 1
+box = 5
 arr = np.zeros(shape=(1,1,2*box,2*box), dtype="float32")
 
 # Find frequency
@@ -77,10 +93,12 @@ peak[3] += int(d.shape[3]/2)-box
 coords = w.pixel_to_world(peak[3],peak[2])
 peak = tuple(peak)
 
+time_arr = []
 beam_vals = []
 for hdu in hdus:
     h = fits.open(hdu)
     try:
+        time_arr.append(Time(h[0].header["DATE-OBS"]).gps)
         val.append(h[0].data[peak])
 #        epo.append(int(hdu[0:10]))
         std.append(sc(h[0].data))
@@ -96,6 +114,8 @@ for hdu in hdus:
 if beam_corr is True:
     val = np.array(val) / np.array(beam_vals)
     std = np.array(std) / np.array(beam_vals)
+time_arr = np.array(time_arr)
+
 
 #scat = ax.scatter(epo, val)#, c = freqs)
 #clb = plt.colorbar(scat, label="Observing frequency / MHz")
@@ -109,5 +129,12 @@ ax.set_ylabel("Brightness (Jy/beam)")
 fig.savefig(f"{prefix}_light_curve.pdf", bbox_inches="tight")
 fig.savefig(f"{prefix}_light_curve.png", bbox_inches="tight")
 
-time_arr = np.arange(d0.gps, d0.gps + len(val)*ts, ts)
-np.savetxt(f"{prefix}_light_curve.csv", np.vstack((time_arr, val)).T, fmt="%0.0d %f")
+# MWA correlator is set to nearest 2s
+# If ts > 0.5 then we should round it, otherwise we just have to hope DATE-OBS is right (because centroid time is 0.25)
+
+if ts > 0.5:
+    ds = round_off_rating(d0.gps)
+else:
+    ds = d0.gps
+time_arr = np.arange(ds, ds + len(val)*ts, ts)
+np.savetxt(f"{prefix}_light_curve.csv", np.vstack((time_arr, val, std)).T, fmt="%0.2f %f %f")
