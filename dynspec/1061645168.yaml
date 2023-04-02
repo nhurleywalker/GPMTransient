@@ -1,10 +1,10 @@
 Apply barycentric correction: true
 Dynamic spectrum:
-  Centre of lowest channel (MHz): 118.395
-  Channel width (MHz): 30.72
+  Centre of lowest channel (MHz): 103.115
+  Channel width (MHz): 0.16
   Input file: 1061645168_dyn_dynamic_spectrum.csv
-  Sample time (s): 4.0
-  T0 (s): 1061645168.0
+  Sample time (s): 0.5
+  T0 (s): 1061645167.25
   Transpose: true
 ObsID: 1061645168
 Reference frequency (MHz): low
