@@ -24,6 +24,7 @@ import glob
 from astropy.time import Time
 from astropy.coordinates import SkyCoord
 import astropy.units as u
+from astropy.stats import sigma_clip
 import datetime
 from dedisperse_dynspec import Dynspec, parse_yaml
 from bc_corr import bc_corr
@@ -66,7 +67,7 @@ for yaml_file in yaml_files:
             "telescope": params['telescope'],
             "midfreq": f"{0.5*(dynspec.f[0] + dynspec.f[-1]):.2f}",
             "peak": peak_flux_density,
-            "toa": toa.mjd,
+            "toa": toa.mjd + bc_correction/86400,
         }
         table.append(row)
 
