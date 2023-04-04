@@ -244,7 +244,7 @@ class Dynspec:
     def fscrunch(self):
         mask_applied = copy.deepcopy(self.dynspec)
         mask_applied[self.mask] = np.nan
-        self.fscrunched = np.nansum(mask_applied, axis=self.FREQAXIS)
+        self.fscrunched = np.nanmean(mask_applied, axis=self.FREQAXIS)
 
     def get_time_at_infinite_frequency(self):
         self.dmdelay = calc_dmdelay(self.dm, self.freq_ref, np.inf)
