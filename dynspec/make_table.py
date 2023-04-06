@@ -41,7 +41,7 @@ min_nch_frac = 0.25 # Only include time bins with more channels used to calculat
 
 table = []
 
-for yaml_file in yaml_files[-6:]:
+for yaml_file in yaml_files:
 
     obsid = yaml_file[:10]
 
@@ -112,11 +112,11 @@ for yaml_file in yaml_files[-6:]:
             'num_obs': 1,
             'pulse_number': new_pulse_number,
             'utcs': [utc],
-            'toa': toa.mjd,
+            'toa': f"{toa.mjd:.4f}",
             'telescopes': [telescope],
             'midfreq': [midfreq],
-            'peak': peak_flux_density,
-            'fluence': fluence,
+            'peak': f"{peak_flux_density:.0f}",
+            'fluence': f"{fluence:.0f}",
         }
 
     else:
@@ -157,8 +157,8 @@ for yaml_file in yaml_files[-6:]:
         peak_flux_density = np.max(lc)
         fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_nch_frac])
 
-        row['peak'] = peak_flux_density
-        row['fluence'] = fluence
+        row['peak'] = f"{peak_flux_density:.0f}"
+        row['fluence'] = f"{fluence:.0f}"
 
     # Add the row to the table
     table.append(row)
@@ -170,8 +170,8 @@ for row in table:
         return f"\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
 
     if row['num_obs'] == 1:
-        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['fluence']} \\\\")
+        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa']} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['fluence']} \\\\")
     else:
-        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {row['toa'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['fluence'])} \\\\")
+        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['fluence'])} \\\\")
         for i in range(1, row['num_obs']):
-            print(f"  & {row['utcs'][0]} & {row['toa'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} &   &   \\\\")
+            print(f"  & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} &   &   \\\\")
