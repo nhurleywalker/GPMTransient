@@ -154,7 +154,12 @@ for yaml_file in yaml_files[-6:]:
 
 # Format the table to LaTeX table format
 for row in table:
+    def multirow(val):
+        return f"\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
+
     if row['num_obs'] == 1:
-        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & ")
+        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['fluence']} \\\\")
     else:
-        print(f"\multirow{{{row['num_obs']}}}{{*}}{{{row['pulse_number']}}} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & ")
+        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['fluence'])} \\\\")
+        for i in range(1, row['num_obs']):
+            print(f"  & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} &   &   \\\\")

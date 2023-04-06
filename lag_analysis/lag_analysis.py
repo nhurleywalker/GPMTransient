@@ -47,7 +47,7 @@ def sc(data, level=3, loops=4):
 P = rr(1318.19578) #Period in seconds
 tscat200 = 0.5 # Scattering at 200MHz in seconds
 
-path = "../dynspec/ppdot_search/"
+path = "../dynspec/"
 cs = sorted(glob(path+"*_lightcurve.txt"))
 # Remove Parkes data, since it is on a different time scale and is difficult to average with the MWA data
 try:
