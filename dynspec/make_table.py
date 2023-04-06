@@ -37,10 +37,11 @@ yaml_files.sort()
 
 P = 1318.1956 # Approximate period in seconds
 prev_pulse_number = None # For keeping track if a given lightcurve is in the same pulse as the previous light curve
+min_nch_frac = 0.25 # Only include time bins with more channels used to calculate them than this fraction of the max number of channels. Example, if a lightcurve is constructed from a total of 100 channels, then only consider time bins that included at least 25 valid channels
 
 table = []
 
-for yaml_file in yaml_files:
+for yaml_file in yaml_files[-6:]:
 
     obsid = yaml_file[:10]
 
@@ -52,7 +53,7 @@ for yaml_file in yaml_files:
         mjd_str = line.split()[2]
         toa = Time(mjd_str, format='mjd')
 
-    new_pulse_number = round((toa.gps - int(yaml_files[0][:10]))/P + 0.15) + 1, # <--- 0.15 is a rough, "manual" pulse centering
+    new_pulse_number = round((toa.gps - int(yaml_files[0][:10]))/P + 0.15) + 1 # <--- 0.15 is a rough, "manual" pulse centering
 
     with open(yaml_file, 'r') as yf:
         params = parse_yaml(yf) # returns dictionary
@@ -88,11 +89,11 @@ for yaml_file in yaml_files:
         fluence_bins = lc * dt
 
         # Get the peak flux
-        peak_flux_density = np.max(lightcurve_data[:,1])
+        peak_flux_density = np.max(lc)
 
         # Get the total fluence (only include bins where the relative noise is no more than 2*min,
         # which occurs when number of channels included in lightcurve calc is < 4*max
-        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)/4])
+        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_nch_frac])
 
         row = {
             'num_obs': 1,
@@ -105,11 +106,8 @@ for yaml_file in yaml_files:
             'fluence': fluence,
         }
 
-        table.append(row)
-        prev_pulse_number = new_pulse_number
-
     else:
-        # Remove the previous row from the table
+        # Pop the previous row from the table
         row = table.pop()
 
         # Update row values
@@ -135,15 +133,28 @@ for yaml_file in yaml_files:
                 i = t_idxs.index(t_idx)
                 lc[i] = (lc[i]*nch[i]*dt + new_lc[new_i]*new_nch[new_i]*new_dt) / (nch[i]*dt + new_nch[new_i]*new_dt) # Weighted sum
                 nch[i] += new_nch[new_i] # Update the channel count
-                fluence_bins[i] = (lc[i]*nch[i]*dt + new_lc[new_i]*new_nch[new_i]*new_dt) / (nch[i] + new_nch[new_i])
+                fluence_bins[i] = (fluence_bins[i]*dt + new_fluence_bins[new_i]*new_dt) / (nch[i] + new_nch[new_i])
             else: # If this bin does not overlap with the previous lightcurve, then none of the others will either, so just append the rest in bulk
-                t.append(new_t[new_i:])
-                lc.append(new_lc[new_i:])
-                nch.append(new_nch[new_i:])
-                fluence_bins.append(new_fluence_bins[new_i:])
+                t = np.hstack((t, new_t[new_i:]))
+                lc = np.hstack((lc, new_lc[new_i:]))
+                nch = np.hstack((nch, new_nch[new_i:]))
+                fluence_bins = np.hstack((fluence_bins, new_fluence_bins[new_i:]))
                 break
 
-        # Same fluence calculation as before
-        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)/4])
+        # Same peak and fluence calculations as before
+        peak_flux_density = np.max(lc)
+        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_nch_frac])
 
-    print(row)
+        row['peak'] = peak_flux_density
+        row['fluence'] = fluence
+
+    # Add the row to the table
+    table.append(row)
+    prev_pulse_number = new_pulse_number
+
+# Format the table to LaTeX table format
+for row in table:
+    if row['num_obs'] == 1:
+        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & ")
+    else:
+        print(f"\multirow{{{row['num_obs']}}}{{*}}{{{row['pulse_number']}}} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & ")
