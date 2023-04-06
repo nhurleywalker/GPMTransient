@@ -30,6 +30,11 @@ import datetime
 from dedisperse_dynspec import Dynspec, parse_yaml
 from bc_corr import bc_corr
 
+def curved_law(nu, ref_nu=1*u.GHz, s_nu=119*u.mJy, alpha=-3.4, q=-0.61):
+    return s_nu * (nu/ref_nu) ** alpha * \
+            np.exp(q * np.log(nu/ref_nu)**2)
+
+
 EPHEMERIS = 'de430.bsp'
 
 yaml_files = glob.glob('*.yaml')
@@ -69,7 +74,7 @@ for yaml_file in yaml_files:
     # Get a few bits of metadata for the table
     telescope = params['telescope']
 
-    midfreq = f"{0.5*(dynspec.f[0] + dynspec.f[-1]):.2f}"
+    midfreq = 0.5*(dynspec.f[0] + dynspec.f[-1])
 
     # Get the corresponding lightcurve files
     # (assumes they've already been made before running this script)
@@ -101,6 +106,9 @@ for yaml_file in yaml_files:
         dt = t[1] - t[0]
         fluence_bins = lc * dt
 
+        # Get the scaling factor for 1 GHz
+        scale_factor = (curved_law(1*u.GHz) / curved_law(midfreq*u.MHz)).decompose()
+
         # Get the peak flux
         peak_flux_density = np.max(lc)
 
@@ -114,9 +122,11 @@ for yaml_file in yaml_files:
             'utcs': [utc],
             'toa': f"{toa.mjd:.4f}",
             'telescopes': [telescope],
-            'midfreq': [midfreq],
-            'peak': f"{peak_flux_density:.0f}",
+            'midfreq': [f"{midfreq:.0f}"],
+            'peak': f"{peak_flux_density:.1f}",
+            'peak_1GHz': f"{peak_flux_density*scale_factor:.3f}",
             'fluence': f"{fluence:.0f}",
+            'fluence_1GHz': f"{fluence*scale_factor:.2f}",
         }
 
     else:
@@ -127,7 +137,7 @@ for yaml_file in yaml_files:
         row['num_obs'] += 1
         row['utcs'].append(utc)
         row['telescopes'].append(telescope)
-        row['midfreq'].append(midfreq)
+        row['midfreq'].append(f"{midfreq:.0f}")
 
         # For the peak and fluence, we have to update the lightcurve first
 
@@ -157,21 +167,33 @@ for yaml_file in yaml_files:
         peak_flux_density = np.max(lc)
         fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_nch_frac])
 
-        row['peak'] = f"{peak_flux_density:.0f}"
+        row['peak'] = f"{peak_flux_density:.1f}"
+        row['peak_1GHz'] = f"{peak_flux_density*scale_factor:.3f}"
         row['fluence'] = f"{fluence:.0f}"
+        row['fluence_1GHz'] = f"{fluence*scale_factor:.2f}"
 
     # Add the row to the table
     table.append(row)
     prev_pulse_number = new_pulse_number
 
 # Format the table to LaTeX table format
+
+# The column headers:
+print("Pulse number & UTC & TOA & Telescope & Frequency (MHz) & \\multicolumn{2}{c}{Peak flux density (Jy)} & \\multicolumn{2}{c}{Fluence (Jy s)} \\\\")
+
+# The column subheaders
+print("& & & & & At freq & At 1 GHz & At freq & At 1 GHz \\\\")
+
+print("\\hline")
+
+# The data
 for row in table:
     def multirow(val):
-        return f"\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
+        return f"\\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
 
     if row['num_obs'] == 1:
-        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa']} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['fluence']} \\\\")
+        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa']} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['peak_1GHz']} & {row['fluence']} & {row['fluence_1GHz']} \\\\")
     else:
-        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['fluence'])} \\\\")
+        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['peak_1GHz'])} & {multirow(row['fluence'])} & {multirow(row['fluence_1GHz'])} \\\\")
         for i in range(1, row['num_obs']):
-            print(f"  & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} &   &   \\\\")
+            print(f"  & {row['utcs'][0]} & & {row['telescopes'][0]} & {row['midfreq'][0]} & & & & \\\\")
