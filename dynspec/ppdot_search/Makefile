@@ -1,6 +1,6 @@
-YAML_FILES = $(shell ls ../*.yaml | sed 's_../__')
-GPSTIMES = $(patsubst %.yaml,%,$(YAML_FILES))
-LIGHTCURVES = $(patsubst %,%_lightcurve.txt,$(GPSTIMES))
+LIGHTCURVES = $(shell ls ../*_lightcurve_mod.txt | sed 's_../__')
+GPSTIMES = $(patsubst %_lightcurve_mod.txt,%,$(LIGHTCURVES_MOD))
+YAML_FILES = $(patsubst %,%.yaml,$(GPSTIMES))
 TOAS = $(patsubst %,%.tim,$(GPSTIMES))
 
 TOA_ERR_SEC = 300
@@ -20,8 +20,8 @@ all_toas.tim: $(TOAS)
 %.yaml: ../%.yaml
 	awk -F '[ ]' '/barycentric/ { $$4 = "false" } /Input file/ {$$5 = "../" $$5} {print}' < $< > $@
 
-%_lightcurve.txt: ../dedisperse_dynspec.py %.yaml ../de430.bsp
+%_lightcurve_mod.txt: ../dedisperse_dynspec.py %.yaml ../de430.bsp
 	python $< --dms $(BEST_DM) --lightcurve $@ --yaml $(word 2,$^)
 
-%.tim: %_lightcurve.txt generate_TOA.py
+%.tim: %_lightcurve_mod.txt generate_TOA.py
 	python $(word 2,$^) $*.yaml $< $(TOA_ERR_SEC) --toa_precision=0.5 --save_plot=$*_toa.png > $@
