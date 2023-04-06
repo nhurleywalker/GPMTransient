@@ -54,43 +54,96 @@ for yaml_file in yaml_files:
 
     new_pulse_number = round((toa.gps - int(yaml_files[0][:10]))/P + 0.15) + 1, # <--- 0.15 is a rough, "manual" pulse centering
 
+    with open(yaml_file, 'r') as yf:
+        params = parse_yaml(yf) # returns dictionary
+
+    dynspec = Dynspec(**params)
+
+    coord = SkyCoord(ra=params['RA']*u.hr, dec=params['Dec']*u.deg, frame='icrs')
+    time = Time(dynspec.t[0] - dynspec.dt/2, format='gps')
+    utc = time.utc.datetime.strftime("%Y-%m-%d %H:%M")
+
+    # Get barycentric correction
+    bc_correction = TimeDelta(bc_corr(coord, time, EPHEMERIS), format='sec')
+    toa += bc_correction
+
+    # Get a few bits of metadata for the table
+    telescope = params['telescope']
+
+    midfreq = f"{0.5*(dynspec.f[0] + dynspec.f[-1]):.2f}"
+
+    # Get the corresponding lightcurve files
+    # (assumes they've already been made before running this script)
+    lightcurve_file = f"{obsid}_lightcurve.txt"
+    lightcurve_data = np.loadtxt(lightcurve_file)
+
     if new_pulse_number != prev_pulse_number:
 
-        # Reset the fluence calc
-        fluence = 0
-
-        # Get the corresponding lightcurve files
-        # (assumes they've already been made before running this script)
-        lightcurve_file = f"{obsid}_lightcurve.txt"
-        lightcurve_data = np.loadtxt(lightcurve_file)
+        # Parse the light curve
         lc = lightcurve_data[:,1]
         t = lightcurve_data[:,0]
+        t_idxs = list(range(len(t)))
         nch = lightcurve_data[:,2] # The number of channels that contributed to each point in the lightcurve
         dt = t[1] - t[0]
+        fluence_bins = lc * dt
 
         # Get the peak flux
         peak_flux_density = np.max(lightcurve_data[:,1])
 
-        with open(yaml_file, 'r') as yf:
-            params = parse_yaml(yf) # returns dictionary
-
-        dynspec = Dynspec(**params)
-
-        # Get barycentric correction
-        coord = SkyCoord(ra=params['RA']*u.hr, dec=params['Dec']*u.deg, frame='icrs')
-        time = Time(dynspec.t[0] - dynspec.dt/2, format='gps')
-        bc_correction = TimeDelta(bc_corr(coord, time, EPHEMERIS), format='sec')
-        toa += bc_correction
+        # Get the total fluence (only include bins where the relative noise is no more than 2*min,
+        # which occurs when number of channels included in lightcurve calc is < 4*max
+        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)/4])
 
         row = {
-            "utc": time.utc.datetime.strftime("%Y-%m-%d %H:%M"),
-            "toa": toa.mjd,
-            "pulse_number": new_pulse_number,
-            "telescope": params['telescope'],
-            "midfreq": f"{0.5*(dynspec.f[0] + dynspec.f[-1]):.2f}",
-            "peak": peak_flux_density,
+            'num_obs': 1,
+            'pulse_number': new_pulse_number,
+            'utcs': [utc],
+            'toas': [toa.mjd],
+            'telescopes': [telescope],
+            'midfreq': [midfreq],
+            'peak': peak_flux_density,
+            'fluence': fluence,
         }
-    else:
+
         table.append(row)
+        prev_pulse_number = new_pulse_number
+
+    else:
+        # Remove the previous row from the table
+        row = table.pop()
+
+        # Update row values
+        row['num_obs'] += 1
+        row['utcs'].append(utc)
+        row['toas'].append(toa.mjd)
+        row['telescopes'].append(telescope)
+        row['midfreq'].append(midfreq)
+
+        # For the peak and fluence, we have to update the lightcurve first
+
+        # Combine the light curve with the previous one
+        # "Combine" means a weighted sum (equivalent to forming the light curve from both dynamic spectra)
+        new_t = lightcurve_data[:,0]
+        new_lc = lightcurve_data[:,1]
+        new_nch = lightcurve_data[:,2] # The number of channels that contributed to each point in the lightcurve
+        new_dt = new_t[1] - new_t[0]
+        new_fluence_bins = new_lc * new_dt
+
+        for new_i in range(len(new_t)): # Loop through the new time axis
+            t_idx = round((new_t[new_i] - t[0])/dt) # The bin number relative to the previous lightcurve
+            if t_idx in t_idxs: # If this bin overlaps with the previous lightcurve
+                i = t_idxs.index(t_idx)
+                lc[i] = (lc[i]*nch[i]*dt + new_lc[new_i]*new_nch[new_i]*new_dt) / (nch[i]*dt + new_nch[new_i]*new_dt) # Weighted sum
+                nch[i] += new_nch[new_i] # Update the channel count
+                fluence_bins[i] = (lc[i]*nch[i]*dt + new_lc[new_i]*new_nch[new_i]*new_dt) / (nch[i] + new_nch[new_i])
+            else: # If this bin does not overlap with the previous lightcurve, then none of the others will either, so just append the rest in bulk
+                t.append(new_t[new_i:])
+                lc.append(new_lc[new_i:])
+                nch.append(new_nch[new_i:])
+                fluence_bins.append(new_fluence_bins[new_i:])
+                break
+
+        # Same fluence calculation as before
+        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)/4])
 
     print(row)
