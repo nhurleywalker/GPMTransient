@@ -47,13 +47,11 @@ for yaml_file in yaml_files[-6:]:
 
     # Get the corresponding TOA
     # (assumes they've already been made before running this script)
-    tim_file = f"ppdot_search/{obsid}.tim"
+    tim_file = f"ppdot_search/{obsid}_orig.tim"
     with open(tim_file, 'r') as tf:
         line = tf.readlines()[0] # These files only have one line in them
-        mjd_str = line.split()[2]
-        toa = Time(mjd_str, format='mjd')
-
-    new_pulse_number = round((toa.gps - int(yaml_files[0][:10]))/P + 0.15) + 1 # <--- 0.15 is a rough, "manual" pulse centering
+    mjd_str = line.split()[2]
+    toa = Time(mjd_str, format='mjd')
 
     with open(yaml_file, 'r') as yf:
         params = parse_yaml(yf) # returns dictionary
@@ -78,7 +76,22 @@ for yaml_file in yaml_files[-6:]:
     lightcurve_file = f"{obsid}_lightcurve.txt"
     lightcurve_data = np.loadtxt(lightcurve_file)
 
+    new_pulse_number = round((toa.gps - int(yaml_files[0][:10]))/P + 0.15) + 1 # <--- 0.15 is a rough, "manual" pulse centering
+
     if new_pulse_number != prev_pulse_number:
+
+        # If this is the first of two (or more) observations in the same pulse, there should be a .tim file
+        # for the joint TOA
+        try:
+            tim_file = f"ppdot_search/{obsid}_mod.tim"
+            with open(tim_file, 'r') as tf:
+                line = tf.readlines()[0] # These files only have one line in them
+            mjd_str = line.split()[2]
+            toa = Time(mjd_str, format='mjd')
+            bc_correction = TimeDelta(bc_corr(coord, time, EPHEMERIS), format='sec')
+            toa += bc_correction
+        except:
+            pass
 
         # Parse the light curve
         lc = lightcurve_data[:,1]
@@ -99,7 +112,7 @@ for yaml_file in yaml_files[-6:]:
             'num_obs': 1,
             'pulse_number': new_pulse_number,
             'utcs': [utc],
-            'toas': [toa.mjd],
+            'toa': toa.mjd,
             'telescopes': [telescope],
             'midfreq': [midfreq],
             'peak': peak_flux_density,
@@ -113,7 +126,6 @@ for yaml_file in yaml_files[-6:]:
         # Update row values
         row['num_obs'] += 1
         row['utcs'].append(utc)
-        row['toas'].append(toa.mjd)
         row['telescopes'].append(telescope)
         row['midfreq'].append(midfreq)
 
@@ -158,8 +170,8 @@ for row in table:
         return f"\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
 
     if row['num_obs'] == 1:
-        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['fluence']} \\\\")
+        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['fluence']} \\\\")
     else:
-        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['fluence'])} \\\\")
+        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {row['toa'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['fluence'])} \\\\")
         for i in range(1, row['num_obs']):
-            print(f"  & {row['utcs'][0]} & {row['toas'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} &   &   \\\\")
+            print(f"  & {row['utcs'][0]} & {row['toa'][0]} & {row['telescopes'][0]} & {row['midfreq'][0]} &   &   \\\\")
