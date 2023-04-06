@@ -245,6 +245,7 @@ class Dynspec:
         mask_applied = copy.deepcopy(self.dynspec)
         mask_applied[self.mask] = np.nan
         self.fscrunched = np.nanmean(mask_applied, axis=self.FREQAXIS)
+        self.num_good_chans = np.nansum(np.logical_not(np.isnan(mask_applied)), axis=self.FREQAXIS)
 
     def get_time_at_infinite_frequency(self):
         self.dmdelay = calc_dmdelay(self.dm, self.freq_ref, np.inf)
@@ -355,10 +356,10 @@ def main(**kwargs):
 
         # Create verbose header for lightcurve output files
         header += 'Using dedispersion delay of {} s for reference frequency {} MHz\n\n'.format(dynspec.dmdelay, dynspec.freq_ref)
-        header += "Time (s) | Flux density (a.u.)"
+        header += "Time (s) | Flux density (a.u.) | Number of non-masked channels"
 
         # Construct array to be written out and write it out
-        lightcurve = np.array([timeaxis, dynspec.fscrunched]).T
+        lightcurve = np.array([timeaxis, dynspec.fscrunched, dynspec.num_good_chans]).T
         np.savetxt(kwargs['lightcurve'], lightcurve, header=header)
 
     if kwargs['output'] is not None:

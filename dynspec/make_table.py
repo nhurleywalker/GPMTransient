@@ -22,7 +22,7 @@ import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 import glob
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.stats import sigma_clip
@@ -33,72 +33,64 @@ from bc_corr import bc_corr
 EPHEMERIS = 'de430.bsp'
 
 yaml_files = glob.glob('*.yaml')
+yaml_files.sort()
+
+P = 1318.1956 # Approximate period in seconds
+prev_pulse_number = None # For keeping track if a given lightcurve is in the same pulse as the previous light curve
 
 table = []
 
 for yaml_file in yaml_files:
 
-    # Get the corresponding lightcurve files
-    # (assumes they've already been made before running this script)
     obsid = yaml_file[:10]
-    lightcurve_file = f"{obsid}_lightcurve.txt"
-    lightcurve_data = np.loadtxt(lightcurve_file)
-    lc = lightcurve_data[:,1]
-    t = lightcurve_data[:,0]
-    dt = t[1] - t[0]
-
-    # Now we just want the bits with signal in it, so do a first round of sigma clipping
-    result = sigma_clip(lc, sigma=3, masked=True, sigma_lower=np.inf)
-    signal = lc[result.mask]
-    clipped_t = t[result.mask]
-
-    if len(clipped_t) > 0: # If SOME signal was found...
-
-        # Define "real" signal to be any time bin within some interval (e.g. 10 sec)
-        # from a time bin that survived the sigma clipping.
-        interval = 10
-        expanded_idxs = [idx for idx in range(len(t)) if np.min(np.abs(t[idx] - clipped_t)) <= interval]
-        expanded_signal = lc[expanded_idxs]
-        expanded_t = t[expanded_idxs]
-    else: # Maybe the thing is too noisy. For now, just include everything
-        expanded_t = t
-        expanded_signal = lc
-
-    plt.clf()
-    ax = plt.gca()
-    plt.fill_between(t, 0, 1, where=[t0 in expanded_t for t0 in t], color='gray', alpha=0.5, transform=ax.get_xaxis_transform())
-    plt.plot(t, lc)
-    #plt.plot(expanded_t, expanded_signal)
-    plt.xlabel("Time (s)")
-    plt.ylabel("Flux density (Jy)")
-    plt.savefig(f"{obsid}_sigmaclip.png")
 
     # Get the corresponding TOA
+    # (assumes they've already been made before running this script)
     tim_file = f"ppdot_search/{obsid}.tim"
     with open(tim_file, 'r') as tf:
         line = tf.readlines()[0] # These files only have one line in them
         mjd_str = line.split()[2]
         toa = Time(mjd_str, format='mjd')
 
-    # Get the peak flux
-    peak_flux_density = np.max(lightcurve_data[:,1])
+    new_pulse_number = round((toa.gps - int(yaml_files[0][:10]))/P + 0.15) + 1, # <--- 0.15 is a rough, "manual" pulse centering
 
-    with open(yaml_file, 'r') as yf:
-        params = parse_yaml(yf) # returns dictionary
+    if new_pulse_number != prev_pulse_number:
+
+        # Reset the fluence calc
+        fluence = 0
+
+        # Get the corresponding lightcurve files
+        # (assumes they've already been made before running this script)
+        lightcurve_file = f"{obsid}_lightcurve.txt"
+        lightcurve_data = np.loadtxt(lightcurve_file)
+        lc = lightcurve_data[:,1]
+        t = lightcurve_data[:,0]
+        nch = lightcurve_data[:,2] # The number of channels that contributed to each point in the lightcurve
+        dt = t[1] - t[0]
+
+        # Get the peak flux
+        peak_flux_density = np.max(lightcurve_data[:,1])
+
+        with open(yaml_file, 'r') as yf:
+            params = parse_yaml(yf) # returns dictionary
+
         dynspec = Dynspec(**params)
 
         # Get barycentric correction
         coord = SkyCoord(ra=params['RA']*u.hr, dec=params['Dec']*u.deg, frame='icrs')
         time = Time(dynspec.t[0] - dynspec.dt/2, format='gps')
-        bc_correction = bc_corr(coord, time, EPHEMERIS)
+        bc_correction = TimeDelta(bc_corr(coord, time, EPHEMERIS), format='sec')
+        toa += bc_correction
 
         row = {
             "utc": time.utc.datetime.strftime("%Y-%m-%d %H:%M"),
+            "toa": toa.mjd,
+            "pulse_number": new_pulse_number,
             "telescope": params['telescope'],
             "midfreq": f"{0.5*(dynspec.f[0] + dynspec.f[-1]):.2f}",
             "peak": peak_flux_density,
-            "toa": toa.mjd + bc_correction/86400,
         }
+    else:
         table.append(row)
 
-#print(table)
+    print(row)
