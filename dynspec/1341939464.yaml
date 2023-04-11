@@ -4,7 +4,7 @@ Dynamic spectrum:
   Channel width (MHz): 0.64
   Input file: 1341939464_dyn_dynamic_spectrum.csv
   Sample time (s): 0.5
-  T0 (s): 1341939464.25
+  T0 (s): 1341939464
   Transpose: true
 ObsID: 1341939464
 Reference frequency (MHz): low
