@@ -3,8 +3,8 @@ Dynamic spectrum:
   Centre of lowest channel (MHz): 322.0
   Channel width (MHz): 33.
   Input file: 1104313243_dyn_dynamic_spectrum.csv
-  Sample time (s): 2.03
-  T0 (s): 1104313243.6
+  Sample time (s): 2.0
+  T0 (s): 1104313242.6
   Transpose: true
 ObsID: 1104313243
 Reference frequency (MHz): low
