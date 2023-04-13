@@ -15,7 +15,7 @@ Before running this script, make sure that the lightcurves are available:
     make all_lightcurves
 
 Also make sure the TOA analysis has already been done:
-    (See the README in the ppsot_search folder)
+    (See the README in the ppdot_search folder)
 '''
 
 import yaml

@@ -7,3 +7,15 @@ Repository of code and data supporting the newly discovered active long-period r
 - **Dec**: -10:31:49.5 (-10.5304 deg)
 - **Uncertainty**: 0.15"
 
+## Analyses
+
+### Timing
+
+<detail>
+<summary><b>Prepare lightcurves <i>without</i> barycentring</b></summary>
+```
+cd lightcurves_nobary
+
+# Copy the yaml files from ../dynspec/, but switch the 
+```
+</detail>
