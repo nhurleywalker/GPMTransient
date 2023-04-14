@@ -66,7 +66,7 @@ plot, = ax1.plot(pol_data["t"], 1000.0*v_profile[294:568], label="Stokes V", col
 plot, = ax1.plot(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], color="blue", label="L", **kwargs)
 ax1.errorbar(pol_data["t"], 1000.0*pol_data["ampPeakPIfit"], yerr=1000*pol_data["dAmpPeakPIfit"], color="blue", **ewargs)
 ax1.legend(fontsize=5)
-ax1.set_ylabel("$S$ / mJy beam$^{-1}$")
+ax1.set_ylabel("$S$ (mJy beam$^{-1}$)")
 
 ax2 = fig.add_subplot(412, sharex=ax1)
 #plot, = ax2.plot(pol_data["t"], 100000*pol_data["ampPeakPIfit"]/pol_data["ImJy"], color="blue", label="P%", **kwargs)
@@ -86,7 +86,7 @@ plot, = ax2.plot(pol_data["t"][s], ratio_v[s], color="magenta", ls="None", label
 ax2.errorbar(pol_data["t"][s], ratio_v[s], yerr=yerr_v[s], color="magenta", **ewargs)
 ax2.axhline(0, color='k', lw=0.5, alpha=1)
 #ax2.errorbar(pol_data["t"], 100*pol_data["fracPol"], yerr=yerr, color="green", **ewargs)
-ax2.set_ylabel("fract. pol. / %")
+ax2.set_ylabel("frac. pol. (%)")
 ax2.set_ylim([-10, 100])
 ax2.legend(fontsize=5)
 
@@ -118,8 +118,8 @@ ax3.errorbar(tp[s], pa[s], yerr=epa[s], color="blue", **ewargs)
 ax3.plot(tp[s], pa[s] + 180, ls="None", color="blue", **kwargs)
 ax3.errorbar(tp[s], pa[s] + 180, yerr=epa[s], color="blue", **ewargs)
 
-ax3.set_xlabel("Time / s")
-ax3.set_ylabel("PA / $^\circ$")
+ax3.set_xlabel("Time (s)")
+ax3.set_ylabel("PA ($^\circ$)")
 ax3.set_yticks([0, 180, 360])
 ax3.set_ylim([0, 360])
 
