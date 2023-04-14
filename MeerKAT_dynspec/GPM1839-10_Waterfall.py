@@ -87,7 +87,8 @@ axs[1].set_ylabel("Frequency (MHz)")
 im = axs[1].imshow(dedisperse(data, channel_freqs, tres, 273.5), **plot_args)
 axs[0].set_ylabel("Frequency (MHz)")
 
-#axs[0].text(0, 0, "a")
+axs[0].text(117, 1040, "a", color='white')
+axs[1].text(117, 1040, "b", color='white')
 
 #cbar = plt.colorbar(im)
 
