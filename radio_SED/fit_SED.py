@@ -25,8 +25,8 @@ cm = 1/2.54
 #TOPCSV = 'three_point_spectrum.csv'
 
 markers = {
-    'MWA':{'marker':'o', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':1},
-    'MeerKAT':{'marker':'s', 'color':'green', 'label':'MeerKAT', 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':1},
+    'MWA':{'marker':'o', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':2},
+    'MeerKAT':{'marker':'s', 'color':'green', 'label':'MeerKAT', 'markeredgewidth':0.1, 'elinewidth':0.2, 'markersize':2},
     'ASKAP':{'marker':'x', 'color':'blue', 'label':'ASKAP', 'markersize':0.5},
     'Parkes':{'marker':'+', 'color':'red', 'label':'Parkes'}
 }
@@ -303,31 +303,31 @@ def make_ax1(ax1, nu, df):
         sigma=df.fluxerr,
         absolute_sigma=True
     )
-    print(fit_res)
+#    print(fit_res)
 
-    no_samps = 1000
-    samps = np.random.multivariate_normal(
-        fit_res[0], fit_res[1], size=no_samps
-    ).swapaxes(0,1)
-    
-    freq = nu
-    models = fit_func(
-        nu[:, None],
-        *samps
-    )
-
-    q16, q50, q84 = np.percentile(models, [16, 50, 84], axis=1)
-    
-    ax1.plot(
-        nu,
-            q50,
-            lw=0.5,
-        )
-    ax1.fill_between(
-        nu,
-        q16, q84, alpha=0.3
-        )
-
+#    no_samps = 1000
+#    samps = np.random.multivariate_normal(
+#        fit_res[0], fit_res[1], size=no_samps
+#    ).swapaxes(0,1)
+#    
+#    freq = nu
+#    models = fit_func(
+#        nu[:, None],
+#        *samps
+#    )
+#
+#    q16, q50, q84 = np.percentile(models, [16, 50, 84], axis=1)
+#    
+#    ax1.plot(
+#        nu,
+#            q50,
+#            lw=0.5,
+#        )
+#    ax1.fill_between(
+#        nu,
+#        q16, q84, alpha=0.3
+#        )
+#
     ax1.set(
         xscale='log',
         yscale='log',

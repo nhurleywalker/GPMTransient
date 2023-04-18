@@ -4,9 +4,9 @@ Dynamic spectrum:
   Channel width (MHz): 33.
   Input file: 0880376783_dyn_dynamic_spectrum.csv
   Sample time (s): 16.8
-  T0 (s): 880376799.8
+  T0 (s): 880376774.6
   Transpose: true
-ObsID: 0880376799
+ObsID: 0880376783
 Reference frequency (MHz): low
 Telescope: GMRT
 RFI Mask:
