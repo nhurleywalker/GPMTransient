@@ -200,8 +200,12 @@ for row in table:
             print(f"  & {row['utcs'][i]} & & {row['telescopes'][i]} & {row['midfreq'][i]} & & & & \\\\")
 
 
-'''
 # Also, make a simple CSV
 with open("pulse_table.csv", "w") as csv:
-    write(
-'''
+    # Write the header line
+    f.write("Pulse number,UTC,Barycentred TOA (MJD),Telescope,Frequency (MHz),Peak flux density at freq (Jy),Peak flux density at 1 GHz (mJy),Fluence at freq (Jy s),Fluence at 1 GHz (Jy s)")
+
+    # Write the rows
+    for row in table:
+        for i in range(row['num_obs']):
+            f.write(f"{row['pulse_number']},{row['utcs'][i]},{row['toa']},{row['telescopes'][i]},{row['midfreq'][i]},{multirow(row['peak'])},{multirow(row['peak_1GHz'])},{multirow(row['fluence'])},{multirow(row['fluence_1GHz'])}")
