@@ -198,3 +198,10 @@ for row in table:
         print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['peak_1GHz'])} & {multirow(row['fluence'])} & {multirow(row['fluence_1GHz'])} \\\\")
         for i in range(1, row['num_obs']):
             print(f"  & {row['utcs'][i]} & & {row['telescopes'][i]} & {row['midfreq'][i]} & & & & \\\\")
+
+
+'''
+# Also, make a simple CSV
+with open("pulse_table.csv", "w") as csv:
+    write(
+'''
