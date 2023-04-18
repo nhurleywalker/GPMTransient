@@ -120,11 +120,11 @@ for yaml_file in yaml_files:
             'num_obs': 1,
             'pulse_number': new_pulse_number,
             'utcs': [utc],
-            'toa': f"{toa.mjd:.4f}",
+            'toa': f"{toa.mjd:.5f}",
             'telescopes': [telescope],
             'midfreq': [f"{midfreq:.0f}"],
             'peak': f"{peak_flux_density:.1f}",
-            'peak_1GHz': f"{peak_flux_density*scale_factor:.3f}",
+            'peak_1GHz': f"{peak_flux_density*scale_factor*1e3:.0f}", # in mJy
             'fluence': f"{fluence:.0f}",
             'fluence_1GHz': f"{fluence*scale_factor:.2f}",
         }
@@ -168,7 +168,7 @@ for yaml_file in yaml_files:
         fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_nch_frac])
 
         row['peak'] = f"{peak_flux_density:.1f}"
-        row['peak_1GHz'] = f"{peak_flux_density*scale_factor:.3f}"
+        row['peak_1GHz'] = f"{peak_flux_density*scale_factor*1e3:.0f}" # in mJy
         row['fluence'] = f"{fluence:.0f}"
         row['fluence_1GHz'] = f"{fluence*scale_factor:.2f}"
 
@@ -179,10 +179,11 @@ for yaml_file in yaml_files:
 # Format the table to LaTeX table format
 
 # The column headers:
-print("Pulse number & UTC & TOA & Telescope & Frequency (MHz) & \\multicolumn{2}{c}{Peak flux density (Jy)} & \\multicolumn{2}{c}{Fluence (Jy s)} \\\\")
+print("Pulse & UTC & Barycentered & Telescope & Frequency & \\multicolumn{2}{c}{Peak flux density} & \\multicolumn{2}{c}{Fluence} \\\\")
 
 # The column subheaders
-print("& & & & & At freq & At 1 GHz & At freq & At 1 GHz \\\\")
+print("number & & TOA & & & At freq & At 1 GHz & At freq & At 1 GHz \\\\")
+print(" & & (MJD) & & (MHz) & (Jy) & (mJy) & (Jy s) & (Jy s) \\\\")
 
 print("\\hline")
 
@@ -196,4 +197,4 @@ for row in table:
     else:
         print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['peak_1GHz'])} & {multirow(row['fluence'])} & {multirow(row['fluence_1GHz'])} \\\\")
         for i in range(1, row['num_obs']):
-            print(f"  & {row['utcs'][0]} & & {row['telescopes'][0]} & {row['midfreq'][0]} & & & & \\\\")
+            print(f"  & {row['utcs'][i]} & & {row['telescopes'][i]} & {row['midfreq'][i]} & & & & \\\\")
