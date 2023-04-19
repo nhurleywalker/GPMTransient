@@ -183,6 +183,15 @@ for yaml_file in yaml_files:
     table.append(row)
     prev_pulse_number = new_pulse_number
 
+    # Write out 'fluence lightcurves', just to have something to eyeball to check for any irregularities
+    fig, ax = plt.subplots(1,1)
+    plt.plot(fluence_bins)
+    plt.xlabel("Time bin number")
+    plt.ylabel("Fluence (Jy s)")
+    plt.title(f"{utc}")
+    plt.savefig(f'{obsid}_fluencebins.png')
+    plt.close()
+
 # Format the table to LaTeX table format
 print("Writing pulse_table.tex...")
 with open("pulse_table.tex", "w") as tex:
