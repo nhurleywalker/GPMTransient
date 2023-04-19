@@ -10,7 +10,6 @@ Repository of code and data supporting the newly discovered active long-period r
 ## Analyses
 
 Each recipe below corresponds to a different folder within this one.
-The listed command(s) are inteded to be run in the corresponding subfolder.
 In some cases, the subfolder has its own `README.md` with more in-depth instructions.
 
 Some subfolders are prerequisites for others, according to the following diagram:
@@ -23,6 +22,7 @@ To re-make the flowchart:
 dot -Tpng flowchart.dot > flowchart.png
 ```
 
+The listed command(s) are inteded to be run in the corresponding subfolder.
 In all of the below, if there are `make` commands, you can use the `-j` command to parallelise execution.
 
 <details>
