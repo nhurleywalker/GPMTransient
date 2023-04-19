@@ -46,9 +46,6 @@ def main(args):
     elif Nk > Nl:
         kernel_rffted = kernel_rffted[:Nl]
 
-    # Apply the filter
-    lightcurve_filtered_rffted = lightcurve_rffted * kernel_rffted
-
     # If the precision wanted is higher than the data time resolution,
     # calculate the number of time bins in the result
     N = len(lightcurve)
@@ -58,12 +55,15 @@ def main(args):
             newN *= int(np.round(dt / args.toa_precision))
     new_dt = dt*(N/newN)
 
+    # Apply the filter
+    lightcurve_filtered_rffted = lightcurve_rffted * kernel_rffted
+
     # Inverse FFT
     lightcurve_filtered = np.fft.irfft(lightcurve_filtered_rffted, n=newN, norm='ortho')
 
     # Construct the relevant time axes
     t = lightcurve_data[:,0]
-    new_t0 = t[0] - dt/2 + new_dt/2
+    new_t0 = t[0] #- dt/2 + new_dt/2
     new_t = np.arange(newN)*new_dt + new_t0
 
     # Get the maximum in the filtered lightcurve and call that the TOA
