@@ -9,15 +9,16 @@ Repository of code and data supporting the newly discovered active long-period r
 
 ## Analyses
 
+Each recipe below corresponds to a different folder within this one.
+The listed command(s) are inteded to be run in the corresponding subfolder.
+In some cases, the subfolder has its own `README.md` with more in-depth instructions.
 In all of the below, if there are `make` commands, you can use the `-j` command to parallelise execution.
 
 <details>
-<summary><b>Prepare lightcurves <i>without</i> barycentring</b></summary>
+<summary><b>lightcurves_nobary</b>Prepare lightcurves <i>without</i> barycentring</summary>
 
 ```
-cd lightcurves_nobary
 make lightcurves
-cd ..
 ```
 
 Expected output: `*_lightcurve.txt` files
@@ -25,12 +26,10 @@ Expected output: `*_lightcurve.txt` files
 </details>
 
 <details>
-<summary><b>Combining same-pulse lightcurves (and lag analysis)</b></summary>
+<summary><b>lag_analysis</b>Combining same-pulse lightcurves and lag analysis</summary>
 
 ```
-cd lag_analysis
 python lag_analysis.py
-cd ..
 ```
 
 Expected output: `*_lightcurve_mod.txt` files
@@ -38,12 +37,10 @@ Expected output: `*_lightcurve_mod.txt` files
 </details>
 
 <details>
-<summary><b>Get the non-barycentred TOAs</b></summary>
+<summary><b>toas_nobary</b>Get the non-barycentred TOAs</summary>
 
 ```
-cd toas_nobary
 make all_toas_mod.tim
-cd ..
 ```
 
 Expected output: `all_toas_mod.tim`
@@ -51,12 +48,30 @@ Expected output: `all_toas_mod.tim`
 </details>
 
 <details>
-<summary><b>Grid search in F0 and F1</b></summary>
+<summary><b>toas_bary</b>Get the barycentred TOAs</summary>
 
 ```
-cd P_Pdot_diagram
+make all_toas.tim
+```
+
+Expected output: `all_toas_mod.tim`
+
+</details>
+
+<details>
+<summary><b>P_Pdot_diagram</b>Grid search in F0 and F1</summary>
+
+```
 python grid_search_f_fdot.py dofit.par ../toas_nobary/all_toas_mod.tim
-cd ..
+```
+
+</details>
+
+<details>
+<summary><b>make_table</b>Generate `.tex` and `.csv` tables of individual pulse information</summary>
+
+```
+python make_table.py
 ```
 
 </details>
