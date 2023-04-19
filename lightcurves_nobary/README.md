@@ -21,12 +21,12 @@ awk -F '[ ]' '/barycentric/ { $$4 = "false" } /Input file/ {$5 = "../dynspec/" $
 or, to run on all available `../dynspec/*.yaml` files,
 
 ```
-make prepare_yaml_files
+make yaml_files
 ```
 
 which puts the revised `yaml` files into this directory.
 Now we are ready to make the lightcurves themselves, by running the `dedisperse_dynspec.py` script on the new `yaml` files, which can be invoked with
 
 ```
-make prepare_lightcurves
+make lightcurves
 ```

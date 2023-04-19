@@ -10,8 +10,6 @@ from astropy import units as u
 import yaml
 import copy
 
-EPHEMERIS = 'de430.bsp'
-
 # The DM delay formula assumes time in seconds, frequencies in MHz
 def calc_dmdelay(DM, flo, fhi):
     return 4.148808e3*DM*(1/(flo*flo) - 1/(fhi*fhi))
@@ -348,7 +346,7 @@ def main(**kwargs):
                 from bc_corr import bc_corr
                 coord = SkyCoord(ra=kwargs['RA']*u.hr, dec=kwargs['Dec']*u.deg, frame='icrs')
                 time = Time(timeaxis[0], format='gps')
-                bc_correction = bc_corr(coord, time, EPHEMERIS)
+                bc_correction = bc_corr(coord, time, kwargs['ephemeris'])
                 header += 'Using barycentric correction of {} s\n'.format(bc_correction)
                 timeaxis += bc_correction # Add the barycentric correction
             else:
@@ -458,6 +456,7 @@ if __name__ == "__main__":
     parser.add_argument('--padding', type=str, help='Number of seconds worth of padding to use along the time axis before dedispersion. The padded pixels will be filled with the value of --mask_value. If set to "DM", and if only one DM is given, then the padding will be chosen to just ensure that there is no wrapping during dedispersion')
     parser.add_argument('--RA', type=float, help='The RA of the source in decimal hours')
     parser.add_argument('--Dec', type=float, help='The Dec of the source in decimal degrees')
+    parser.add_argument('--ephemeris', default='de430.bsp', help='The path to the planetary ephemeris file to use (default de430.bsp)')
     parser.add_argument('--yaml', type=argparse.FileType('r'), help='Obtain parameters from yaml file. These will be overriden by equivalent parameters given on the command line')
     parser.add_argument('--yaml_help', action='store_true', help='More detailed documentation on the --yaml option')
 
