@@ -26,7 +26,7 @@ dot -Tpng flowchart.dot > flowchart.png
 In all of the below, if there are `make` commands, you can use the `-j` command to parallelise execution.
 
 <details>
-<summary><b>lightcurves_nobary</b>Prepare lightcurves <i>without</i> barycentring</summary>
+<summary><b>lightcurves_nobary</b>: Prepare lightcurves <i>without</i> barycentring</summary>
 
 ```
 make lightcurves
@@ -37,7 +37,7 @@ Expected output: `*_lightcurve.txt` files
 </details>
 
 <details>
-<summary><b>lag_analysis</b>Combining same-pulse lightcurves and lag analysis</summary>
+<summary><b>lag_analysis</b>: Combining same-pulse lightcurves and lag analysis</summary>
 
 ```
 python lag_analysis.py
@@ -48,7 +48,7 @@ Expected output: `*_lightcurve_mod.txt` files
 </details>
 
 <details>
-<summary><b>toas_nobary</b>Get the non-barycentred TOAs</summary>
+<summary><b>toas_nobary</b>: Get the non-barycentred TOAs</summary>
 
 ```
 make all_toas_mod.tim
@@ -59,7 +59,7 @@ Expected output: `all_toas_mod.tim`
 </details>
 
 <details>
-<summary><b>toas_bary</b>Get the barycentred TOAs</summary>
+<summary><b>toas_bary</b>: Get the barycentred TOAs</summary>
 
 ```
 make all_toas.tim
@@ -70,7 +70,7 @@ Expected output: `all_toas_mod.tim`
 </details>
 
 <details>
-<summary><b>P_Pdot_diagram</b>Grid search in F0 and F1</summary>
+<summary><b>P_Pdot_diagram</b>: Grid search in F0 and F1</summary>
 
 ```
 python grid_search_f_fdot.py dofit.par ../toas_nobary/all_toas_mod.tim
@@ -79,7 +79,7 @@ python grid_search_f_fdot.py dofit.par ../toas_nobary/all_toas_mod.tim
 </details>
 
 <details>
-<summary><b>make_table</b>Generate `.tex` and `.csv` tables of individual pulse information</summary>
+<summary><b>make_table</b>: Generate `.tex` and `.csv` tables of individual pulse information</summary>
 
 ```
 python make_table.py
