@@ -13,4 +13,4 @@ all_toas_mod.tim: $(TOAS_MOD)
 #------------------------------------------
 
 %_mod.tim: ../lag_analysis/%_lightcurve_mod.txt generate_TOA.py
-	python $(word 2,$^) $*.yaml $< $(TOA_ERR_SEC) --toa_precision=0.5 --save_plot=$*_toa.png > $@
+	python $(word 2,$^) ../lightcurves_nobary/$*.yaml $< $(TOA_ERR_SEC) --toa_precision=0.5 --save_plot=$*_toa.png > $@

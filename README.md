@@ -9,6 +9,8 @@ Repository of code and data supporting the newly discovered active long-period r
 
 ## Analyses
 
+In all of the below, if there are `make` commands, you can use the `-j` command to parallelise execution.
+
 ### Timing
 
 <detail>
@@ -34,4 +36,10 @@ cd ..
 </detail>
 
 <detail>
-<summary><b>
+<summary><b>Get the TOAs</b></summary>
+```
+make all_toas_mod.tim
+```
+
+**Expected output**: `*_mod.tim`
+</detail>
