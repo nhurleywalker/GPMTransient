@@ -1,0 +1,7 @@
+digraph G {
+
+  lightcurves_nobary -> lag_analysis -> toas_nobary -> P_Pdot_diagram;
+  lightcurves_bary -> toas_bary -> pulse_table
+  toas_nobary -> pulse_table
+  
+}
