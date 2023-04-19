@@ -188,9 +188,10 @@ print(" & & (MJD) & & (MHz) & (Jy) & (mJy) & (Jy s) & (Jy s) \\\\")
 print("\\hline")
 
 # The data
+def multirow(val):
+    return f"\\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
+
 for row in table:
-    def multirow(val):
-        return f"\\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
 
     if row['num_obs'] == 1:
         print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa']} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['peak_1GHz']} & {row['fluence']} & {row['fluence_1GHz']} \\\\")
@@ -203,9 +204,9 @@ for row in table:
 # Also, make a simple CSV
 with open("pulse_table.csv", "w") as csv:
     # Write the header line
-    f.write("Pulse number,UTC,Barycentred TOA (MJD),Telescope,Frequency (MHz),Peak flux density at freq (Jy),Peak flux density at 1 GHz (mJy),Fluence at freq (Jy s),Fluence at 1 GHz (Jy s)")
+    print("Pulse number,UTC,Barycentred TOA (MJD),Telescope,Frequency (MHz),Peak flux density at freq (Jy),Peak flux density at 1 GHz (mJy),Fluence at freq (Jy s),Fluence at 1 GHz (Jy s)", file=csv)
 
     # Write the rows
     for row in table:
         for i in range(row['num_obs']):
-            f.write(f"{row['pulse_number']},{row['utcs'][i]},{row['toa']},{row['telescopes'][i]},{row['midfreq'][i]},{multirow(row['peak'])},{multirow(row['peak_1GHz'])},{multirow(row['fluence'])},{multirow(row['fluence_1GHz'])}")
+            print(f"{row['pulse_number']},{row['utcs'][i]},{row['toa']},{row['telescopes'][i]},{row['midfreq'][i]},{row['peak']},{row['peak_1GHz']},{row['fluence']},{row['fluence_1GHz']}", file=csv)
