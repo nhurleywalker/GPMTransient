@@ -165,7 +165,7 @@ plt.xscale('log')
 plt.legend(loc='lower right')
 
 # Magnetic field lines
-x = np.linspace(1e-4,1e6,3000)
+x = np.logspace(-3, 6, 3000)
 def yplace(Gpow, x):
     return ((10**Gpow)**2)/(x * 1.e-11*(6.4*10**19)**2) 
 
@@ -195,7 +195,7 @@ Msolar = 2*1.e33
 M_NS = 1.4*Msolar
 K = 4 * (3 * light_c_cgs**3) * 2 / (5 * 8 * math.pi**2)
 
-x = np.linspace(1e-3,1e7,6000)
+x = np.logspace(-3, 6, 3000)
 
 # Chen 1 Pure Dipole
 chen1_ppdot_pd = 1/K * ((2.2*1.e12 * (R_NS6)**(-19/8) * x**(15/8))**2) * (R_NS)**4 / M_NS  / x
@@ -215,8 +215,6 @@ beta = 10
 chen4_ppdot_tw_multi = 1/K * ((9.2*1.e10 * beta**(-1/4) * (R_NS6)**(-2) * x**(3/2))**2) * (R_NS)**4 / M_NS  / x
 plt.plot(x,chen4_ppdot_tw_multi/1.e-11, linestyle='solid', color='black', markersize=12, alpha=1, lw=0.5)
 
-
-
 # Zhang III 
 zhangIII_ppdot = 1/K * ((9.2*1.e25 * (R_NS)**(-9/4) * x**(7/4))**2) * (R_NS)**4 / M_NS  / x
 plt.plot(x,zhangIII_ppdot/1.e-11, linestyle='dashed', color='black', markersize=12, alpha=1, lw=0.5)
@@ -225,7 +223,9 @@ plt.plot(x,zhangIII_ppdot/1.e-11, linestyle='dashed', color='black', markersize=
 # Zhang III prime
 zhangIIIprime_ppdot = 1/K * ((3.5*1.e23 * (R_NS)**(-2) * x**(3/2))**2) * (R_NS)**4 / M_NS  / x
 plt.plot(x,zhangIIIprime_ppdot/1.e-11, linestyle='dotted', color='black', markersize=12, alpha=1, lw=0.5)
-plt.fill_between(x, chen1_ppdot_pd/1.e-11, chen4_ppdot_tw_multi/1.e-11, color='grey', alpha=0.2)
+
+plt.fill_between(x, chen4_ppdot_tw_multi/1.e-11, np.maximum(chen1_ppdot_pd/1.e-11, zhangIII_ppdot/1.e-11), color='grey', alpha=0.2)
+
 
 #
 plt.xlim(8e-3, 1.e6)
