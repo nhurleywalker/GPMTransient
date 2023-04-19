@@ -38,8 +38,22 @@ cd ..
 <detail>
 <summary><b>Get the TOAs</b></summary>
 ```
+cd toas
 make all_toas_mod.tim
+cd ..
 ```
 
-**Expected output**: `*_mod.tim`
+**Expected output**: `all_toas_mod.tim`
 </detail>
+
+<detail>
+<summary><b>Grid search in F0 and F1</b><summary>
+```
+cd P_Pdot_diagram
+python grid_search_f_fdot.py dofit.par ../toas/all_toas_mod.tim
+cd ..
+```
+
+</detail>
+
+### Producing the pulse table in Supplementary
