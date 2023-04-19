@@ -42,9 +42,9 @@ def main():
     print(f.get_summary(nodmx=True))
 
     # Set up the gridding
-    nsig_grid_f0 = 5  # Number of sigma to search around nominal value
+    nsig_grid_f0 = 10  # Number of sigma to search around nominal value
     npts_f0 = 150  # Number of grid points for this parameter
-    nsig_grid_f1 = 3
+    nsig_grid_f1 = 6
     npts_f1 = 300
 
     print(f"Setting up F0 grid ({npts_f0} points around nominal value +\- {nsig_grid_f0}-sigma)")
