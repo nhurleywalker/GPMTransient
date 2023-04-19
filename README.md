@@ -15,7 +15,23 @@ Repository of code and data supporting the newly discovered active long-period r
 <summary><b>Prepare lightcurves <i>without</i> barycentring</b></summary>
 ```
 cd lightcurves_nobary
-
-# Copy the yaml files from ../dynspec/, but switch the 
+make lightcurves
+cd ..
 ```
+
+**Expected output**: `*_lightcurve.txt` files
 </detail>
+
+<detail>
+<summary><b>Combining same-pulse lightcurves (and lag analysis)</b></summary>
+```
+cd lag_analysis
+python lag_analysis.py
+cd ..
+```
+
+**Expected output**: `*_lightcurve_mod.txt` files
+</detail>
+
+<detail>
+<summary><b>
