@@ -178,8 +178,8 @@ for i in range(0, len(final_list)):
                     t3_start = 0
                     t3_end = -1
                 if (t1_start or t1_start == 0) and (t1_end or t1_end == 0) and (t3_start or t3_start == 0) and (t3_end or t3_end == 0):
-                    s1_crop = s1[t1_start:t1_end] #/np.nanmax(s1)
-                    s3_crop = s2[t3_start:t3_end] #/np.nanmax(s2)
+                    s1_crop = s1[t1_start:t1_end+1] #/np.nanmax(s1)
+                    s3_crop = s2[t3_start:t3_end+1] #/np.nanmax(s2)
                     if len(s1_crop) == len(s3_crop):
                         corr_matrix[i, j] = np.correlate(s1_crop, s3_crop)
                     else:
