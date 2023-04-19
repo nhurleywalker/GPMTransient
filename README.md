@@ -43,7 +43,7 @@ Expected output: `*_lightcurve_mod.txt` files
 <summary><b>Get the TOAs</b></summary>
 
 ```
-cd toas
+cd toas_nobary
 make all_toas_mod.tim
 cd ..
 ```
@@ -57,7 +57,7 @@ Expected output: `all_toas_mod.tim`
 
 ```
 cd P_Pdot_diagram
-python grid_search_f_fdot.py dofit.par ../toas/all_toas_mod.tim
+python grid_search_f_fdot.py dofit.par ../toas_nobary/all_toas_mod.tim
 cd ..
 ```
 
