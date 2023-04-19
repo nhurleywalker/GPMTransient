@@ -27,17 +27,23 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.stats import sigma_clip
 import datetime
+import sys
+sys.path.append("../dynspec")
 from dedisperse_dynspec import Dynspec, parse_yaml
 from bc_corr import bc_corr
+
 
 def curved_law(nu, ref_nu=1*u.GHz, s_nu=119*u.mJy, alpha=-3.4, q=-0.61):
     return s_nu * (nu/ref_nu) ** alpha * \
             np.exp(q * np.log(nu/ref_nu)**2)
 
 
-EPHEMERIS = 'de430.bsp'
+EPHEMERIS = '../dynspec/de430.bsp'
+TOAS_BARY_PATH = "../toas_bary"
+TOAS_NOBARY_PATH = "../toas_nobary"
+LIGHTCURVES_BARY_PATH = "../lightcurves_bary"
 
-yaml_files = glob.glob('*.yaml')
+yaml_files = glob.glob(f'{LIGHTCURVES_BARY_PATH}/*.yaml')
 yaml_files.sort()
 
 P = 1318.1956 # Approximate period in seconds
@@ -48,11 +54,12 @@ table = []
 
 for yaml_file in yaml_files:
 
-    obsid = yaml_file[:10]
+    print(f"Reading {yaml_file}...")
+    obsid = yaml_file[-15:-5]
 
     # Get the corresponding TOA
     # (assumes they've already been made before running this script)
-    tim_file = f"ppdot_search/{obsid}_orig.tim"
+    tim_file = f"{TOAS_BARY_PATH}/{obsid}.tim"
     with open(tim_file, 'r') as tf:
         line = tf.readlines()[0] # These files only have one line in them
     mjd_str = line.split()[2]
@@ -78,17 +85,17 @@ for yaml_file in yaml_files:
 
     # Get the corresponding lightcurve files
     # (assumes they've already been made before running this script)
-    lightcurve_file = f"{obsid}_lightcurve.txt"
+    lightcurve_file = f"{LIGHTCURVES_BARY_PATH}/{obsid}_lightcurve.txt"
     lightcurve_data = np.loadtxt(lightcurve_file)
 
-    new_pulse_number = round((toa.gps - int(yaml_files[0][:10]))/P + 0.15) + 1 # <--- 0.15 is a rough, "manual" pulse centering
+    new_pulse_number = round((toa.gps - int(yaml_files[0][-15:-5]))/P + 0.15) + 1 # <--- 0.15 is a rough, "manual" pulse centering
 
     if new_pulse_number != prev_pulse_number:
 
         # If this is the first of two (or more) observations in the same pulse, there should be a .tim file
         # for the joint TOA
         try:
-            tim_file = f"ppdot_search/{obsid}_mod.tim"
+            tim_file = f"{TOAS_NOBARY_PATH}/{obsid}_mod.tim"
             with open(tim_file, 'r') as tf:
                 line = tf.readlines()[0] # These files only have one line in them
             mjd_str = line.split()[2]
@@ -177,31 +184,34 @@ for yaml_file in yaml_files:
     prev_pulse_number = new_pulse_number
 
 # Format the table to LaTeX table format
+print("Writing pulse_table.tex...")
+with open("pulse_table.tex", "w") as tex:
 
-# The column headers:
-print("Pulse & UTC & Barycentered & Telescope & Frequency & \\multicolumn{2}{c}{Peak flux density} & \\multicolumn{2}{c}{Fluence} \\\\")
+    # The column headers:
+    print("Pulse & UTC & Barycentered & Telescope & Frequency & \\multicolumn{2}{c}{Peak flux density} & \\multicolumn{2}{c}{Fluence} \\\\", file=tex)
 
-# The column subheaders
-print("number & & TOA & & & At freq & At 1 GHz & At freq & At 1 GHz \\\\")
-print(" & & (MJD) & & (MHz) & (Jy) & (mJy) & (Jy s) & (Jy s) \\\\")
+    # The column subheaders
+    print("number & & TOA & & & At freq & At 1 GHz & At freq & At 1 GHz \\\\", file=tex)
+    print(" & & (MJD) & & (MHz) & (Jy) & (mJy) & (Jy s) & (Jy s) \\\\", file=tex)
 
-print("\\hline")
+    print("\\hline", file=tex)
 
-# The data
-def multirow(val):
-    return f"\\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
+    # The data
+    def multirow(val):
+        return f"\\multirow{{{row['num_obs']}}}{{*}}{{{val}}}"
 
-for row in table:
+    for row in table:
 
-    if row['num_obs'] == 1:
-        print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa']} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['peak_1GHz']} & {row['fluence']} & {row['fluence_1GHz']} \\\\")
-    else:
-        print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['peak_1GHz'])} & {multirow(row['fluence'])} & {multirow(row['fluence_1GHz'])} \\\\")
-        for i in range(1, row['num_obs']):
-            print(f"  & {row['utcs'][i]} & & {row['telescopes'][i]} & {row['midfreq'][i]} & & & & \\\\")
+        if row['num_obs'] == 1:
+            print(f"{row['pulse_number']} & {row['utcs'][0]} & {row['toa']} & {row['telescopes'][0]} & {row['midfreq'][0]} & {row['peak']} & {row['peak_1GHz']} & {row['fluence']} & {row['fluence_1GHz']} \\\\", file=tex)
+        else:
+            print(f"{multirow(row['pulse_number'])} & {row['utcs'][0]} & {multirow(row['toa'])} & {row['telescopes'][0]} & {row['midfreq'][0]} & {multirow(row['peak'])} & {multirow(row['peak_1GHz'])} & {multirow(row['fluence'])} & {multirow(row['fluence_1GHz'])} \\\\", file=tex)
+            for i in range(1, row['num_obs']):
+                print(f"  & {row['utcs'][i]} & & {row['telescopes'][i]} & {row['midfreq'][i]} & & & & \\\\", file=tex)
 
 
 # Also, make a simple CSV
+print("Writing pulse_table.csv...")
 with open("pulse_table.csv", "w") as csv:
     # Write the header line
     print("Pulse number,UTC,Barycentred TOA (MJD),Telescope,Frequency (MHz),Peak flux density at freq (Jy),Peak flux density at 1 GHz (mJy),Fluence at freq (Jy s),Fluence at 1 GHz (Jy s)", file=csv)

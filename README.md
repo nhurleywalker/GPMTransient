@@ -11,8 +11,6 @@ Repository of code and data supporting the newly discovered active long-period r
 
 In all of the below, if there are `make` commands, you can use the `-j` command to parallelise execution.
 
-### Timing
-
 <details>
 <summary><b>Prepare lightcurves <i>without</i> barycentring</b></summary>
 
@@ -40,7 +38,7 @@ Expected output: `*_lightcurve_mod.txt` files
 </details>
 
 <details>
-<summary><b>Get the TOAs</b></summary>
+<summary><b>Get the non-barycentred TOAs</b></summary>
 
 ```
 cd toas_nobary
@@ -62,5 +60,3 @@ cd ..
 ```
 
 </details>
-
-### Producing the pulse table in Supplementary
