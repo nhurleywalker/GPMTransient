@@ -8,7 +8,7 @@ Dynamic spectrum:
   Transpose: true
 ObsID: 1208352415
 Reference frequency (MHz): low
-Telescope: VLA
+Telescope: VLITE
 RFI Mask:
   Value: 0.0
 RA: 18.6505
