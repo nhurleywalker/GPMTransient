@@ -14,8 +14,6 @@ import pandas as pd
 import scipy.stats
 from matplotlib.ticker import FormatStrFormatter
 
-from plot_P_Pdot import align_marker
-
 def P(f0):
    return 1/f0
 
@@ -42,10 +40,12 @@ plt.rcParams.update({
 
 cm = 1/2.54  # centimeters in inches
 
+errargs = dict(yerr=0.08, lolims=1, uplims=0, lw=0.5, color='magenta', markersize=0, capsize=1.5, elinewidth=0.5, markeredgewidth=0.0, xerr=0.004)
+
 DOF = 56 # 58 TOAs minus 2 fitted parameters
 
 #df = pd.read_csv("chi2_grid_orig.csv", delimiter=",")
-df = pd.read_csv("chi2_grid.csv", delimiter=",")
+df = pd.read_csv("chi2_grid_38s_errors.csv", delimiter=",")
 #df.columns = ["Name", "RA", "Dec"]
 print(df.keys())
 xsize = len(np.unique(df['F0']))
@@ -127,8 +127,6 @@ sig1_B = B(sig1_P, sig1_Pdot)
 sig1_Edot = Edot(sig1_P, sig1_Pdot)
 sig1_tau = s_to_Myr(tau(sig1_P, sig1_Pdot))
 
-#print(np.nanmin(df['F0'])- best_f0)
-#print(np.nanmax(df['F0'])- best_f0)
 im = ax.imshow(arr/DOF, origin="lower", extent=[1.e9*(np.nanmin(df['F0'])- best_f0), 1.e9*(np.nanmax(df['F0'])-best_f0), 1.e18*np.nanmin(df['F1']), 1.e18*np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="bone_r", norm=LogNorm(vmin=1, vmax=10))
 ax.set_ylim([-1.5, 1.5])
 ax.set_xlim([-0.2, 0.2])
@@ -136,10 +134,11 @@ ax.set_xlabel(r'$\Delta f$  / nHz')
 ax.set_ylabel(r'$\Delta \dot{f}$ / $10^{-18}$')
 ax.axvline(0, lw=0.5, ls="--", color="k", alpha=0.5)
 ax.axhline(0, lw=0.5, ls="--", color="k", alpha=0.5)
-ax.scatter(best_f0 - best_f0, 1.e18*best_f1, marker="+", zorder=30, lw=0.5, s=5)
-ax.scatter(sig1_f0 - best_f0/1.e9, sig1_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=1, zorder=30, lw=0.5)
-ax.scatter(sig2_f0 - best_f0/1.e9, sig2_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.5, zorder=30, lw=0.5)
-ax.scatter(sig3_f0 - best_f0/1.e9, sig3_f1, marker=align_marker(r"$\uparrow$", valign="bottom"), color="magenta", alpha=0.2, zorder=30, lw=0.5)
+ax.scatter(best_f0 - best_f0, 1.e18*best_f1, marker="o", zorder=30, lw=0.5, s=10)
+
+ax.errorbar(sig1_f0 - best_f0/1.e9, sig1_f1, **errargs)
+ax.errorbar(sig2_f0 - best_f0/1.e9, sig2_f1, alpha=0.5, **errargs)
+ax.errorbar(sig3_f0 - best_f0/1.e9, sig3_f1, alpha=0.2, **errargs)
 cb = plt.colorbar(im, label=r"reduced $\chi^2$", format=FormatStrFormatter('%2.0f'))
 cb.ax.yaxis.set_minor_formatter(FormatStrFormatter('%2.0f'))
 fig.savefig("Ppdot_search.pdf", bbox_inches="tight", dpi=300)
