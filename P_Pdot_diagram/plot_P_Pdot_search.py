@@ -14,8 +14,6 @@ import pandas as pd
 import scipy.stats
 from matplotlib.ticker import FormatStrFormatter
 
-from plot_P_Pdot import align_marker
-
 def P(f0):
    return 1/f0
 
@@ -129,8 +127,6 @@ sig1_B = B(sig1_P, sig1_Pdot)
 sig1_Edot = Edot(sig1_P, sig1_Pdot)
 sig1_tau = s_to_Myr(tau(sig1_P, sig1_Pdot))
 
-#print(np.nanmin(df['F0'])- best_f0)
-#print(np.nanmax(df['F0'])- best_f0)
 im = ax.imshow(arr/DOF, origin="lower", extent=[1.e9*(np.nanmin(df['F0'])- best_f0), 1.e9*(np.nanmax(df['F0'])-best_f0), 1.e18*np.nanmin(df['F1']), 1.e18*np.nanmax(df['F1'])], interpolation="none", aspect="auto", cmap="bone_r", norm=LogNorm(vmin=1, vmax=10))
 ax.set_ylim([-1.5, 1.5])
 ax.set_xlim([-0.2, 0.2])
