@@ -16,6 +16,7 @@ tempo_telescope_names = {"murriyang": "pks",
                          "mwa": "mwa",
                          "meerkat": "meerkat",
                          "vla": "vla",
+                         "vlite": "vla",
                          "gmrt": "gmrt"}
 
 def main(args):
