@@ -7,7 +7,7 @@ from astropy.time import Time
 
 import sys
 from os import path
-sys.path.append("..")
+sys.path.append("../dynspec")
 import dedisperse_dynspec as dd
 
 tempo_telescope_names = {"murriyang": "pks",

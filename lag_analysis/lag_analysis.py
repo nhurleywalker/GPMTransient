@@ -47,7 +47,7 @@ def sc(data, level=3, loops=4):
 P = rr(1318.19578) #Period in seconds
 tscat200 = 0.5 # Scattering at 200MHz in seconds
 
-path = "../dynspec/ppdot_search/"
+path = "../lightcurves_nobary/"
 cs = sorted(glob(path+"*_lightcurve.txt"))
 # Remove Parkes data, since it is on a different time scale and is difficult to average with the MWA data
 try:
@@ -60,7 +60,7 @@ final_cs = []
 # deal with light curves that overlap
 skipnext = False
 for i in range(0, len(cs)):
-    outfile = cs[i].replace(".txt", "_mod.txt")
+    outfile = os.path.basename(cs[i]).replace(".txt", "_mod.txt")
     if i < len(cs) -1:
         arr1 = np.loadtxt(cs[i])
         t1 = rr(arr1.T[0])
@@ -178,8 +178,8 @@ for i in range(0, len(final_list)):
                     t3_start = 0
                     t3_end = -1
                 if (t1_start or t1_start == 0) and (t1_end or t1_end == 0) and (t3_start or t3_start == 0) and (t3_end or t3_end == 0):
-                    s1_crop = s1[t1_start:t1_end] #/np.nanmax(s1)
-                    s3_crop = s2[t3_start:t3_end] #/np.nanmax(s2)
+                    s1_crop = s1[t1_start:t1_end+1] #/np.nanmax(s1)
+                    s3_crop = s2[t3_start:t3_end+1] #/np.nanmax(s2)
                     if len(s1_crop) == len(s3_crop):
                         corr_matrix[i, j] = np.correlate(s1_crop, s3_crop)
                     else:
