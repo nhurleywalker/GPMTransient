@@ -8,7 +8,7 @@ BEST_DM = $(shell cat ../BEST_DM)
 
 all_toas_mod.tim: $(TOAS_MOD)
 	echo "FORMAT 1" > $@
-	cat $^ | awk '{$$4 = 60000000; print}' >> $@
+	cat $^ | awk '{$$4 = 38000000; print}' >> $@
 
 #------------------------------------------
 
