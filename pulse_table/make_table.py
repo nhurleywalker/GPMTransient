@@ -51,6 +51,7 @@ prev_pulse_number = None # For keeping track if a given lightcurve is in the sam
 min_nch_frac = 0.25 # Only include time bins with more channels used to calculate them than this fraction of the max number of channels. Example, if a lightcurve is constructed from a total of 100 channels, then only consider time bins that included at least 25 valid channels
 
 table = []
+fluence_bins_to_plot = []
 
 for yaml_file in yaml_files:
 
@@ -139,6 +140,7 @@ for yaml_file in yaml_files:
     else:
         # Pop the previous row from the table
         row = table.pop()
+        fluence_bins_to_plot.pop()
 
         # Update row values
         row['num_obs'] += 1
@@ -182,8 +184,21 @@ for yaml_file in yaml_files:
     # Add the row to the table
     table.append(row)
     prev_pulse_number = new_pulse_number
+    fluence_bins_to_plot.append({
+        "obsid": obsid,
+        "utc": utc,
+        "fluence_bins": fluence_bins
+    })
 
-    # Write out 'fluence lightcurves', just to have something to eyeball to check for any irregularities
+# Write out 'fluence lightcurves', just to have something to eyeball to check for any irregularities
+print("Plotting fluence bins...")
+for fluence_bin_dict in fluence_bins_to_plot:
+
+    # Pull out shorthand variables from dictionary
+    obsid = fluence_bin_dict['obsid']
+    utc = fluence_bin_dict['utc']
+    fluence_bins = fluence_bin_dict['fluence_bins']
+
     fig, ax = plt.subplots(1,1)
     plt.plot(fluence_bins)
     plt.xlabel("Time bin number")
