@@ -17,3 +17,5 @@ yaml_files: $(YAML_FILES)
 %_lightcurve.txt: ../dynspec/dedisperse_dynspec.py %.yaml $(EPHEMERIS)
 	python $< --dms $(BEST_DM) --lightcurve $@ --yaml $(word 2,$^) --ephemeris $(EPHEMERIS)
 
+clean:
+	$(RM) *_lightcurve.txt *.yaml

@@ -75,8 +75,8 @@ for yaml_file in yaml_files:
     utc = time.utc.datetime.strftime("%Y-%m-%d %H:%M")
 
     # Get barycentric correction
-    bc_correction = TimeDelta(bc_corr(coord, time, EPHEMERIS), format='sec')
-    toa += bc_correction
+    #bc_correction = TimeDelta(bc_corr(coord, time, EPHEMERIS), format='sec')
+    #toa += bc_correction
 
     # Get a few bits of metadata for the table
     telescope = params['telescope']
