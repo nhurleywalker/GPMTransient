@@ -431,6 +431,10 @@ def parse_yaml(yaml_file):
         obj['telescope'] = yaml_params['Telescope']
     except:
         pass
+    try:
+        obj['truncated'] = yaml_params['Truncated']
+    except:
+        obj['truncated'] = False
 
     return obj
 

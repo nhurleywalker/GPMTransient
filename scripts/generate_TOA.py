@@ -75,7 +75,10 @@ def main(args):
     TOA_mjd = Time(TOA_gps, format='gps').mjd
 
     # Convert the error (the width of the kernel) to ms
-    TOA_err_us = args.kernel_width*1e6
+    if args.truncated_error and metadata['truncated']:
+        TOA_err_us = args.truncated_error*1e6
+    else:
+        TOA_err_us = args.kernel_width*1e6
 
     # Get the reference frequency (cf. Dynspec.set_freq_ref())
     dynspec = dd.Dynspec(**metadata)
@@ -106,6 +109,7 @@ if __name__ == '__main__':
     parser.add_argument('yaml', type=argparse.FileType('r'), help='The yaml file containing the meta information for the observation')
     parser.add_argument('lightcurve', type=str, help='The two-column ASCII file containing the lightcurve data')
     parser.add_argument('kernel_width', type=float, help='The 1σ width of the Gaussian used for the filter (in seconds)')
+    parser.add_argument('--truncated_error', type=float, help='If supplied, use this value (in seconds) for the TOA error instead of the kernel_width value, but only for pulses marked as "Truncated: true" in the YAML file.')
     parser.add_argument('--toa_precision', type=float, default=None, help='The precision of the reported TOA (in seconds). Only changes precision if the desired precision is higher than the data time resolution. Default: Same as data time resolution')
     parser.add_argument('--save_plot', type=str, help='Saves a plot of the original light curve, the filtered light curve, and the TOA. If the argument equals "SHOW", it will only display the plot on the screen.')
 
