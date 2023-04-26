@@ -485,6 +485,7 @@ if __name__ == "__main__":
         print("Time bins                      | RFI Mask         | [list of ints] | --mask_time_bins")
         print("Freq bins                      | RFI Mask         | [list of ints] | --mask_freq_bins")
         print("Padding                        |                  | [float]/DM     | --padding")
+        print("Truncated                      |                  | true/false     | [not used in this script]")
         print("\nExample:\n")
         print("Apply barycentric correction: true")
         print("Dynamic spectrum:")

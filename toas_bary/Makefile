@@ -12,7 +12,7 @@ all_toas.tim: $(TOAS_MOD)
 
 #------------------------------------------
 
-%.tim: ../lightcurves_bary/%_lightcurve.txt generate_TOA.py
+%.tim: ../lightcurves_bary/%_lightcurve.txt ../scripts/generate_TOA.py
 	python $(word 2,$^) ../lightcurves_nobary/$*.yaml $< $(TOA_ERR_SEC) --toa_precision=0.5 --save_plot=$*_toa.png > $@
 
 clean:
