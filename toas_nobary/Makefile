@@ -2,13 +2,13 @@ LIGHTCURVES_MOD = $(shell ls ../lag_analysis/*_lightcurve_mod.txt)
 YAML_FILES = $(patsubst ../lag_analysis/%_lightcurve_mod.txt,../lightcurves_nobary/%.yaml,$(LIGHTCURVES_MOD))
 TOAS_MOD = $(patsubst ../lag_analysis/%_lightcurve_mod.txt,%_mod.tim,$(LIGHTCURVES_MOD))
 
-TOA_ERR_SEC = 300
+TOA_ERR_SEC = 38
 
 BEST_DM = $(shell cat ../BEST_DM)
 
 all_toas_mod.tim: $(TOAS_MOD)
 	echo "FORMAT 1" > $@
-	cat $^ | awk '{$$4 = 38000000; print}' >> $@
+	cat $^ >> $@
 
 #------------------------------------------
 

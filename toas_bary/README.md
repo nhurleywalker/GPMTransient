@@ -1,4 +1,4 @@
-# Using pulsar timing software to get constraints on P and Pdot
+# Get TOAs for each barycentred pulse
 
 ```
 make all_toas.tim
