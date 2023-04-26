@@ -14,6 +14,8 @@ import pandas as pd
 import scipy.stats
 from matplotlib.ticker import FormatStrFormatter
 
+SOURCE_CSV = "chi2_grid.csv"
+
 def P(f0):
    return 1/f0
 
@@ -44,8 +46,7 @@ errargs = dict(yerr=0.08, lolims=1, uplims=0, lw=0.5, color='magenta', markersiz
 
 DOF = 56 # 58 TOAs minus 2 fitted parameters
 
-#df = pd.read_csv("chi2_grid_orig.csv", delimiter=",")
-df = pd.read_csv("chi2_grid_38s_errors.csv", delimiter=",")
+df = pd.read_csv(SOURCE_CSV, delimiter=",")
 #df.columns = ["Name", "RA", "Dec"]
 print(df.keys())
 xsize = len(np.unique(df['F0']))
