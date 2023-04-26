@@ -43,12 +43,16 @@ TOAS_BARY_PATH = "../toas_bary"
 TOAS_NOBARY_PATH = "../toas_nobary"
 LIGHTCURVES_BARY_PATH = "../lightcurves_bary"
 
+SHOW_PLOTS = False
+
 yaml_files = glob.glob(f'{LIGHTCURVES_BARY_PATH}/*.yaml')
+#yaml_files = [f'{LIGHTCURVES_BARY_PATH}/1342623496.yaml', f'{LIGHTCURVES_BARY_PATH}/1342623792.yaml']  # <-- Just the MWA "split" pulse
+
 yaml_files.sort()
 
 P = 1318.1956 # Approximate period in seconds
 prev_pulse_number = None # For keeping track if a given lightcurve is in the same pulse as the previous light curve
-min_nch_frac = 0.25 # Only include time bins with more channels used to calculate them than this fraction of the max number of channels. Example, if a lightcurve is constructed from a total of 100 channels, then only consider time bins that included at least 25 valid channels
+min_bw_frac = 0.25 # Only include time bins with more channels used to calculate them than this fraction of total bandwidth. For example, if a lightcurve is constructed from 100 MHz, and if this number is 0.25, then only consider time bins that included at least 25 MHz of bandwidth
 
 table = []
 fluence_bins_to_plot = []
@@ -112,6 +116,8 @@ for yaml_file in yaml_files:
         t_idxs = list(range(len(t)))
         nch = lightcurve_data[:,2] # The number of channels that contributed to each point in the lightcurve
         dt = t[1] - t[0]
+        bw = params['bw']
+        freq_range = nch*bw
         fluence_bins = lc * dt
 
         # Get the scaling factor for 1 GHz
@@ -122,7 +128,7 @@ for yaml_file in yaml_files:
 
         # Get the total fluence (only include bins where the relative noise is no more than 2*min,
         # which occurs when number of channels included in lightcurve calc is < 4*max
-        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_nch_frac])
+        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_bw_frac])
 
         row = {
             'num_obs': 1,
@@ -137,6 +143,11 @@ for yaml_file in yaml_files:
             'fluence_1GHz': f"{fluence*scale_factor:.2f}",
         }
 
+        if SHOW_PLOTS:
+            plt.plot(t, lc, label=f"LC #1 (dt = {dt})")
+            #plt.plot(t, freq_range, label="Freq range #1 (MHz)")
+            #plt.legend()
+            #plt.show()
     else:
         # Pop the previous row from the table
         row = table.pop()
@@ -156,30 +167,47 @@ for yaml_file in yaml_files:
         new_lc = lightcurve_data[:,1]
         new_nch = lightcurve_data[:,2] # The number of channels that contributed to each point in the lightcurve
         new_dt = new_t[1] - new_t[0]
+        new_bw = params['bw']
+        new_freq_range = new_nch*new_bw
         new_fluence_bins = new_lc * new_dt
 
         for new_i in range(len(new_t)): # Loop through the new time axis
             t_idx = round((new_t[new_i] - t[0])/dt) # The bin number relative to the previous lightcurve
             if t_idx in t_idxs: # If this bin overlaps with the previous lightcurve
                 i = t_idxs.index(t_idx)
-                lc[i] = (lc[i]*nch[i]*dt + new_lc[new_i]*new_nch[new_i]*new_dt) / (nch[i]*dt + new_nch[new_i]*new_dt) # Weighted sum
-                nch[i] += new_nch[new_i] # Update the channel count
-                fluence_bins[i] = (fluence_bins[i]*dt + new_fluence_bins[new_i]*new_dt) / (nch[i] + new_nch[new_i])
+                lc[i] = (lc[i]*freq_range[i]*dt + new_lc[new_i]*new_freq_range[new_i]*new_dt) / (freq_range[i]*dt + new_freq_range[new_i]*new_dt) # Weighted sum
+                fluence_bins[i] = lc[i] * dt
+                freq_range[i] += new_freq_range[new_i] # Update the channel count
             else: # If this bin does not overlap with the previous lightcurve, then none of the others will either, so just append the rest in bulk
                 t = np.hstack((t, new_t[new_i:]))
                 lc = np.hstack((lc, new_lc[new_i:]))
-                nch = np.hstack((nch, new_nch[new_i:]))
+                freq_range = np.hstack((freq_range, new_freq_range[new_i:]))
                 fluence_bins = np.hstack((fluence_bins, new_fluence_bins[new_i:]))
                 break
 
         # Same peak and fluence calculations as before
         peak_flux_density = np.max(lc)
-        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_nch_frac])
+        fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if freq_range[i] >= max(freq_range)*min_bw_frac])
 
         row['peak'] = f"{peak_flux_density:.1f}"
         row['peak_1GHz'] = f"{peak_flux_density*scale_factor*1e3:.0f}" # in mJy
         row['fluence'] = f"{fluence:.0f}"
         row['fluence_1GHz'] = f"{fluence*scale_factor:.2f}"
+
+        if SHOW_PLOTS:
+            plt.plot(new_t, new_lc, label=f"LC #2 (dt = {new_dt})")
+            #plt.plot(new_t, new_freq_range, label="Freq range #2 (MHz)")
+            #plt.legend()
+            #plt.show()
+
+            plt.plot(t, lc, label=f"Combined LC (dt = {dt})")
+            #plt.plot(t, freq_range, label="Combined freq range (MHz)")
+
+            plt.xlabel("Time (GPS second)")
+            #plt.ylabel("Flux density (Jy) & Freq range (MHz)")
+            plt.ylabel("Flux density (Jy)")
+            plt.legend()
+            plt.show()
 
     # Add the row to the table
     table.append(row)
@@ -187,7 +215,8 @@ for yaml_file in yaml_files:
     fluence_bins_to_plot.append({
         "obsid": obsid,
         "utc": utc,
-        "fluence_bins": fluence_bins
+        "fluence_bins": fluence_bins,
+        "freq_range": freq_range,
     })
 
 # Write out 'fluence lightcurves', just to have something to eyeball to check for any irregularities
@@ -198,12 +227,18 @@ for fluence_bin_dict in fluence_bins_to_plot:
     obsid = fluence_bin_dict['obsid']
     utc = fluence_bin_dict['utc']
     fluence_bins = fluence_bin_dict['fluence_bins']
+    freq_range = fluence_bin_dict['freq_range']
+
+    time_bins = np.arange(len(fluence_bins))
+    included = freq_range > max(freq_range)*min_bw_frac
 
     fig, ax = plt.subplots(1,1)
-    plt.plot(fluence_bins)
+    plt.plot(time_bins, fluence_bins, label="Fluence in each bin")
+    plt.plot(time_bins[included], fluence_bins[included], label="Included in fluence calculation")
     plt.xlabel("Time bin number")
     plt.ylabel("Fluence (Jy s)")
     plt.title(f"{utc}")
+    plt.legend()
     plt.savefig(f'{obsid}_fluencebins.png')
     plt.close()
 
