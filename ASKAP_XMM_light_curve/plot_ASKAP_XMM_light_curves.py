@@ -61,7 +61,7 @@ ax = plt.subplot(gs1[0])
 ax.plot(askap_time, askap_flux, lw=0.5, color = 'darkblue', label = 'Radio flux density (mJy)')
 
 ax.xaxis.set_ticks_position('both')
-ax.set_xticklabels([])
+#ax.set_xticklabels([])
 ax.get_yaxis().set_tick_params(direction='in', which='both')
 ax.get_xaxis().set_tick_params(direction='in', which='both', top=False)
 
@@ -79,7 +79,7 @@ bx = plt.subplot(gs1[1], sharex=ax)
 bx.errorbar(xmm_time ,xmm_flux*1.e3,xerr=xmm_time_err, yerr=xmm_flux_err*1.e3, fmt = 'o', lw=0.5, markersize=1,
             mec = 'darkred', color = 'darkred', ecolor='darkred', capsize=3, label = 'XMM-Newton/EPIC (0.3-10 keV)')
 
-plt.axhline(y=0.002*1.e3, color='darkblue', linestyle='dotted', lw=0.5)
+plt.axhline(y=0.002*1.e3, color='black', linestyle='dotted', lw=1)
 
 #bx.tick_params(width=3, length=12, axis='both', which='major', pad=5)
 #bx.tick_params(length=7, width=2, axis='both', which='minor', pad=5)
@@ -95,12 +95,10 @@ bx.set_ylim(-0.005*1.e3, 0.018*1.e3)
 bx.set_ylabel('XMM-Newton/EPIC \n net count rate (10$^{-3}$ counts s$^{-1}$)')#, labelpad=10)
 bx.set_xlabel(r'Epoch (BMJD$_{{\rm TDB}}$ - {0})'.format(offset)) # Bottom panel: defining the x-axis label
 
-#bx.ticklabel_format(useOffset=False)
-#bx.xaxis.set_major_locator(plt.FixedLocator([59836.44, 59836.45, 59836.46, 59836.47, 59836.48, 59836.49]))
+# Since we used a shared x-axis, we have to be careful when selecting which x-tick labels to hide
+# https://stackoverflow.com/questions/4209467/matplotlib-share-x-axis-but-dont-show-x-axis-tick-labels-for-both-just-one#:~:text=This%20is%20a%20common%20gotcha,invisible%20on%20just%20one%20axis.
+plt.setp(ax.get_xticklabels(), visible=False)
 
-##################################
-
-    
 ####################################################################################################################
 # Saving the figure.
 plt.tight_layout()
