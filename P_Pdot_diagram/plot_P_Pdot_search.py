@@ -44,7 +44,7 @@ cm = 1/2.54  # centimeters in inches
 
 errargs = dict(yerr=0.08, lolims=1, uplims=0, lw=0.5, color='magenta', markersize=0, capsize=1.5, elinewidth=0.5, markeredgewidth=0.0, xerr=0.004)
 
-DOF = 56 # 58 TOAs minus 2 fitted parameters
+DOF = 57 # 59 TOAs minus 2 fitted parameters
 
 df = pd.read_csv(SOURCE_CSV, delimiter=",")
 #df.columns = ["Name", "RA", "Dec"]
