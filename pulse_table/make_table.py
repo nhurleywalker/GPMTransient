@@ -50,6 +50,10 @@ yaml_files = glob.glob(f'{LIGHTCURVES_BARY_PATH}/*.yaml')
 
 yaml_files.sort()
 
+# A hack to get the Murriyang yaml out from the middle of the two MWA ones of the same pulse
+a, b = yaml_files.index(f'{LIGHTCURVES_BARY_PATH}/1342096266.yaml'), yaml_files.index(f'{LIGHTCURVES_BARY_PATH}/1342096400.yaml')
+yaml_files[b], yaml_files[a] = yaml_files[a], yaml_files[b]
+
 P = 1318.1956 # Approximate period in seconds
 prev_pulse_number = None # For keeping track if a given lightcurve is in the same pulse as the previous light curve
 min_bw_frac = 0.25 # Only include time bins with more channels used to calculate them than this fraction of total bandwidth. For example, if a lightcurve is constructed from 100 MHz, and if this number is 0.25, then only consider time bins that included at least 25 MHz of bandwidth
@@ -102,7 +106,7 @@ for yaml_file in yaml_files:
 
     new_pulse_number = round((toa.gps - int(yaml_files[0][-15:-5]))/P + 0.15) + 1 # <--- 0.15 is a rough, "manual" pulse centering
 
-    if new_pulse_number != prev_pulse_number:
+    if new_pulse_number != prev_pulse_number or telescope == "Murriyang":
 
         # If this is the first of two (or more) observations in the same pulse, there should be a .tim file
         # for the joint TOA
