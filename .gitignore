@@ -1,6 +1,8 @@
 *_lightcurve.txt
 *_lightcurve_mod.txt
-dynspec/ppdot_search/*.yaml
-dynspec/ppdot_search/*.tim
-dynspec/ppdot_search/*.png
 de430.bsp
+dynspec/ppdot_search/*.yaml
+lightcurves_bary/*.yaml
+lightcurves_nobary/*.yaml
+*.tim
+*.png

@@ -72,8 +72,14 @@ Expected output: `all_toas_mod.tim`
 <details>
 <summary><b>P_Pdot_diagram</b>: Grid search in F0 and F1</summary>
 
+To generate `chi2_grid.csv`:
 ```
 python grid_search_f_fdot.py dofit.par ../toas_nobary/all_toas_mod.tim
+```
+
+To generate `Ppdot_search.pdf`:
+```
+python plot_P_Pdot_search.py
 ```
 
 </details>
