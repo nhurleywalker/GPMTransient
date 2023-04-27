@@ -141,6 +141,12 @@ for yaml_file in yaml_files:
         # which occurs when number of channels included in lightcurve calc is < 4*max
         fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if nch[i] >= max(nch)*min_bw_frac])
 
+        # For well-sampled data (2022 onward) with very low fluence, perform some sigma-clipping to reduce the amount of noise being multiplied in
+        if fluence*scale_factor <  0.5 and int(obsid) > 1340639535:
+            fl = np.array([fluence_bins[i] for i in range(len(fluence_bins)) if freq_range[i] >= max(freq_range)*min_bw_frac])
+            rms = np.nanstd(sigma_clip(fl))
+            fluence = np.sum(fl[fl > 3*rms])
+
         row = {
             'num_obs': 1,
             'pulse_number': new_pulse_number,
@@ -204,6 +210,7 @@ for yaml_file in yaml_files:
         row['peak_1GHz'] = f"{peak_flux_density*scale_factor*1e3:.0f}" # in mJy
         row['fluence'] = f"{fluence:.0f}"
         row['fluence_1GHz'] = f"{fluence*scale_factor:.2f}"
+
 
         if SHOW_PLOTS:
             plt.plot(new_t, new_lc, label=f"LC #2 (dt = {new_dt})")
