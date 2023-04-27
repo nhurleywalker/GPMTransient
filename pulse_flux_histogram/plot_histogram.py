@@ -19,8 +19,10 @@ plt.rcParams.update({
 
 cm = 1/2.54  # centimeters in inches
 
-df = pd.read_csv("pulse_table.csv")
+df = pd.read_csv("pulse_table.csv", usecols=(0, 6, 8))
 # Pulse number,UTC,Barycentred TOA (MJD),Telescope,Frequency (MHz),Peak flux density at freq (Jy),Peak flux density at 1 GHz (mJy),Fluence at freq (Jy s),Fluence at 1 GHz (Jy s)
+# Discard duplicate rows (split pulses)
+df = df.drop_duplicates(keep='first')
 
 #https://www.nature.com/nature/for-authors/final-submission#:~:text=For%20guidance%2C%20Nature's%20standard%20figure,(120%E2%80%93136%20mm).
 nbins = 22
