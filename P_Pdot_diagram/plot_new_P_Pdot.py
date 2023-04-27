@@ -118,6 +118,10 @@ plt.scatter(x=df_sources_data[selection]['period(s)'],
             c=df_sources_data[selection]['Bp(e14G)'], cmap=my_cmap, 
             **pulsargs)
 
+for index, row in df_sources_data[selection].iterrows():
+    texts.append(plt.text(offpad*row['period(s)'], row['pdot(1e-11s/s)'], 
+                         row['source'].replace("J", " J"), ha='left', va='center', color='black', size=inside_text_size))
+
 #GLEAM-XJ162759-523504
 selection = ((df_sources_data['source']=='GLEAM-XJ162759-523504'))
 plt.scatter(x=df_sources_data[selection]['period(s)'], 
