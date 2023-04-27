@@ -32,6 +32,15 @@ sys.path.append("../dynspec")
 from dedisperse_dynspec import Dynspec, parse_yaml
 from bc_corr import bc_corr
 
+def round_to_sf(x, sf=3):
+    i = int(np.floor(np.log10(abs(x))))
+    rounded = round(x, sf - 1 - i)
+    if i - sf >= -1:
+        return f"{rounded:.0f}"
+    else:
+        return f"{rounded}"
+
+sf = 3 # Number of significant figures in the table
 
 def curved_law(nu, ref_nu=1*u.GHz, s_nu=149*u.mJy, alpha=-3.17, q=-0.56):
     return s_nu * (nu/ref_nu) ** alpha * \
@@ -154,10 +163,10 @@ for yaml_file in yaml_files:
             'toa': f"{toa.mjd:.5f}",
             'telescopes': [telescope],
             'midfreq': [f"{midfreq:.0f}"],
-            'peak': f"{peak_flux_density:.1f}",
-            'peak_1GHz': f"{peak_flux_density*scale_factor*1e3:.0f}", # in mJy
-            'fluence': f"{fluence:.0f}",
-            'fluence_1GHz': f"{fluence*scale_factor:.2f}",
+            'peak': f"{round_to_sf(peak_flux_density, sf=sf)}",
+            'peak_1GHz': f"{round_to_sf(peak_flux_density*scale_factor.value*1e3, sf=sf)}", # in mJy
+            'fluence': f"{round_to_sf(fluence, sf=sf)}",
+            'fluence_1GHz': f"{round_to_sf(fluence*scale_factor.value, sf=sf)}",
         }
 
         if SHOW_PLOTS:
@@ -206,10 +215,10 @@ for yaml_file in yaml_files:
         peak_flux_density = np.max(lc)
         fluence = np.sum([fluence_bins[i] for i in range(len(fluence_bins)) if freq_range[i] >= max(freq_range)*min_bw_frac])
 
-        row['peak'] = f"{peak_flux_density:.1f}"
-        row['peak_1GHz'] = f"{peak_flux_density*scale_factor*1e3:.0f}" # in mJy
-        row['fluence'] = f"{fluence:.0f}"
-        row['fluence_1GHz'] = f"{fluence*scale_factor:.2f}"
+        row['peak'] = f"{round_to_sf(peak_flux_density, sf=sf)}"
+        row['peak_1GHz'] = f"{round_to_sf(peak_flux_density*scale_factor.value*1e3, sf=sf)}" # in mJy
+        row['fluence'] = f"{round_to_sf(fluence, sf=sf)}"
+        row['fluence_1GHz'] = f"{round_to_sf(fluence*scale_factor.value, sf=sf)}"
 
 
         if SHOW_PLOTS:
