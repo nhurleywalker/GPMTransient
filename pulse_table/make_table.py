@@ -77,7 +77,14 @@ for yaml_file in yaml_files:
 
     coord = SkyCoord(ra=params['RA']*u.hr, dec=params['Dec']*u.deg, frame='icrs')
     time = Time(dynspec.t[0] - dynspec.dt/2, format='gps')
-    utc = time.utc.datetime.strftime("%Y-%m-%d %H:%M")
+    
+    # Old way, which truncates the minute down
+    #utc = Time(int(obsid), format='gps').utc.datetime.strftime("%Y-%m-%d %H:%M")
+    # Copying what is done in make_pulsestack, which rounds to the nearest minute
+    utc_time = Time(int(obsid), format="gps")
+    utc_time.format="ymdhms"
+    utc_value = utc_time.value
+    utc = f"{utc_value[0]:04d}-{utc_value[1]:02d}-{utc_value[2]:02d} {utc_value[3]:02d}:{utc_value[4]:02d}"
 
     # Get barycentric correction
     #bc_correction = TimeDelta(bc_corr(coord, time, EPHEMERIS), format='sec')
