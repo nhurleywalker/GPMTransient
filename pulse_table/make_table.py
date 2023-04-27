@@ -33,7 +33,7 @@ from dedisperse_dynspec import Dynspec, parse_yaml
 from bc_corr import bc_corr
 
 
-def curved_law(nu, ref_nu=1*u.GHz, s_nu=119*u.mJy, alpha=-3.4, q=-0.61):
+def curved_law(nu, ref_nu=1*u.GHz, s_nu=148*u.mJy, alpha=-3.17, q=-0.56):
     return s_nu * (nu/ref_nu) ** alpha * \
             np.exp(q * np.log(nu/ref_nu)**2)
 
