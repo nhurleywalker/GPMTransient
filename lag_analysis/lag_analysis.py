@@ -44,7 +44,7 @@ def sc(data, level=3, loops=4):
         std = np.nanstd(data[data<level*std])
     return std
 
-def curved_law(nu, ref_nu=1000, s_nu=0.119, alpha=-3.4, q=-0.61):
+def curved_law(nu, ref_nu=1000, s_nu=0.149, alpha=-3.17, q=-0.56):
     return s_nu * (nu/ref_nu) ** alpha * \
             np.exp(q * np.log(nu/ref_nu)**2)
 
