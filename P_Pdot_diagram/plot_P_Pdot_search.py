@@ -42,7 +42,7 @@ plt.rcParams.update({
 
 cm = 1/2.54  # centimeters in inches
 
-errargs = dict(yerr=0.08, lolims=1, uplims=0, lw=0.5, color='magenta', markersize=0, capsize=1.5, elinewidth=0.5, markeredgewidth=0.0, xerr=0.004)
+arrowprops = dict(arrowstyle="->", lw=0.5, shrinkA=0.0)
 
 DOF = 57 # 59 TOAs minus 2 fitted parameters
 
@@ -137,12 +137,18 @@ ax.axvline(0, lw=0.5, ls="--", color="k", alpha=0.5)
 ax.axhline(0, lw=0.5, ls="--", color="k", alpha=0.5)
 ax.scatter(best_f0 - best_f0, 1.e18*best_f1, marker="o", zorder=30, lw=0.5, s=10)
 
-ax.errorbar(sig1_f0 - best_f0/1.e9, sig1_f1, **errargs)
-ax.errorbar(sig2_f0 - best_f0/1.e9, sig2_f1, alpha=0.5, **errargs)
-ax.errorbar(sig3_f0 - best_f0/1.e9, sig3_f1, alpha=0.2, **errargs)
+#ax.errorbar(sig1_f0 - best_f0/1.e9, sig1_f1, color='magenta', **errargs)
+arrowlength = 0.15
+ax.annotate("", xy=(sig1_f0 - best_f0/1.e9, sig1_f1 + arrowlength), xytext=(sig1_f0 - best_f0/1.e9, sig1_f1), arrowprops = {'color' : 'magenta', **arrowprops})
+ax.annotate("", xy=(sig2_f0 - best_f0/1.e9, sig2_f1 + arrowlength), xytext=(sig2_f0 - best_f0/1.e9, sig2_f1), arrowprops = {'color' : 'violet', **arrowprops})
+ax.annotate("", xy=(sig3_f0 - best_f0/1.e9, sig3_f1 + arrowlength), xytext=(sig3_f0 - best_f0/1.e9, sig3_f1), arrowprops = {'color' : 'thistle', **arrowprops})
+
+#ax.errorbar(sig2_f0 - best_f0/1.e9, sig2_f1, color='violet', **errargs)
+#ax.errorbar(sig3_f0 - best_f0/1.e9, sig3_f1, color='thistle', **errargs)
 cb = plt.colorbar(im, label=r"reduced $\chi^2$", format=FormatStrFormatter('%2.0f'))
 cb.ax.yaxis.set_minor_formatter(FormatStrFormatter('%2.0f'))
 fig.savefig("Ppdot_search.pdf", bbox_inches="tight", dpi=300)
+fig.savefig("Ppdot_search.eps", bbox_inches="tight", dpi=300)
 
 print(f"Best F0 = {best_f0}, Best F1 = {best_f1}")
 print(f"Best P = {best_P}, Best Pdot = {best_Pdot}")
