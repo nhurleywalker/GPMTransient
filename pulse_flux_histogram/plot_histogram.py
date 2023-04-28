@@ -30,7 +30,7 @@ fig = plt.figure(figsize=(8.9*cm,7.8*cm))
 ax1 = fig.add_subplot(111)
 h1 = ax1.hist(df["Fluence at 1 GHz (Jy s)"][df["Fluence at 1 GHz (Jy s)"]>0], color='blue', alpha=0.5, label="Fluence", bins=nbins)
 ax2 = ax1.twiny()
-h2 = ax2.hist(df["Peak flux density at 1 GHz (mJy)"][df["Fluence at 1 GHz (Jy s)"]>0], edgecolor='red', alpha=0.5, label="$S$", bins=nbins, fill=None)
+h2 = ax2.hist(df["Peak flux density at 1 GHz (mJy)"][df["Fluence at 1 GHz (Jy s)"]>0], edgecolor='red', alpha=0.5, label="Peak $S$", bins=nbins, fill=None)
 ax1.set_xlabel("Fluence$_\mathrm{1GHz}$ (Jy s)")
 ax2.set_xlabel("Peak $S_\mathrm{1GHz}$ (mJy)")
 ax1.set_ylabel("Number of pulses")
@@ -38,8 +38,8 @@ ax1.set_ylabel("Number of pulses")
 ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
 # https://stackoverflow.com/questions/5484922/secondary-axis-with-twinx-how-to-add-to-legend
 colors = ['red', 'blue']
-handles = [Rectangle((0, 0), 1, 1, color=c, alpha=0.5) for c in colors]
-labels = ["Fluence", "$S$"]
+handles = [Rectangle((0, 0), 1, 1, edgecolor='red', facecolor='none', alpha=0.5), Rectangle((0, 0), 1, 1, color='blue')]
+labels = ["Fluence", "Peak $S$"]
 plt.legend(handles, labels)
 fig.savefig("S_hist.pdf", bbox_inches="tight", dpi=300)
 fig.savefig("S_hist.eps", bbox_inches="tight", dpi=300)
