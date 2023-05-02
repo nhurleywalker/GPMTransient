@@ -13,4 +13,6 @@ pintk out.par all.tim
 
 # Filtering the predicted TOAs against some other criteria
 
-
+```
+python filter_toas.py all.tim out.txt --HA_range 22.5 1.5
+```
