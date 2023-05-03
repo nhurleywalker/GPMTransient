@@ -3,13 +3,13 @@ import astropy.units as u
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.time import Time, TimeDelta
 import argparse
+#import matplotlib.pyplot as plt
 
 from pint.toa import get_TOAs
 
 # Defined in
 # https://github.com/MWATelescope/mwalib/blob/2155c19ad2eebbc6ab2131b012d12e8638d6f493/src/lib.rs#L30
 MWA_long = 2.0362898668561042*u.rad
-MWA_lat = 0.4660608448386394*u.rad
 
 # Given in top-level README.md
 GPM_RA = 18.6505*(15*u.degree)
@@ -30,22 +30,16 @@ def main():
 
     # Load TOAs
     toas = get_TOAs(args.timfile)
-    toa_list = toas.to_TOA_list()
-    mjds = np.array([toa.mjd for toa in toa_list])
+    mjds = Time(toas.get_mjds(), format='mjd')
 
     if args.HA_range:
-
-        # Setup the MWA's location
-        MWA_location = EarthLocation(lat=MWA_lat, lon=MWA_long)
 
         # Setup the GPM 1839-10's coords
         source_coord = SkyCoord(ra=GPM_RA, dec=GPM_Dec)
 
-        # Convert the source to Alt-Az
-        source_altaz = source_coord.transform_to(AltAz(obstime=mjds, location=MWA_location))
-
         # Get the LHA of the source
-        source_LHA = source_altaz.transform_to('fk5').ra.hour - MWA_long.to('degree').value*15
+        lst = mjds.sidereal_time('apparent', longitude=MWA_long)
+        source_LHA = (lst - source_coord.ra).hour % 24
 
         # Actually apply the hour angle filter
         LHA_min, LHA_max = args.HA_range
