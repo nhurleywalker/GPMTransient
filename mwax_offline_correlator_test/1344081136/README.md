@@ -39,7 +39,7 @@ mwax_update_subfile_header -s MODE=MWAX_CORRELATOR *.sub
 
 #### Running the correlator
 
-See [correlate.sbatch](correlate.sbatch) (also still a **work in progress**).
+See [correlateSingle.sbatch](correlateSingle.sbatch) (also still a **work in progress**).
 
 ##### Notes (Log)
 
