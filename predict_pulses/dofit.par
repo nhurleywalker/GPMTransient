@@ -1,0 +1,19 @@
+PSRJ            GPM1839-10
+RAJ             18:39:02.0                 0   0.000e+00
+DECJ            -10:31:49.5                0   0.000e+00
+DM              275                        0  10.000e+00
+PEPOCH          59761
+F0              0.000758612654639207       1   2.877e-11
+F1              0                          1   5.046238488132926054e-19
+POSEPOCH        59761
+DMEPOCH         59761
+UNITS TDB
+TIMEEPH                              FB90
+T2CMETHOD                        IAU2000B
+DILATEFREQ                              N
+CORRECT_TROPOSPHERE                     N
+PLANET_SHAPIRO                          N
+TZRMJD                              59761
+TZRFRQ                                150
+TZRSITE                               MWA
+EPHEM                               DE436
