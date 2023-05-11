@@ -10,6 +10,7 @@ from matplotlib import rc
 plt.rcParams.update({
     "text.usetex": False,
     "font.size": 7,
+    "pdf.fonttype" : 42,
     "font.sans-serif": ["Helvetica"]})
 
 # inches to cm
@@ -75,7 +76,7 @@ if __name__ == '__main__':
                     yticks.append(yticks[-1] + 1)
                     pulse_numbers.append(pulse_number)
             phase = (gpstimes - gps_ref + P/2) % P - P/2
-            x = phase
+            x = phase  - 75 # shift everything back a little to be better aligned overall
             y = 0.7*flux_density/np.nanmax(flux_density) + yticks[-1]
 # Log shows the frequencies a little better than linear
             plt.plot(x, y[np.isfinite(y)], lw=0.5, color=cm1((np.log10(freq) - np.log10(88.))/(np.log10(500.)-np.log10(88.))))
@@ -86,14 +87,30 @@ if __name__ == '__main__':
                 plt.text(xt, yticks[-1], f"{t[0]:04d}-{t[1]:02d}-{t[2]:02d} {t[3]:02d}:{t[4]:02d}", url=url, bbox = dict(color='w', alpha=0.01, url=url), fontsize=5)
             elif args.gpstimes is True:
                 plt.text(xt, yticks[-1], obsname, url=url, bbox = dict(color='w', alpha=0.01, url=url))
+#	    rms = rms_clip(y)
+#	    if rms < 3.0:
+#		rms = 0.4
+#		r = np.random.normal(loc=0, scale=rms, size=200)
+#		zrange = np.array(2*(x+50), dtype="int")
+#		offset = zrange[0]
+#		for z in zrange:
+#		    if z>=30 and z<170 and z-offset<len(dat[1]) and z-offset>0:
+#			if np.logical_not(np.isnan(dat[1][z-offset])) and dat[1][z-offset] != 0.0:
+#			    r[z] = dat[1][z-offset]
+#		with open("ulpm.csv", "a") as f:
+#		    np.savetxt(f, r, newline=",")
+#		    #np.savetxt(f, 25*r/np.nanmax(r), newline=",")
+#		    f.write("\n")
+
+
     # Turn off yticks for now
     #        plt.yticks(ticks=yticks, labels=pulse_numbers, fontsize=5)
     plt.yticks(ticks=[], labels=[], fontsize=5)
     plt.xlim([-600, 600])
     plt.ylim([yticks[0]-1, yticks[-1]+1])
 
-    plt.axvline(-100, lw=0.5, color="k", alpha=0.5, ls="--")
-    plt.axvline(250, lw=0.5, color="k", alpha=0.5, ls="--")
+    plt.axvline(-200, lw=0.5, color="k", alpha=0.5, ls="--")
+    plt.axvline(200, lw=0.5, color="k", alpha=0.5, ls="--")
     plt.xlabel("Time (s)")
     #plt.ylabel("Pulse number")
     if args.title is True:
