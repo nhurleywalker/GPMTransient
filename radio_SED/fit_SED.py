@@ -12,6 +12,7 @@ from matplotlib import rc
 plt.rcParams.update({
     "text.usetex": True,
     "font.size": 7,
+    "pdf.fonttype" : 42,
     "font.sans-serif": ["Helvetica"]})
 
 #plt.rcParams.update({

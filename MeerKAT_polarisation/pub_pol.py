@@ -16,6 +16,7 @@ cm = 1/2.54   # centimeters in inches
 plt.rcParams.update({
     "text.usetex": False,
     "font.size": 7,
+    "pdf.fonttype" : 42,
     "font.sans-serif": ["Helvetica"]})
 
 v_data = np.loadtxt("MKT_1342378934_V_dynamic_spectrum_dedispersed.csv")
