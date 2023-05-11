@@ -24,6 +24,7 @@ cm = 1/2.54  # centimeters in inches
 plt.rcParams.update({
     "font.size": 7,
     "font.sans-serif": ["Helvetica"],
+    "pdf.fonttype" : 42,
     "figure.figsize" : (17.8*cm,11.9*cm)})
 
 inside_text_size = 5
@@ -236,3 +237,4 @@ plt.xlim(8e-3, 1.e6)
 plt.ylim(1.001e-9, 2000)
 plt.clim(0.0001, 50)
 plt.savefig('P_Pdot_deathlines.pdf', bbox_inches="tight")
+plt.savefig('P_Pdot_deathlines.png', bbox_inches="tight", dpi=300)
