@@ -9,3 +9,7 @@ python predict_toas.py dofit.par ../toas_nobary/all_toas_mod.tim 60176 60178  --
 cat ../toas_nobary/all_toas_mod.tim out.tim > all.tim
 pintk out.par all.tim
 # ...and then grabbing a screenshot of the resulting plot.
+
+
+# After subtracting 2.5 minutes to signal the beginning of the pulse window, the times can be listed in different formats via:
+./timeconv $(grep "^[0-9]" 2023-08-20_pulses.txt | cut -f1 -d' ') --to_fmt gps

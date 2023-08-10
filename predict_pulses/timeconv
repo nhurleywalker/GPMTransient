@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+
+import sys
+from astropy.time import Time
+import argparse
+
+def main():
+
+    parser = argparse.ArgumentParser(description='Convert times from one format to another')
+    parser.add_argument('--from_fmt', default='mjd', help="The format to convert from (any valid string understood by Astropy) (default=mjd)")
+    parser.add_argument('--to_fmt', default='gps', help="The format to convert to (any valid string understood by Astropy) (default=gps)")
+    parser.add_argument('times', type=float, nargs='*', help="The times to convert")
+
+    args = parser.parse_args()
+
+    try:
+        ts = Time(args.times, format=args.from_fmt)
+        ts.format = args.to_fmt
+        for t in ts:
+            print(t.value)
+    except:
+        print("error: arguments must be numbers that represent valid times in the chosen format")
+
+if __name__ == '__main__':
+    main()
