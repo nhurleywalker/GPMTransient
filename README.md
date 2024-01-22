@@ -7,6 +7,21 @@ Repository of code and data supporting the newly discovered active long-period r
 - **Dec**: -10:31:49.5 (-10.5304 deg)
 - **Uncertainty**: 0.15"
 
+## Setup
+
+The analysis code below is self-contained except for a planetary ephemeris file that is needed to do the barycentring.
+The ephemeris assumed by this code can be downloaded from `http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp` and should be placed in the `dynspec` folder.
+One way to do download this file on the command line is
+```
+cd dynspec
+wget -O de430.bsp http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp
+```
+There is also a rule in the `Makefile` in the `dynspec` directory, so one can also run
+```
+cd dynspec
+make de430.bsp
+```
+
 ## Analyses
 
 Each recipe below corresponds to a different folder within this one.
